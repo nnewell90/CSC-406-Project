@@ -16,11 +16,13 @@ public class Customer {
     int customerID;
     private static int customerIDCounter = 0;
 
-    // The arrayList which holds all customers
-    static ArrayList<Customer> customersList = new ArrayList<Customer>();
-    static HashMap<Integer, Customer> customerMap = new HashMap<Integer, Customer>();
+    // Holds the accounts that each customer owns
+    ArrayList<AbstractAccount> customerAccounts = new ArrayList<>();
 
+    // Constructor
     public Customer(String SSN, String address, String city, String state, String zip, String firstName, String lastName) {
+        // First search to make sure a duplicate user isn't being created!
+
         // Data management
         setSSN(SSN);
         setAddress(address);
@@ -31,10 +33,6 @@ public class Customer {
         setLastName(lastName);
         customerIDCounter++;
         setCustomerID(customerIDCounter);
-
-        // List and Map management
-        customersList.add(this);
-        customerMap.put(customerID, this);
     }
 
 
@@ -102,33 +100,21 @@ public class Customer {
         this.customerID = customerID;
     }
 
-    // Gets a customer from the arraylist
-    public Customer getCustomerArrayList() {
-        for (Customer customer : customersList) {
-            if (customer.getCustomerID() == customerID) {
-                return customer;
-            }
-        }
-        return null; // If no customer could be found return null
+    // These two are for database purposes
+    public String toFileString() {
+        return "";
     }
 
-    // Gets a customer from the HashMap
-    // Faster than an arrayList search, however this may also not be needed based on how we search
-    public Customer getCustomerHashMap() {
-        return customerMap.get(customerID);
+    public Customer fromFileString() {
+        Customer temp;
+
+        // Logic once we have everything necessary for savings accounts
+
+        return temp;
     }
 
-    // Removes a customer from the customer data
-    // !!! This functionality will also need to include accounts at some point, but basic for now
-    public void removeCustomer(Customer customer) {
-        // Handle list
-        for (Customer c : customersList) {
-            if (c.getCustomerID() == customer.getCustomerID()) {
-                customersList.remove(c);
-            }
-        }
-
-        // Handle map
-        customerMap.remove(customerID);
+    // Adds an account to the accounts customers have
+    public void addAccountToCustomerAccounts(AbstractAccount account) {
+        customerAccounts.add(account);
     }
 }
