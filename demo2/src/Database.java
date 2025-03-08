@@ -166,7 +166,7 @@ public class Database implements Runnable {
     private static <T>void loadFromFile(String fileName, ArrayList<T> list, Class<T> clazz) {
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             String line;
-            Method fromFileString = clazz.getDeclaredMethod("fromFileString", String.class); // !!! Every account class must include the functon "public static ClassName fromFileString(String data){...}"
+            Method fromFileString = clazz.getDeclaredMethod("fromFileString", String.class); // !!! Every account class must include the functon "public ClassName fromFileString(){...}"
             while ((line = reader.readLine()) != null) {
                 T temp = (T) fromFileString.invoke(line, (Object) null);
                 list.add(temp);
