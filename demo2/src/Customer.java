@@ -117,4 +117,9 @@ public class Customer {
     public void addAccountToCustomerAccounts(AbstractAccount account) {
         customerAccounts.add(account);
     }
+
+    // Gets the entire list of customer accounts
+    public ArrayList<AbstractAccount> getCustomerAccounts() {
+        return customerAccounts;
+    }
 }

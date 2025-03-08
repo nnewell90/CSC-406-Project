@@ -32,4 +32,20 @@ public class ATMCard {
             System.out.println("You have already withdrawn the maximum amount of times today.");
         }
     }
+
+    public int getNumOfWithdrawalsToday() {
+        return numOfWithdrawalsToday;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public SavingsAccount getSavingsAccount() {
+        return savingsAccount;
+    }
+
+    public CheckingAccount getCheckingAccount() {
+        return checkingAccount;
+    }
 }

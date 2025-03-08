@@ -115,8 +115,9 @@ public class SavingsAccount extends AbstractAccount {
         double interestRate;
         Date dueDate;
 
-        public CDSavingsAccount(int customerID, Date accountCreationDate, int initialBalance) {
+        public CDSavingsAccount(int customerID, Date accountCreationDate, int initialBalance, Date dueDate) {
             super(customerID, accountCreationDate, "CD", initialBalance);
+            this.dueDate = dueDate;
         }
 
         @Override

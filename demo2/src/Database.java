@@ -90,63 +90,129 @@ public class Database implements Runnable {
 
     // Gets an account from a given list
     // !!! work on this
-    public static <T> AbstractAccount getAccountFromList(ArrayList<T> accountList, int customerID) {
-        /*
-        I'm not certain how to implement this.
-        This function aims to get one account from a given list of accounts
-        However if a customer holds multiple accounts of the same type there will need to be a way to
-        show which one
-        However, this function could instead be rewritten to instead return a list of all accounts a customer
-        has of the given type, and then Swing could provide a dropdown menu (or something similar) to look
-        at specific accounts
-        The Customer class has an arrayList of accounts that each customer owns that could be used,
-        but that could be a pain to work with; we can decide whether we want to try and use that or just
-        search through the database's arrayLists for accounts the user owns
-
-        I also added in an accountID in the AbstractAccount class so each account gets a unique ID
-        This might be able to be used for this (and other searching), but I'm not certain
-         */
-
+    public static AbstractAccount getAccountFromList(ArrayList<AbstractAccount> accountList, int accountID) {
+        // Search through the given list for the given ID, then return the matching account
+        for (AbstractAccount account : accountList) {
+            if (account.accountID == accountID) {
+                return account;
+            }
+        }
+        // We have been given some ID for an account that doesn't exist
+        // Probably give some warning message here
         return null;
+    }
+
+    // Gets all the accounts for one customer
+    public static ArrayList<AbstractAccount> getAllAccountsOfCustomer(int customerID) {
+        for (Customer customer : customerList) {
+            if (customer.getCustomerID() == customerID) {
+                return customer.getCustomerAccounts();
+            }
+        }
+
+        // We have been given some ID for a customer that doesn't exist
+        // Probably give some warning message here
+        return null;
+    }
+
+    // Restores the internal accounts of each customer to their associated objects
+    // This function is called when information needs to be restored from the database
+    public static void restoreCustomerAccounts() {
+        // This is inefficient with the way I have written the database, but I'm leaving it for now just to finish it
+
+        // Savings accounts
+        // Simple savings
+        for (SavingsAccount.SimpleSavingsAccount a : simpleSavingsAccountList) { // Check every entry in the list
+            for (Customer c : customerList) { // Check for every customer
+                if (a.getCustomerID() == c.getCustomerID()) {
+                    c.addAccountToCustomerAccounts(a);
+                    break; // Once a match has been found, move to the next account in the accountList
+                }
+            }
+        }
+        // CD
+        for (SavingsAccount.CDSavingsAccount a : cdSavingsAccountList) { // Check every entry in the list
+            for (Customer c : customerList) { // Check for every customer
+                if (a.getCustomerID() == c.getCustomerID()) {
+                    c.addAccountToCustomerAccounts(a);
+                    break; // Once a match has been found, move to the next account in the accountList
+                }
+            }
+        }
+
+        // Checking accounts
+        for (CheckingAccount a : checkingAccountList) { // Check every entry in the list
+            for (Customer c : customerList) { // Check for every customer
+                if (a.getCustomerID() == c.getCustomerID()) {
+                    c.addAccountToCustomerAccounts(a);
+                    break; // Once a match has been found, move to the next account in the accountList
+                }
+            }
+        }
+
+        // Loan accounts
+        // ShortOrLong
+        for (LoanAccount.ShortOrLong a : shortOrLongLoanList) { // Check every entry in the list
+            for (Customer c : customerList) { // Check for every customer
+                if (a.getCustomerID() == c.getCustomerID()) {
+                    c.addAccountToCustomerAccounts(a);
+                    break; // Once a match has been found, move to the next account in the accountList
+                }
+            }
+        }
+        // CC
+        for (LoanAccount.CC a : CCList) { // Check every entry in the list
+            for (Customer c : customerList) { // Check for every customer
+                if (a.getCustomerID() == c.getCustomerID()) {
+                    c.addAccountToCustomerAccounts(a);
+                    break; // Once a match has been found, move to the next account in the accountList
+                }
+            }
+        }
     }
 
     // The function for restoring information from the database (.txts) back to the system
     private static void restoreFromDatabase() {
         lock.lock();
-        loadFromFile(abstractAccounts, abstractAccountList, AbstractAccount.class);
+        // Accounts
+        loadFromFile(abstractAccounts, abstractAccountList);
 
-        loadFromFile(savingAccounts, savingsAccountList, SavingsAccount.class);
-        loadFromFile(simpleSavingsAccounts, simpleSavingsAccountList, SavingsAccount.SimpleSavingsAccount.class);
-        loadFromFile(cdSavingsAccounts, cdSavingsAccountList, SavingsAccount.CDSavingsAccount.class);
+        loadFromFile(savingAccounts, savingsAccountList);
+        loadFromFile(simpleSavingsAccounts, simpleSavingsAccountList);
+        loadFromFile(cdSavingsAccounts, cdSavingsAccountList);
 
-        loadFromFile(checkingAccounts, checkingAccountList, CheckingAccount.class);
+        loadFromFile(checkingAccounts, checkingAccountList);
 
-        loadFromFile(loanAccounts, loanAccountList, LoanAccount.class);
-        loadFromFile(shortOrLongLoans, shortOrLongLoanList, LoanAccount.ShortOrLong.class);
-        loadFromFile(CCAccounts, CCList, LoanAccount.CC.class);
+        loadFromFile(loanAccounts, loanAccountList);
+        loadFromFile(shortOrLongLoans, shortOrLongLoanList);
+        loadFromFile(CCAccounts, CCList);
 
-        loadFromFile(customers, customerList, Customer.class);
-        loadFromFile(atmCards, atmCardList, ATMCard.class);
+        // Non-accounts
+        loadFromFile(customers, customerList);
+        loadFromFile(atmCards, atmCardList);
+
+        // Each customer has an arrayList of their own accounts, restore that list so they can view it
+        restoreCustomerAccounts();
         lock.unlock();
     }
 
     // The function for storing information to the database (.txts) from the system
     private static void storeToDatabase() {
         lock.lock();
-        storeToFile(abstractAccounts, abstractAccountList, AbstractAccount.class);
+        storeToFile(abstractAccounts, abstractAccountList);
 
-        storeToFile(savingAccounts, savingsAccountList, SavingsAccount.class);
-        storeToFile(simpleSavingsAccounts, simpleSavingsAccountList, SavingsAccount.SimpleSavingsAccount.class);
-        storeToFile(cdSavingsAccounts, cdSavingsAccountList, SavingsAccount.CDSavingsAccount.class);
+        storeToFile(savingAccounts, savingsAccountList);
+        storeToFile(simpleSavingsAccounts, simpleSavingsAccountList);
+        storeToFile(cdSavingsAccounts, cdSavingsAccountList);
 
-        storeToFile(checkingAccounts, checkingAccountList, CheckingAccount.class);
+        storeToFile(checkingAccounts, checkingAccountList);
 
-        storeToFile(loanAccounts, loanAccountList, LoanAccount.class);
-        storeToFile(shortOrLongLoans, shortOrLongLoanList, LoanAccount.ShortOrLong.class);
-        storeToFile(CCAccounts, CCList, LoanAccount.CC.class);
+        storeToFile(loanAccounts, loanAccountList);
+        storeToFile(shortOrLongLoans, shortOrLongLoanList);
+        storeToFile(CCAccounts, CCList);
 
-        storeToFile(customers, customerList, Customer.class);
-        storeToFile(atmCards, atmCardList, ATMCard.class);
+        storeToFile(customers, customerList);
+        storeToFile(atmCards, atmCardList);
         lock.unlock();
     }
 
@@ -163,10 +229,11 @@ public class Database implements Runnable {
         fromFileString is called on a string to turn that string into an object, so line is the first parameter
         The second parameter is just a dummy parameter because I was getting a warning about needing a second parameter for invoke()
      */
-    private static <T>void loadFromFile(String fileName, ArrayList<T> list, Class<T> clazz) {
+    private static <T>void loadFromFile(String fileName, ArrayList<T> list) {
+        Class clazz = list.getFirst().getClass();
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             String line;
-            Method fromFileString = clazz.getDeclaredMethod("fromFileString", String.class); // !!! Every account class must include the functon "public static ClassName fromFileString(String data){...}"
+            Method fromFileString = clazz.getDeclaredMethod("fromFileString", String.class); // !!! Every account class must include the functon "public ClassName fromFileString(){...}"
             while ((line = reader.readLine()) != null) {
                 T temp = (T) fromFileString.invoke(line, (Object) null);
                 list.add(temp);
@@ -180,7 +247,8 @@ public class Database implements Runnable {
     /*
     Similar logic to above but a print writer rather than a buffered reader
      */
-    private static <T>void storeToFile(String fileName, ArrayList<T> list, Class<T> clazz) {
+    private static <T>void storeToFile(String fileName, ArrayList<T> list) {
+        Class clazz = list.getFirst().getClass();
         try (PrintWriter writer = new PrintWriter(new FileWriter(fileName))) {
             Method toFileString = clazz.getDeclaredMethod("toFileString", clazz); // !!! Same as above but for this function
             for (T item : list) {
