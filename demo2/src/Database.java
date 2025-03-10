@@ -117,7 +117,7 @@ public class Database implements Runnable {
 
     // Restores the internal accounts of each customer to their associated objects
     // This function is called when information needs to be restored from the database
-    public static void restoreCustomerAccounts() {
+    private static void restoreCustomerAccounts() {
         // This is inefficient with the way I have written the database, but I'm leaving it for now just to finish it
 
         // Savings accounts
