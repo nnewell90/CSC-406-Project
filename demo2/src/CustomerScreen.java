@@ -15,7 +15,7 @@ public class CustomerScreen extends JFrame {
 
         creditButton.addActionListener(e -> new SystemControllerScreen());
         reviewButton.addActionListener(e -> new TellerScreen());
-        checkButton.addActionListener(e -> new ManagerScreen());
+        checkButton.addActionListener(e -> new LoanInterest());
         returnButton.addActionListener(e -> new SystemControllerScreen());
 
         add(creditButton);

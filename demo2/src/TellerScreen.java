@@ -18,7 +18,7 @@ public class TellerScreen extends JFrame {
 
         systemButton.addActionListener(e -> new SystemControllerScreen());
         tellerButton.addActionListener(e -> new TellerScreen());
-        managerButton.addActionListener(e -> new ManagerScreen());
+        managerButton.addActionListener(e -> new LoanInterest());
         customerButton.addActionListener(e -> new CustomerScreen());
         stopButton.addActionListener(e -> new CustomerScreen());
         reviewButton.addActionListener(e -> new CustomerScreen());

@@ -106,7 +106,7 @@ public class Customer {
     }
 
     public Customer fromFileString() {
-        Customer temp;
+        Customer temp = null;
 
         // Logic once we have everything necessary for savings accounts
 

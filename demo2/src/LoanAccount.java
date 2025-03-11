@@ -18,7 +18,7 @@ public class LoanAccount extends AbstractAccount {
 
     @Override
     public LoanAccount fromFileString() {
-        LoanAccount temp;
+        LoanAccount temp = null;
 
         return temp;
     }
@@ -48,7 +48,7 @@ public class LoanAccount extends AbstractAccount {
 
         @Override
         public ShortOrLong fromFileString() {
-            ShortOrLong temp;
+            ShortOrLong temp = null;
 
             return temp;
         }
@@ -74,7 +74,7 @@ public class LoanAccount extends AbstractAccount {
 
         @Override
         public CC fromFileString() {
-            CC temp;
+            CC temp = null;
 
             return temp;
         }

@@ -22,7 +22,7 @@ public class SavingsAccount extends AbstractAccount {
 
     @Override
     public SavingsAccount fromFileString() {
-        SavingsAccount temp;
+        SavingsAccount temp = null;
 
         // Logic once we have everything necessary for savings accounts
 
@@ -81,7 +81,7 @@ public class SavingsAccount extends AbstractAccount {
 
         @Override
         public SimpleSavingsAccount fromFileString() {
-            SimpleSavingsAccount temp;
+            SimpleSavingsAccount temp = null;
 
             // Logic once we have everything necessary for savings accounts
 
@@ -132,7 +132,7 @@ public class SavingsAccount extends AbstractAccount {
 
         @Override
         public CDSavingsAccount fromFileString() {
-            CDSavingsAccount temp;
+            CDSavingsAccount temp = null;
 
             // Logic once we have everything necessary for savings accounts
 

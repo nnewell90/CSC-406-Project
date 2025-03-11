@@ -36,7 +36,7 @@ public class CheckingAccount extends AbstractAccount{
 
     @Override
     public CheckingAccount fromFileString() {
-        CheckingAccount temp;
+        CheckingAccount temp = null;
 
         // Logic once we have everything necessary for savings accounts
 
