@@ -37,4 +37,5 @@ abstract public class AbstractAccount {
      */
     public abstract String toFileString();
     public abstract AbstractAccount fromFileString();
+
 }

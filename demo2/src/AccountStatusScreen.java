@@ -19,6 +19,7 @@ public class AccountStatusScreen extends JFrame {
         add(returntoCustomerScreen);
 
         setVisible(true);
+
     }
 }
 

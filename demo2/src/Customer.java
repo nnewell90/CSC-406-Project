@@ -122,4 +122,10 @@ public class Customer {
     public ArrayList<AbstractAccount> getCustomerAccounts() {
         return customerAccounts;
     }
+
+    //toString to be able to printout all of the customers information for testing purposes
+    @Override
+    public String toString(){
+        return "CustomerID: " + customerID + " SSN: " + SSN + " Address: " + address + " City: " + city + " State: " + state + " Zip Code: " + zip + " First Name: " + firstName + " Last Name: " + lastName;
+    }
 }

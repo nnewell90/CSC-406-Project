@@ -5,6 +5,8 @@ public class SavingsAccount extends AbstractAccount {
     double balance;
     CheckingAccount overdraftForAccount; // The checking account this account is an overdraft for
 
+    public ATMCard atmCard;
+
     public SavingsAccount(int customerID, Date accountCreationDate, String accountType, double initialBalance) {
         super(customerID, accountCreationDate, accountType);
         setBalance(initialBalance);
@@ -65,8 +67,12 @@ public class SavingsAccount extends AbstractAccount {
         // Data
         double interestRate;
 
-        public SimpleSavingsAccount(int customerID, Date accountCreationDate, int initialBalance) {
+        public SimpleSavingsAccount(int customerID, Date accountCreationDate, int initialBalance, Customer customer, int atmCardChoice) {
             super(customerID, accountCreationDate, "Simple Savings Account", initialBalance);
+
+            if(atmCardChoice == 1){ //if card choice equals 1 the customer will receive their ATM card
+                this.atmCard = new ATMCard(customer,this);
+            }
         }
 
         @Override
@@ -77,6 +83,13 @@ public class SavingsAccount extends AbstractAccount {
         @Override
         public String toFileString() {
             return "";
+        }
+        /*
+        ATM card test print statement to ensure the selection of the atm card works properly
+         */
+        @Override
+        public String toString(){
+            return super.toString() + "Customer: " + customerID + " Has opened an account on: " + accountCreationDate + " Account Type: " + accountType + " Initial Deposit: " + balance + " ATM Card: " + (hasATMCard() ? " Yes " : " No ");
         }
 
         @Override
@@ -106,6 +119,14 @@ public class SavingsAccount extends AbstractAccount {
 
         public void withdraw(int amount) {
             super.withdraw(amount);
+        }
+
+        //New ATM cards for simple savings accounts
+        public boolean hasATMCard(){
+            return atmCard != null;
+        }
+        public ATMCard getATMCard(){
+            return atmCard;
         }
     }
 
@@ -154,5 +175,8 @@ public class SavingsAccount extends AbstractAccount {
         public void withdraw(int amount) {
             super.withdraw(amount);
         }
+
+
+
     }
 }

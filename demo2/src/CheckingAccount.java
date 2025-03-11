@@ -6,18 +6,26 @@ public class CheckingAccount extends AbstractAccount{
     final int minimumBalanceGoldDiamond = 5000;
     AccountType accountSpecificType;
 
+    //ATM card field to be able to choose if the customer wants an ATM card with their checking out
+    private ATMCard atmCard;
+
     public enum AccountType {
         TMB,
         GoldDiamond
     }
 
-    public CheckingAccount(int customerID, Date accountCreationDate, String accountType, double initialBalance, AccountType type) {
+
+    public CheckingAccount(int customerID, Date accountCreationDate, String accountType, double initialBalance, AccountType type, Customer customer, int atmCardChoice) {
         // Some logic for checking if an account with type GoldDiamond has the minimum funds
         // This could also be done at the end, just depends on how we want to implement it
 
         super(customerID, accountCreationDate, accountType);
         setBalance(initialBalance);
         setAccountSpecificType(type);
+
+        if(atmCardChoice == 1){ //if ATM card choice is 1, then the customer gets an ATMCard
+            this.atmCard = new ATMCard(customer, this);
+        }
     }
 
     public static void deleteAccount(CheckingAccount account) {
@@ -69,5 +77,20 @@ public class CheckingAccount extends AbstractAccount{
 
     public String getAccountSpecificType() {
         return accountType;
+    }
+
+    //Checks account to see if they have an atm card
+    public boolean hasATMCard(){
+        return atmCard != null;
+    }
+
+    public ATMCard getAtmCard(){
+        return atmCard;
+    }
+
+    // toString Method to show who all has what types of accounts, date opened, and how much their initial deposit was
+    public String toString(){
+        return "Customer: " + customerID + " Has opened an account on: " + accountCreationDate + " Account Type: " + accountType + " Initial Deposit: " + balance +
+                " Account Level: " + accountSpecificType + " ATM Card: " + (hasATMCard() ? " Yes " : " No ");
     }
 }
