@@ -13,8 +13,7 @@ public class Customer {
     String zip;
     String firstName;
     String lastName;
-    int customerID;
-    private static int customerIDCounter = 0;
+    String customerID;
 
     // Holds the accounts that each customer owns
     ArrayList<AbstractAccount> customerAccounts = new ArrayList<>();
@@ -31,8 +30,7 @@ public class Customer {
         setZip(zip);
         setFirstName(firstName);
         setLastName(lastName);
-        customerIDCounter++;
-        setCustomerID(customerIDCounter);
+        setCustomerID(SSN);
     }
 
 
@@ -92,11 +90,11 @@ public class Customer {
         this.lastName = lastName;
     }
 
-    public int getCustomerID() {
+    public String getCustomerID() {
         return customerID;
     }
 
-    public void setCustomerID(int customerID) {
+    public void setCustomerID(String customerID) {
         this.customerID = customerID;
     }
 

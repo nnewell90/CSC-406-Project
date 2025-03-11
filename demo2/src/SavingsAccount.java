@@ -5,7 +5,7 @@ public class SavingsAccount extends AbstractAccount {
     double balance;
     CheckingAccount overdraftForAccount; // The checking account this account is an overdraft for
 
-    public SavingsAccount(int customerID, Date accountCreationDate, String accountType, double initialBalance) {
+    public SavingsAccount(String customerID, Date accountCreationDate, String accountType, double initialBalance) {
         super(customerID, accountCreationDate, accountType);
         setBalance(initialBalance);
     }
@@ -65,7 +65,7 @@ public class SavingsAccount extends AbstractAccount {
         // Data
         double interestRate;
 
-        public SimpleSavingsAccount(int customerID, Date accountCreationDate, int initialBalance) {
+        public SimpleSavingsAccount(String customerID, Date accountCreationDate, int initialBalance) {
             super(customerID, accountCreationDate, "Simple Savings Account", initialBalance);
         }
 
@@ -115,7 +115,7 @@ public class SavingsAccount extends AbstractAccount {
         double interestRate;
         Date dueDate;
 
-        public CDSavingsAccount(int customerID, Date accountCreationDate, int initialBalance, Date dueDate) {
+        public CDSavingsAccount(String customerID, Date accountCreationDate, int initialBalance, Date dueDate) {
             super(customerID, accountCreationDate, "CD", initialBalance);
             this.dueDate = dueDate;
         }

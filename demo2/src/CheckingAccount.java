@@ -11,7 +11,7 @@ public class CheckingAccount extends AbstractAccount{
         GoldDiamond
     }
 
-    public CheckingAccount(int customerID, Date accountCreationDate, String accountType, double initialBalance, AccountType type) {
+    public CheckingAccount(String customerID, Date accountCreationDate, String accountType, double initialBalance, AccountType type) {
         // Some logic for checking if an account with type GoldDiamond has the minimum funds
         // This could also be done at the end, just depends on how we want to implement it
 
