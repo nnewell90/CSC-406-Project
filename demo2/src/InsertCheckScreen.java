@@ -10,7 +10,7 @@ public class InsertCheckScreen extends JFrame {
         l2.setBounds(100, 100, 120, 80);
         add(l1);
         add(l2);
-        setSize(300, 200);
+        setSize(500, 200); // changed width to fit text
         setLayout(new GridLayout(4, 1));
 
         JTextField amountField = new JTextField(10);
@@ -23,7 +23,10 @@ public class InsertCheckScreen extends JFrame {
         accountGroup.add(checkingButton);
         accountGroup.add(savingsButton);
 
-        returntoCustomerScreen.addActionListener(e -> new CustomerScreen());
+        returntoCustomerScreen.addActionListener(e -> {
+            dispose(); // close CustomerScreen
+            new CustomerScreen(); // reopens CustomerScreen
+        });
         add(amountField);
 
 
