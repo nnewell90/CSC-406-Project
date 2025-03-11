@@ -10,7 +10,6 @@ public class MainMenu extends JFrame {
     public MainMenu() {
         setTitle("Main Menu");
         setSize(300, 200);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new GridLayout(4, 1));
 
         JButton systemButton = new JButton("System Controller");

@@ -5,8 +5,7 @@ public class ManagerScreen extends JFrame {
     public ManagerScreen() {
         setTitle("Manager Screen");
         setSize(300, 200);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new GridLayout(4, 1));
+        setLayout(new GridLayout(5, 1));
 
         JButton loanButton = new JButton("Loan Interest Rates");
         JButton cdButton = new JButton("CD Interest Rates");
@@ -14,11 +13,11 @@ public class ManagerScreen extends JFrame {
         JButton checksButton = new JButton("Checks Processing");
         JButton returnButton = new JButton("Return to Controller");
 
-        loanButton.addActionListener(e -> new SystemControllerScreen());
-        cdButton.addActionListener(e -> new TellerScreen());
-        cdmanageButton.addActionListener(e -> new ManagerScreen());
-        checksButton.addActionListener(e -> new CustomerScreen());
-        returnButton.addActionListener(e -> new SystemControllerScreen());
+        loanButton.addActionListener(e -> new LoanInterest());
+        cdButton.addActionListener(e -> new CDInterest());
+        cdmanageButton.addActionListener(e -> new EstablishCD());
+        checksButton.addActionListener(e -> new ProcessCheck());
+        returnButton.addActionListener(e -> new MainMenu());
 
         add(loanButton);
         add(cdButton);
