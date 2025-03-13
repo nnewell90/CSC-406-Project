@@ -10,7 +10,7 @@ public class InsertCheckScreen extends JFrame {
         l2.setBounds(100, 100, 120, 80);
         add(l1);
         add(l2);
-        setSize(300, 200);
+        setSize(500, 500);
         setLayout(new GridLayout(4, 1));
 
         JTextField amountField = new JTextField(10);
