@@ -4,14 +4,14 @@ import java.awt.*;
 public class ManagerScreen extends JFrame {
     public ManagerScreen() {
         setTitle("Manager Screen");
-        setSize(300, 200);
+        setSize(500, 500);
         setLayout(new GridLayout(5, 1));
 
         JButton loanButton = new JButton("Loan Interest Rates");
         JButton cdButton = new JButton("CD Interest Rates");
         JButton cdmanageButton = new JButton("CD Manager");
         JButton checksButton = new JButton("Checks Processing");
-        JButton returnButton = new JButton("Return to Controller");
+        JButton returnButton = new JButton("Return to Main Menu");
 
         loanButton.addActionListener(e -> new LoanInterest());
         cdButton.addActionListener(e -> new CDInterest());

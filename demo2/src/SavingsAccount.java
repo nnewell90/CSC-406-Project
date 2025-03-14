@@ -1,13 +1,16 @@
+import java.util.ArrayList;
 import java.util.Date;
 
 public class SavingsAccount extends AbstractAccount {
     // Data
     double balance;
     CheckingAccount overdraftForAccount; // The checking account this account is an overdraft for
+    ArrayList<String> stopPaymentArray; // Used to stop checks from going through
 
     public SavingsAccount(String customerID, Date accountCreationDate, String accountType, double initialBalance) {
         super(customerID, accountCreationDate, accountType);
         setBalance(initialBalance);
+        stopPaymentArray = new ArrayList<>();
     }
 
     @Override
@@ -44,6 +47,8 @@ public class SavingsAccount extends AbstractAccount {
     public void withdraw(double amount) {
         if (balance > amount) {
             balance -= amount;
+        } else {
+            System.out.println("Insufficient Balance");
         }
     }
 
@@ -57,6 +62,68 @@ public class SavingsAccount extends AbstractAccount {
 
     public void removeOverdraftForAccount() {
         this.overdraftForAccount = null;
+    }
+
+
+    // Check stuff
+    // Add this check to the array of checks to stop payments for
+    public void addStopPaymentNumber(String checkNumber) {
+
+        boolean validNumber = validateCheckNumber(checkNumber);
+
+        // Now actually add a number
+        if (validNumber) {
+            stopPaymentArray.add(checkNumber);
+            balance -= 25; // $25 charge
+        } else {
+            System.out.println("Invalid Check Number or number already stored");
+        }
+    }
+
+    // checks a checkNumber's validity
+    public boolean validateCheckNumber(String checkNumber) {
+        boolean validNumber = true;
+
+        // Do some checks on the given checkNumber
+        if (stopPaymentArray.contains(checkNumber)) { // If the array already has this number
+            validNumber = false;
+        } else if (checkNumber.length() == 1) { // !!! This will need to change for actual check numbers
+            validNumber = false;
+        } else if (checkNumber.matches("[a-zA-Z]+") || checkNumber.matches("[-_]+")) { // Contains a letter, - , or _
+            validNumber = false;
+        }
+
+        // Return true or false
+        return validNumber;
+    }
+
+    // Withdraw via a check rather than by card
+    public void withdrawByCheck(int withdrawAmount, String checkNumber) {
+        boolean validNumber = validateCheckNumber(checkNumber);
+        boolean stopPayment = false;
+
+        // Check if the check is valid and if it is contained in the "stop payment" list
+        if (!validNumber) {
+             stopPayment = true;
+            System.out.println("Invalid Check Number");
+        }
+        if (stopPaymentArray.contains(checkNumber)) {
+            stopPayment = true;
+            System.out.println("Check number has previously been set to not be paid");
+        }
+
+        // Now do actual withdrawing
+        if (!stopPayment) {
+
+            // First check to see if this will cause an overdraft
+            if (withdrawAmount > balance) {
+                balance -= 25; // $25 charge
+                System.out.println("Insufficient funds: Check returned unpaid, $25 Overdraft Service charged to account");
+            } else {
+                balance -= withdrawAmount;
+            }
+
+        }
     }
 
     // Simple Savings class
@@ -98,6 +165,11 @@ public class SavingsAccount extends AbstractAccount {
 
         public void setInterestRate(double interestRate) {
             this.interestRate = interestRate;
+        }
+
+        // Calculates and adds the interest for am account
+        public void calcAndAddInterest() {
+            balance += balance * interestRate;
         }
 
         public void deposit(int amount) {
@@ -151,7 +223,13 @@ public class SavingsAccount extends AbstractAccount {
             this.interestRate = interestRate;
         }
 
+        // Calculates and adds the interest for am account
+        public void calcAndAddInterest() {
+            balance += balance * interestRate;
+        }
+
         public void withdraw(int amount) {
+            // !!! The paper specifies some punishment for withdrawing early, but it doesn't state what that is
             super.withdraw(amount);
         }
     }
