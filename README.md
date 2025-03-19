@@ -28,6 +28,8 @@ This project models a banking system that manages different types of accounts, t
 2. Database: Stores account details, transactions, and customer information.
 3. Actors: Customers, Tellers, and Managers interact with the system.
 
+## Actors and Their Roles
+
 | Actor | Capabilities |
 | ----- | ------------ |
 | Customer | Deposits, withdrawals, transfers, loan payments, credit card usage |
