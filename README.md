@@ -24,3 +24,13 @@ This project models a banking system that manages different types of accounts, t
 * Management Functions: Interest rate adjustments, credit/debit of accounts, and loan processing.
 
 ## System Components
+1. Banking System: The core application handling transactions and processing requests.
+2. Database: Stores account details, transactions, and customer information.
+3. Actors: Customers, Tellers, and Managers interact with the system.
+
+| Actor | Capabilities |
+| ----- | ------------ |
+| Customer | Deposits, withdrawals, transfers, loan payments, credit card usage |
+| Teller | Access balances, process transactions, manage transfers |
+| Manager | Adjust interest rates, manage loans, handle overdrafts, process fees |
+
