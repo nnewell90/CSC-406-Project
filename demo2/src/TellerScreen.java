@@ -5,7 +5,7 @@ public class TellerScreen extends JFrame {
     public TellerScreen() {
         setTitle("Teller Screen");
         setSize(300, 200);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(4, 1));
 
         JButton systemButton = new JButton("Create a New Account");
@@ -17,7 +17,7 @@ public class TellerScreen extends JFrame {
         JButton returnButton = new JButton("Return to Controller");
 
         systemButton.addActionListener(e -> new SystemControllerScreen());
-        tellerButton.addActionListener(e -> new TellerScreen());
+        tellerButton.addActionListener(e -> new NewCustomerScreen());  // creates new customer
         managerButton.addActionListener(e -> new LoanInterest());
         customerButton.addActionListener(e -> new CustomerScreen());
         stopButton.addActionListener(e -> new CustomerScreen());
