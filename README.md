@@ -36,3 +36,32 @@ This project models a banking system that manages different types of accounts, t
 | Teller | Access balances, process transactions, manage transfers |
 | Manager | Adjust interest rates, manage loans, handle overdrafts, process fees |
 
+## Transaction Workflow
+Example: Customer Withdraws Money
+1. Customer requests a withdrawal.
+2. Banking System checks balance.
+3. If funds are sufficient, the system deducts the amount and dispenses cash.
+4. If funds are insufficient, the system checks for overdraft protection.
+5. If overdraft protection exists, it transfers funds from savings.
+6. Transaction is recorded in the database.
+
+## Overdraft Protection
+* If a checking account has overdraft protection enabled, funds are automatically transferred from savings to cover insufficient balances.
+* If overdraft protection is not enabled, a $25 fee is charged for a returned check.
+
+## Interest Rate Adjustments
+* Savings accounts accrue a fixed daily compounded interest rate.
+* Gold/Diamond checking accounts earn 0.5 x the savings rate, but only if the minimum $5,000 balance is maintained.
+* Managers can update interest rates, which automatically affects all relevant accounts.
+
+## Penalties and Fees
+
+| Transaction | Fee |
+| ------ | ---- |
+| Stop Payment Request | $35 per check |
+| Overdraft (without protection) | $25 per check |
+| TMB Account Transactions | $0.75 per transaction |
+| Monthly Transfers (TMB Account) | $1.25 per transaction |
+| Late Loan Payment | $75 per month |
+
+## Setup and Configuration
