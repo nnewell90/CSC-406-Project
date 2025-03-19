@@ -65,3 +65,22 @@ Example: Customer Withdraws Money
 | Late Loan Payment | $75 per month |
 
 ## Setup and Configuration
+1. Database Setup
+    * Configure tables for accounts, transactions, loans, and customers.
+    * Ensure indexes are set on primary keys for fast lookups (SSNs).
+2. Banking System Implementation
+    * Implement account operations (withdraw, deposit, transfer).
+    * Implement loan management (payment processing, late fee handling).
+    * Implement credit card processing (purchase validation, monthly billing).
+3. User Access Control
+    * Customers should only see their own accounts.
+    * Tellers should have broader access but no administrative controls.
+    * Managers should have full access, including loan processing and interest rate changes.
+
+## Limitations
+* The system currently does not support multi-currency transactions.
+* Fraud detection is not implemented but should be considered for real-world applications.
+* ATM withdrawals are limited to two per day, which may need adjustments for business requirements.
+
+## Conclusion
+This banking system efficiently manages customer transactions, loans, and accounts while enforcing penalties, fees, and overdraft protection. The system is designed to ensure accurate financial operations while providing flexibility for customers, tellers, and managers. 
