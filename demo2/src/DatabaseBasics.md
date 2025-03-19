@@ -21,9 +21,9 @@ restoreFromDatabase() calls a helper function, loadFromFile() which does the act
 
 This function uses a buffered reader to read from the given .txt file
 
-This function requires that **every** class it reads from implements the ***fromFileString()*** function. This function accepts no parameters, and is called on String objects. It returns an object of the type of the passed in arrayList.
+This function requires that **every** class it reads from implements the ***fromFileString()*** function. This function accepts a String argument. It returns an object of the type of the passed in arrayList.
 
-The String object to be called on is line, which comes from the buffered reader and correlates to a line within the file. Which means you only need to worry about passing in parameters.
+The String object to be passed is "line", which comes from the buffered reader and correlates to a line within the file. This is handled by the function however, so no user input is needed.
 
 This function will run and add objects into the arrayList until the file runs out of lines.
 

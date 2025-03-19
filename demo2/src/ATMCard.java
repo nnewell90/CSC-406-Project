@@ -48,4 +48,49 @@ public class ATMCard {
     public CheckingAccount getCheckingAccount() {
         return checkingAccount;
     }
+
+    public String toFileString() {
+        String toReturn = "";
+
+        toReturn += customer.getCustomerID();
+        if (savingsAccount != null) {
+            toReturn += ";" + "Savings";
+            toReturn += ";" + savingsAccount.getAccountID();
+        }
+        if (checkingAccount != null) {
+            toReturn += ";" + "Checking";
+            toReturn += ";" + checkingAccount.getAccountID();
+        }
+
+        return toReturn;
+    }
+
+    static public ATMCard fromFileString(String s) {
+        String[] split = s.split(";");
+
+        // Get the customer object
+        String customerID = split[0];
+        Customer customer = null;
+        for (Customer c : Database.customerList) {
+            if (c.getCustomerID().equals(customerID)) {
+                customer = c;
+                break;
+            }
+        }
+
+        // Get the savings/checking account
+        SavingsAccount savingsAccount = null;
+        CheckingAccount checkingAccount = null;
+
+        long accountID = Long.parseLong(split[2]);
+
+        if (split[1].equals("Savings")) {
+            savingsAccount = (SavingsAccount) Database.getAccountFromList(Database.savingsAccountList, accountID);
+            return new ATMCard(customer, savingsAccount);
+        } else { // Must be a checking account
+            checkingAccount = (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, accountID);
+            return new ATMCard(customer, checkingAccount);
+        }
+
+    }
 }

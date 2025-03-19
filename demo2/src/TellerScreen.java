@@ -4,8 +4,8 @@ import java.awt.*;
 public class TellerScreen extends JFrame {
     public TellerScreen() {
         setTitle("Teller Screen");
-        setSize(500, 500);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(300, 200);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(4, 1));
 
         JButton newAccountButton = new JButton("Create a New Account");
@@ -16,13 +16,14 @@ public class TellerScreen extends JFrame {
         JButton reviewButton = new JButton("Review Customer Accounts");
         JButton returnButton = new JButton("Return to Main Menu");
 
-        newAccountButton.addActionListener(e -> new NewAccountScreen());
-        newCustomerButton.addActionListener(e -> new NewCustomerScreen());
-        linkButton.addActionListener(e -> new LinkAccountsScreen());
-        withdrawButton.addActionListener(e -> new WithdrawScreen());
-        stopButton.addActionListener(e -> new StopPayScreen());
-        reviewButton.addActionListener(e -> new CustomerReviewScreen());
-        returnButton.addActionListener(e -> new MainMenu());
+        systemButton.addActionListener(e -> new SystemControllerScreen());
+        tellerButton.addActionListener(e -> new NewCustomerScreen());  // creates new customer
+        managerButton.addActionListener(e -> new LoanInterest());
+        customerButton.addActionListener(e -> new CustomerScreen());
+        stopButton.addActionListener(e -> new CustomerScreen());
+        reviewButton.addActionListener(e -> new CustomerScreen());
+        returnButton.addActionListener(e -> new SystemControllerScreen());
+
 
         add(newAccountButton);
         add(newCustomerButton);

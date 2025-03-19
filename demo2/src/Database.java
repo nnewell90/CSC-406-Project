@@ -89,8 +89,8 @@ public class Database implements Runnable {
     }
 
     // Gets an account from a given list
-    // !!! work on this
-    public static AbstractAccount getAccountFromList(ArrayList<AbstractAccount> accountList, long accountID) {
+    // The given list must be from a type that extends from AbstractAccount
+    public static <T extends AbstractAccount> AbstractAccount getAccountFromList(ArrayList<T> accountList, long accountID) {
         // Search through the given list for the given ID, then return the matching account
         for (AbstractAccount account : accountList) {
             if (account.accountID == accountID) {
@@ -235,8 +235,9 @@ public class Database implements Runnable {
             String line;
             Method fromFileString = clazz.getDeclaredMethod("fromFileString", String.class); // !!! Every account class must include the functon "public ClassName fromFileString(){...}"
             while ((line = reader.readLine()) != null) {
-                T temp = (T) fromFileString.invoke(line, (Object) null);
+                T temp = (T) fromFileString.invoke(null, line);
                 list.add(temp);
+                AbstractAccount.incrementAccountIDCounter(); // See note in AbstractAccount for why this is necessary
             }
         } catch (Exception e) {
             System.out.println("Error loading from file: " + fileName + " :"+ e.getMessage());
@@ -250,9 +251,9 @@ public class Database implements Runnable {
     private static <T>void storeToFile(String fileName, ArrayList<T> list) {
         Class clazz = list.getFirst().getClass();
         try (PrintWriter writer = new PrintWriter(new FileWriter(fileName))) {
-            Method toFileString = clazz.getDeclaredMethod("toFileString", clazz); // !!! Same as above but for this function
+            Method toFileString = clazz.getDeclaredMethod("toFileString"); // !!! Same as above but for this function
             for (T item : list) {
-                String temp = (String) toFileString.invoke(item, (Object) null);
+                String temp = (String) toFileString.invoke(item);
                 writer.println(temp);
             }
         } catch (Exception e) {
