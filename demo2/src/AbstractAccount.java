@@ -5,14 +5,14 @@ import java.util.Date;
  */
 abstract public class AbstractAccount {
     // Data
-    protected int customerID = -1; // -1 should be seen as an error for IDs
+    protected String customerID = ""; // -1 should be seen as an error for IDs
     protected Date accountCreationDate;
     protected String accountType;
-    static int accountIDCounter = 0;
-    int accountID; // Accounts need IDs so if a customer holds multiple of the same type the correct one can be retrieved
+    static long accountIDCounter = 0;
+    long accountID; // Accounts need IDs so if a customer holds multiple of the same type the correct one can be retrieved
 
     // Methods
-    public AbstractAccount(int customerID, Date accountCreationDate, String accountType) {
+    public AbstractAccount(String customerID, Date accountCreationDate, String accountType) {
         this.customerID = customerID;
         this.accountCreationDate = accountCreationDate;
         this.accountType = accountType;
@@ -20,7 +20,7 @@ abstract public class AbstractAccount {
         this.accountID = accountIDCounter;
     }
 
-    public int getCustomerID() {
+    public String getCustomerID() {
         return customerID;
     }
 

@@ -11,6 +11,7 @@ public class InsertCheckScreen extends JFrame {
         add(l1);
         add(l2);
         setSize(500, 200); // changed width to fit text
+
         setLayout(new GridLayout(4, 1));
 
         JTextField amountField = new JTextField(10);

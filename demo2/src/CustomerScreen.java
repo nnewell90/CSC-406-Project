@@ -11,7 +11,8 @@ public class CustomerScreen extends JFrame {
         JButton creditButton = new JButton("Credit Card");
         JButton reviewButton = new JButton("Review Account Status");
         JButton checkButton = new JButton("Input Checks");
-        JButton returnButton = new JButton("Return to Controller");
+        JButton returnButton = new JButton("Return to Main Menu");
+
 
         creditButton.addActionListener(e -> {
             dispose();
@@ -29,6 +30,7 @@ public class CustomerScreen extends JFrame {
             dispose();
             new SystemControllerScreen();
         });
+
 
         add(creditButton);
         add(reviewButton);

@@ -8,13 +8,13 @@ public class TellerScreen extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(4, 1));
 
-        JButton systemButton = new JButton("Create a New Account");
-        JButton tellerButton = new JButton("Create a New Customer");
-        JButton managerButton = new JButton("Link Accounts");
-        JButton customerButton = new JButton("Withdraw from Account");
+        JButton newAccountButton = new JButton("Create a New Account");
+        JButton newCustomerButton = new JButton("Create a New Customer");
+        JButton linkButton = new JButton("Link Accounts");
+        JButton withdrawButton = new JButton("Withdraw from Account");
         JButton stopButton = new JButton("Stop Payment");
         JButton reviewButton = new JButton("Review Customer Accounts");
-        JButton returnButton = new JButton("Return to Controller");
+        JButton returnButton = new JButton("Return to Main Menu");
 
         systemButton.addActionListener(e -> new SystemControllerScreen());
         tellerButton.addActionListener(e -> new NewCustomerScreen());  // creates new customer
@@ -24,10 +24,11 @@ public class TellerScreen extends JFrame {
         reviewButton.addActionListener(e -> new CustomerScreen());
         returnButton.addActionListener(e -> new SystemControllerScreen());
 
-        add(systemButton);
-        add(tellerButton);
-        add(managerButton);
-        add(customerButton);
+
+        add(newAccountButton);
+        add(newCustomerButton);
+        add(linkButton);
+        add(withdrawButton);
         add(stopButton);
         add(reviewButton);
         add(returnButton);

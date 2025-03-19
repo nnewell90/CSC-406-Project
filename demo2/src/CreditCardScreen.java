@@ -15,7 +15,7 @@ public class CreditCardScreen extends JFrame {
         add(l1);
         add(l2);
         add(l3);
-        setSize(300, 200);
+        setSize(500, 500);
         setLayout(new GridLayout(4, 1));
 
         JButton returntoCustomerr = new JButton("Return to Customer Screen");

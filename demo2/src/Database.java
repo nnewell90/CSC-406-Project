@@ -90,7 +90,7 @@ public class Database implements Runnable {
 
     // Gets an account from a given list
     // !!! work on this
-    public static AbstractAccount getAccountFromList(ArrayList<AbstractAccount> accountList, int accountID) {
+    public static AbstractAccount getAccountFromList(ArrayList<AbstractAccount> accountList, long accountID) {
         // Search through the given list for the given ID, then return the matching account
         for (AbstractAccount account : accountList) {
             if (account.accountID == accountID) {
@@ -103,9 +103,9 @@ public class Database implements Runnable {
     }
 
     // Gets all the accounts for one customer
-    public static ArrayList<AbstractAccount> getAllAccountsOfCustomer(int customerID) {
+    public static ArrayList<AbstractAccount> getAllAccountsOfCustomer(String customerID) {
         for (Customer customer : customerList) {
-            if (customer.getCustomerID() == customerID) {
+            if (customer.getCustomerID().equals(customerID)) {
                 return customer.getCustomerAccounts();
             }
         }
@@ -124,7 +124,7 @@ public class Database implements Runnable {
         // Simple savings
         for (SavingsAccount.SimpleSavingsAccount a : simpleSavingsAccountList) { // Check every entry in the list
             for (Customer c : customerList) { // Check for every customer
-                if (a.getCustomerID() == c.getCustomerID()) {
+                if (a.getCustomerID().equals(c.getCustomerID())) {
                     c.addAccountToCustomerAccounts(a);
                     break; // Once a match has been found, move to the next account in the accountList
                 }
@@ -133,7 +133,7 @@ public class Database implements Runnable {
         // CD
         for (SavingsAccount.CDSavingsAccount a : cdSavingsAccountList) { // Check every entry in the list
             for (Customer c : customerList) { // Check for every customer
-                if (a.getCustomerID() == c.getCustomerID()) {
+                if (a.getCustomerID().equals(c.getCustomerID())) {
                     c.addAccountToCustomerAccounts(a);
                     break; // Once a match has been found, move to the next account in the accountList
                 }
@@ -143,7 +143,7 @@ public class Database implements Runnable {
         // Checking accounts
         for (CheckingAccount a : checkingAccountList) { // Check every entry in the list
             for (Customer c : customerList) { // Check for every customer
-                if (a.getCustomerID() == c.getCustomerID()) {
+                if (a.getCustomerID().equals(c.getCustomerID())) {
                     c.addAccountToCustomerAccounts(a);
                     break; // Once a match has been found, move to the next account in the accountList
                 }
@@ -154,7 +154,7 @@ public class Database implements Runnable {
         // ShortOrLong
         for (LoanAccount.ShortOrLong a : shortOrLongLoanList) { // Check every entry in the list
             for (Customer c : customerList) { // Check for every customer
-                if (a.getCustomerID() == c.getCustomerID()) {
+                if (a.getCustomerID().equals(c.getCustomerID())) {
                     c.addAccountToCustomerAccounts(a);
                     break; // Once a match has been found, move to the next account in the accountList
                 }
@@ -163,7 +163,7 @@ public class Database implements Runnable {
         // CC
         for (LoanAccount.CC a : CCList) { // Check every entry in the list
             for (Customer c : customerList) { // Check for every customer
-                if (a.getCustomerID() == c.getCustomerID()) {
+                if (a.getCustomerID().equals(c.getCustomerID())) {
                     c.addAccountToCustomerAccounts(a);
                     break; // Once a match has been found, move to the next account in the accountList
                 }

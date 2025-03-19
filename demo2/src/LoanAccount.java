@@ -2,7 +2,7 @@ import java.util.Date;
 
 public class LoanAccount extends AbstractAccount {
 
-    public LoanAccount(int customerID, Date accountCreationDate, String accountType) {
+    public LoanAccount(String customerID, Date accountCreationDate, String accountType) {
         super(customerID, accountCreationDate, accountType);
     }
 
@@ -32,7 +32,7 @@ public class LoanAccount extends AbstractAccount {
         boolean problemAccount = false;
 
 
-        public ShortOrLong(int customerID, Date accountCreationDate, String accountType) {
+        public ShortOrLong(String customerID, Date accountCreationDate, String accountType) {
             super(customerID, accountCreationDate, accountType);
         }
 
@@ -58,7 +58,7 @@ public class LoanAccount extends AbstractAccount {
         // Data
         double limit;
 
-        public CC(int customerID, Date accountCreationDate, String accountType) {
+        public CC(String customerID, Date accountCreationDate, String accountType) {
             super(customerID, accountCreationDate, accountType);
         }
 
