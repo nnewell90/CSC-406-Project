@@ -1,5 +1,8 @@
 import javax.swing.*;
 import java.awt.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class TellerScreen extends JFrame {
     public TellerScreen() {
@@ -16,13 +19,13 @@ public class TellerScreen extends JFrame {
         JButton reviewButton = new JButton("Review Customer Accounts");
         JButton returnButton = new JButton("Return to Main Menu");
 
-        systemButton.addActionListener(e -> new SystemControllerScreen());
-        tellerButton.addActionListener(e -> new NewCustomerScreen());  // creates new customer
-        managerButton.addActionListener(e -> new LoanInterest());
-        customerButton.addActionListener(e -> new CustomerScreen());
-        stopButton.addActionListener(e -> new CustomerScreen());
-        reviewButton.addActionListener(e -> new CustomerScreen());
-        returnButton.addActionListener(e -> new SystemControllerScreen());
+        //systemButton.addActionListener(e -> new SystemControllerScreen());
+        newCustomerButton.addActionListener(e ->{ dispose(); new NewCustomerScreen();});  // creates new customer
+        //managerButton.addActionListener(e -> new LoanInterest());
+        //customerButton.addActionListener(e -> new CustomerScreen());
+        stopButton.addActionListener(e -> {dispose(); new CustomerScreen();});
+        reviewButton.addActionListener(e ->{ dispose(); new CustomerScreen();});
+        returnButton.addActionListener(e -> {saveUIState("MainMenu"); new MainMenu();dispose();});
 
 
         add(newAccountButton);
@@ -34,5 +37,13 @@ public class TellerScreen extends JFrame {
         add(returnButton);
 
         setVisible(true);
+    }
+    private void saveUIState(String state) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("ui_state.txt"))) {
+            writer.write(state);
+            System.out.println("UI state saved: " + state);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
