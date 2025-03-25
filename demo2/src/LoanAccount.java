@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.time.LocalDateTime;
 
 public class LoanAccount extends AbstractAccount {
 
@@ -169,6 +170,7 @@ public class LoanAccount extends AbstractAccount {
 
         // boolean problemAccount;      missedPayment
         int numOfYearsTotal; // 15/30 for Long, 5 for short
+        int numOfMonthsTotal; // Some multiple of the above
 
 
         // Regular constructor
@@ -178,7 +180,19 @@ public class LoanAccount extends AbstractAccount {
             balance = loanTotalValue; // Initially set the total amount to pay to the given total;
             // this changes as the user pays, this is the amount of the loan left to pay
             this.rate = rate;
-            this.fixedPayment = fixedPaymentValue;
+            amountPaidThisMonth = 0; // No payment yet when an account is created
+            lateFees = 0;
+            missedPayment = false;
+            numOfYearsTotal = numOfYears; // !!! Maybe some logic for checking for 5/15/30
+            numOfMonthsTotal = numOfYearsTotal * 12;
+            //  If a check needs to be done, it needs to happen before this constructor call
+
+            // Do calculation for monthly payment
+            double monthlyPrinciple = balance/numOfMonthsTotal;
+            double monthlyInterest = (balance/2) * numOfYearsTotal * rate;
+            this.fixedPayment = monthlyPrinciple + monthlyInterest;
+
+            // this.fixedPayment = fixedPaymentValue; For now, keep the fixedPaymentValue input, but it will be corrected here
             currentPaymentDue = fixedPaymentValue + fixedPaymentValue * rate;
             
             paymentDueDate = finalPaymentDate;
@@ -195,16 +209,10 @@ public class LoanAccount extends AbstractAccount {
             
             notifiedOfPaymentDate = accountCreationDate; // Since there has been no payment yet, just set it to the creation date
             lastPaymentMadeDate = accountCreationDate; // Same as above
-            
-            amountPaidThisMonth = 0; // No payment yet when an account is created
-            lateFees = 0;
-            missedPayment = false;
-            numOfYearsTotal = numOfYears; // !!! Maybe some logic for checking for 5/15/30
-                //  If a check needs to be done, it needs to happen before this constructor call
         }
 
         // Reading from database constructor
-        public ShortOrLong(String customerID, Date accountCreationDate, String accountType, long accountID, double loanTotalValue, double rate, Date paymentDueDate, Date notifiedOfPaymentDate, Date thisPaymentDueDate, Date lastPaymentMadeDate, double fixedPaymentValue, double currentPaymentDue, double balance, double lateFees, double amountPaidThisMonth, boolean missedPayment, int numOfYearsTotal) {
+        public ShortOrLong(String customerID, Date accountCreationDate, String accountType, long accountID, double loanTotalValue, double rate, Date paymentDueDate, Date notifiedOfPaymentDate, Date thisPaymentDueDate, Date lastPaymentMadeDate, double fixedPaymentValue, double currentPaymentDue, double balance, double lateFees, double amountPaidThisMonth, boolean missedPayment, int numOfYearsTotal, int numOfMonthsTotal) {
             // Reminder that balance stands for how much is left to pay off, NOT the total value of the loan
             // This will return the total balance to pay off, not the value assigned to balance
             super(customerID, accountCreationDate, accountType, accountID, balance + lateFees, rate, currentPaymentDue, paymentDueDate, notifiedOfPaymentDate, lastPaymentMadeDate, missedPayment);
@@ -214,6 +222,7 @@ public class LoanAccount extends AbstractAccount {
             this.loanTotal = loanTotalValue;
             this.lateFees = lateFees;
             this.numOfYearsTotal = numOfYearsTotal;
+            this.numOfMonthsTotal = numOfMonthsTotal;
         }
 
         @Override
@@ -247,6 +256,7 @@ public class LoanAccount extends AbstractAccount {
             toReturn += ";" + getLoanTotal();
             toReturn += ";" + getLateFees();
             toReturn += ";" + getNumOfYearsTotal();
+            toReturn += ";" + getNumOfMonthsTotal();
 
             return toReturn;
         }
@@ -276,8 +286,9 @@ public class LoanAccount extends AbstractAccount {
             double loanTotal = Double.parseDouble(split[14]);
             double lateFees = Double.parseDouble(split[15]);
             int numOfYearsTotal = Integer.parseInt(split[16]);
+            int numOfMonthsTotal = Integer.parseInt(split[17]);
 
-            return new ShortOrLong(customerID, accountCreationDate, abstractAccountType, accountID, loanTotal, rate, paymentDueDate, notifiedOfPaymentDate, thisPaymentDueDate, lastPaymentMadeDate, fixedPayment, currentPaymentDue, balance, lateFees, amountPaidThisMonth, missedPayment, numOfYearsTotal);
+            return new ShortOrLong(customerID, accountCreationDate, abstractAccountType, accountID, loanTotal, rate, paymentDueDate, notifiedOfPaymentDate, thisPaymentDueDate, lastPaymentMadeDate, fixedPayment, currentPaymentDue, balance, lateFees, amountPaidThisMonth, missedPayment, numOfYearsTotal, numOfMonthsTotal);
         }
 
         public void makePayment(double amount, Date dayOfPay) {
@@ -364,7 +375,14 @@ public class LoanAccount extends AbstractAccount {
         public void setLateFees(double lateFees) {
             this.lateFees = lateFees;
         }
-        
+
+        public int getNumOfMonthsTotal() {
+            return numOfMonthsTotal;
+        }
+
+        public void setNumOfMonthsTotal(int numOfMonthsTotal) {
+            this.numOfMonthsTotal = numOfMonthsTotal;
+        }
     }
 
     static class CC extends LoanAccount {
@@ -453,6 +471,21 @@ public class LoanAccount extends AbstractAccount {
             } else {
                 System.out.println("Credit card not paid off this month, adding finance charge to total");
             }
+        }
+
+        // Returns charge messages as a string
+        public String getChargeMessagesString() {
+            String initialString = """
+                    Charge History for Credit Card
+                    
+                    """;
+            StringBuilder allMessages = new StringBuilder(initialString);
+
+            for (String message : chargeMessages) {
+                allMessages.append(message).append("\n");
+            }
+
+            return allMessages.toString();
         }
 
         @Override
@@ -546,7 +579,8 @@ public class LoanAccount extends AbstractAccount {
             this.sumOfChargesThisMonth = sumOfChargesThisMonth;
         }
 
-        public ArrayList<String> getChargeMessages() {
+        // Returns the array of charge messages
+        public ArrayList<String> getChargeMessagesArray() {
             return chargeMessages;
         }
 

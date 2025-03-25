@@ -70,21 +70,21 @@ public class Database implements Runnable {
     // Functions for adding and removing accounts from given lists
     // When working with Swing we may want to change these to return a String or some other Swing type
     // For now just a println() placeholder
-    public static <T>void addAccountToList(ArrayList<T> list, T account) {
-        if (!list.contains(account)) {
-            list.add(account);
+    public static <T>void addItemToList(ArrayList<T> list, T item) {
+        if (!list.contains(item)) {
+            list.add(item);
         } else {
             // This will need to be changed to work with Swing
-            System.out.println("Account already exists in the database: Doing nothing");
+            System.out.println("Item already exists in the database: Doing nothing");
         }
     }
 
-    public static <T>void removeAccountFromList(ArrayList<T> list, T account) {
-        if (list.contains(account)) {
-            list.remove(account);
+    public static <T>void removeItemFromList(ArrayList<T> list, T item) {
+        if (list.contains(item)) {
+            list.remove(item);
         } else {
             // This will need to be changed to work with Swing
-            System.out.println("Account does not exist in the database: Cannot remove account");
+            System.out.println("Item does not exist in the database: Cannot remove item");
         }
     }
 

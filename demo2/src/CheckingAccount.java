@@ -115,14 +115,48 @@ public class CheckingAccount extends AbstractAccount{
     public void deposit(double amount) {
         balance += amount;
         balance -= getTransactionFee(false);
+        if (accountSpecificType == AccountType.TMB) {
+            if (balance >= minimumBalanceGoldDiamond) {
+                setAccountSpecificType(AccountType.GoldDiamond);
+            }
+        } else { // AccountType is GoldDiamond
+            if (balance < minimumBalanceGoldDiamond) {
+                setAccountSpecificType(AccountType.TMB);
+            }
+        }
     }
 
     public void withdraw(double amount) {
         if (balance >= amount) {
             balance -= amount;
             balance -= getTransactionFee(false);
+            if (accountSpecificType == AccountType.TMB) {
+                if (balance >= minimumBalanceGoldDiamond) {
+                    setAccountSpecificType(AccountType.GoldDiamond);
+                }
+            }
         } else {
-            System.out.println("Insufficient Balance"); // !!! Swing will need to change this
+            boolean overdraftFail = false;
+
+            // Check for a SavingsAccount (Overdraft account)
+            if (overdraftAccount != null) {
+                if (overdraftAccount.getBalance() >= amount) { // Enough money in the overdraft account
+                    // Withdraw from overdraft, deposit in checking, then withdraw from checking
+                    overdraftAccount.withdraw(amount);
+                    deposit(amount);
+                    balance -= amount;
+                } else { // Not enough money in the overdraft account
+                    overdraftFail = true;
+                }
+            } else { // No overdraft account
+                overdraftFail = true;
+            }
+
+            // If an overdraft couldn't be resolved
+            if (overdraftFail) {
+                balance -= 25; // $25 charge
+                System.out.println("Insufficient funds: Withdrawal denied, $25 Overdraft Service charged to account");
+            }
         }
     }
 
@@ -131,6 +165,11 @@ public class CheckingAccount extends AbstractAccount{
         if (balance >= amount) {
             balance -= amount;
             balance -= getTransactionFee(true);
+            if (accountSpecificType == AccountType.TMB) {
+                if (balance >= minimumBalanceGoldDiamond) {
+                    setAccountSpecificType(AccountType.GoldDiamond);
+                }
+            }
         } else {
             System.out.println("Insufficient Balance"); // !!! Swing will need to change this
         }
