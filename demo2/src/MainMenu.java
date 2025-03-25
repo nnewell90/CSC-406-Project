@@ -18,7 +18,7 @@ public class MainMenu extends JFrame {
         // If the last screen before the system went down was the NOT MainMenu, open that instead
         if (!lastScreen.equals("MainMenu")) {
             openLastScreen();
-            return; // Also, this'll stop the main meny from appearing every time, it's kind of annoying
+            return; // Also, this'll stop the main menu from appearing every time, it's kind of annoying
         }
 
         JButton tellerButton = new JButton("Teller Screen");

@@ -48,8 +48,12 @@ public class NewCustomerScreen extends JFrame {
                 createCustomer();
             }
         });
+        JButton returntoButton = new JButton("Return to Teller Screen");
+
+        returntoButton.addActionListener(e -> {dispose(); new TellerScreen();});
 
         add(submitButton);
+        add(returntoButton);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
     }
