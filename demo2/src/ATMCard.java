@@ -79,8 +79,8 @@ public class ATMCard {
         }
 
         // Get the savings/checking account
-        SavingsAccount savingsAccount = null;
-        CheckingAccount checkingAccount = null;
+        SavingsAccount savingsAccount;
+        CheckingAccount checkingAccount;
 
         long accountID = Long.parseLong(split[2]);
 

@@ -6,7 +6,7 @@ import java.util.Date;
  */
 abstract public class AbstractAccount {
     // Data
-    protected String customerID = ""; // -1 should be seen as an error for IDs
+    protected String customerID;
     protected Date accountCreationDate;
     protected String accountType;
     static long accountIDCounter = 0;

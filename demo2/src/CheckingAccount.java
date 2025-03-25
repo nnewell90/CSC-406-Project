@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 public class CheckingAccount extends AbstractAccount{
@@ -96,9 +97,7 @@ public class CheckingAccount extends AbstractAccount{
         // Now make an aList of the held stopped checks
         ArrayList<String> stopPaymentArrayPassed = new ArrayList<>();
         if (split.length > 8) {
-            for (int i = 8; i < split.length; i++) {
-                stopPaymentArrayPassed.add(split[i]);
-            }
+            stopPaymentArrayPassed.addAll(Arrays.asList(split).subList(8, split.length));
         }
 
         // Return an account made from this information
