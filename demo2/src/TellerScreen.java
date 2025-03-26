@@ -24,7 +24,13 @@ public class TellerScreen extends JFrame {
         //managerButton.addActionListener(e -> new LoanInterest());
         //customerButton.addActionListener(e -> new CustomerScreen());
         stopButton.addActionListener(e -> {dispose(); new CustomerScreen();});
-        reviewButton.addActionListener(e ->{ dispose(); new CustomerScreen();});
+        reviewButton.addActionListener(e ->{ dispose();
+            try {
+                new ReviewAccountsScreen();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
         returnButton.addActionListener(e -> {saveUIState("MainMenu"); new MainMenu();dispose();});
 
 
