@@ -100,15 +100,42 @@ public class Customer {
 
     // These two are for database purposes
     public String toFileString() {
-        return "";
+        String toReturn = "";
+
+        // Basic data
+        toReturn += getSSN();
+        toReturn += ";" + getAddress();
+        toReturn += ";" + getCity();
+        toReturn += ";" + getState();
+        toReturn += ";" + getZip();
+        toReturn += ";" + getFirstName();
+        toReturn += ";" + getLastName();
+        toReturn += ";" + getCustomerID();
+
+        // Customer's accounts (Uses IDs)
+        for (AbstractAccount a : customerAccounts) {
+            toReturn += ";" + a.getAccountID();
+        }
+
+        return toReturn;
     }
 
-    public Customer fromFileString() {
-        Customer temp = null;
+    public static Customer fromFileString(String s) {
+        String[] split = s.split(";");
 
-        // Logic once we have everything necessary for savings accounts
+        // Basic data
+        String SSN = split[0];
+        String address = split[1];
+        String city = split[2];
+        String state = split[3];
+        String zip = split[4];
+        String firstName = split[5];
+        String lastName = split[6];
+        // String customerID = split[7]; // This is set in the constructor
 
-        return temp;
+        // Customer accounts are restored from the database, don't do it here
+
+        return new Customer(SSN, address, city, state, zip, firstName, lastName);
     }
 
     // Adds an account to the accounts customers have

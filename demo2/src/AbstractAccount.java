@@ -1,3 +1,4 @@
+import java.lang.reflect.Method;
 import java.util.Date;
 
 /**
@@ -5,7 +6,7 @@ import java.util.Date;
  */
 abstract public class AbstractAccount {
     // Data
-    protected String customerID = ""; // -1 should be seen as an error for IDs
+    protected String customerID;
     protected Date accountCreationDate;
     protected String accountType;
     static long accountIDCounter = 0;
@@ -16,8 +17,16 @@ abstract public class AbstractAccount {
         this.customerID = customerID;
         this.accountCreationDate = accountCreationDate;
         this.accountType = accountType;
-        accountIDCounter++;
+        incrementAccountIDCounter();
         this.accountID = accountIDCounter;
+    }
+
+    // Constructor used when accounts are being restored, meaning they have already been created
+    public AbstractAccount(String customerID, Date accountCreationDate, String accountType, long accountID) {
+        this.customerID = customerID;
+        this.accountCreationDate = accountCreationDate;
+        this.accountType = accountType;
+        this.accountID = accountID;
     }
 
     public String getCustomerID() {
@@ -30,11 +39,33 @@ abstract public class AbstractAccount {
 
     public abstract String getAccountType();
 
+    public long getAccountID() {
+        return accountID;
+    }
+
+    // This is needed for when the database restores, ensuring the accountID counter is correctly setup
+    // If this wasn't used, accounts would start at 0 again,
+    // which would be an issue because of how overdraft accounts are implemented
+    public static void incrementAccountIDCounter() {
+        accountIDCounter++;
+    }
+
     // These are used for database manipulation
     /*
     Look in the Database class for specific details
-    These don't require any arguments because I think it makes working with the various accounts easier
+    toFileString is a non-static function which every class implements, this is easy to write
+    fromFileString works better as a static function, which makes its implementation messier
      */
     public abstract String toFileString();
-    public abstract AbstractAccount fromFileString();
+    public static AbstractAccount fromFileString (String line, Class<? extends AbstractAccount> clazz) {
+        try {
+            Method fromFileString = clazz.getDeclaredMethod("fromFileString", String.class);
+            return (AbstractAccount) fromFileString.invoke(null, line);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        // !!! Some error message
+        return null;
+    }
 }
