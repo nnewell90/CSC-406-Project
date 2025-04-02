@@ -17,6 +17,7 @@ public class WithdrawScreen extends JFrame {
         JRadioButton checkingButton = new JRadioButton("Checking");
         JRadioButton savingsButton = new JRadioButton("Savings");
         JRadioButton cdButton = new JRadioButton("Certificate of Deposit");
+        JButton submitButton = new JButton("Submit");
         JButton returntoTellerScreen = new JButton("Return to Teller Screen");
 
 
@@ -25,7 +26,7 @@ public class WithdrawScreen extends JFrame {
         accountGroup.add(savingsButton);
         accountGroup.add(cdButton);
 
-        returntoTellerScreen.addActionListener(e -> new TellerScreen());
+        returntoTellerScreen.addActionListener(e -> {dispose(); new TellerScreen();});
         add(accountholderField);
 
 
@@ -34,6 +35,7 @@ public class WithdrawScreen extends JFrame {
         radioPanel.add(savingsButton);
         radioPanel.add(cdButton);
         add(radioPanel);
+        add(submitButton);
         add(returntoTellerScreen);
 
 

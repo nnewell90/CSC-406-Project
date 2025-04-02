@@ -79,10 +79,10 @@ public class NewCustomerScreen extends JFrame {
 
             // Store the data to database
             // might have to change txt name - not created yet!!!!!!!!!!!!
-            try (FileWriter writer = new FileWriter("customers.txt", true)) {
+            try (FileWriter writer = new FileWriter("database.txt", true)) {
                 writer.write(socialSecurityNumber + ";" + streetAddress + ";" + resCity + ";" + resState + ";" + zipCode + ";" + fName + ";" + lName + "\n");
                 JOptionPane.showMessageDialog(this, "Customer Created Successfully!");
-                dispose();
+                //dispose();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Error creating customer!", "Error", JOptionPane.ERROR_MESSAGE);
             }

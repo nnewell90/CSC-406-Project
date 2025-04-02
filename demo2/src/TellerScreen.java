@@ -15,14 +15,17 @@ public class TellerScreen extends JFrame {
         JButton newCustomerButton = new JButton("Create a New Customer");
         JButton linkButton = new JButton("Link Accounts");
         JButton withdrawButton = new JButton("Withdraw from Account");
+        JButton depositButton = new JButton("Deposit to Account");
         JButton stopButton = new JButton("Stop Payment");
         JButton reviewButton = new JButton("Review Customer Accounts");
+        JButton closeButton = new JButton("Close an Account");
         JButton returnButton = new JButton("Return to Main Menu");
 
-        //systemButton.addActionListener(e -> new SystemControllerScreen());
         newCustomerButton.addActionListener(e ->{ dispose(); new NewCustomerScreen();});  // creates new customer
-        //managerButton.addActionListener(e -> new LoanInterest());
-        //customerButton.addActionListener(e -> new CustomerScreen());
+        newAccountButton.addActionListener(e -> {dispose(); new NewAccountScreen();});
+        withdrawButton.addActionListener(e -> {dispose(); new WithdrawScreen();});
+        depositButton.addActionListener(e -> {dispose(); new DepositScreen();});
+        closeButton.addActionListener(e -> {dispose(); new CloseAccountScreen();});
         stopButton.addActionListener(e -> {dispose(); new CustomerScreen();});
         reviewButton.addActionListener(e ->{ dispose();
             try {
@@ -38,8 +41,10 @@ public class TellerScreen extends JFrame {
         add(newCustomerButton);
         add(linkButton);
         add(withdrawButton);
+        add(depositButton);
         add(stopButton);
         add(reviewButton);
+        add(closeButton);
         add(returnButton);
 
         setVisible(true);

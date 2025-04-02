@@ -14,7 +14,7 @@ public class ProcessCheck extends JFrame {
         JButton returntoManager = new JButton("Return to Manager Screen");
 
 
-        returntoManager.addActionListener(e -> new ManagerScreen());
+        returntoManager.addActionListener(e -> {dispose(); new TellerScreen();});
         add(loanRateField);
         add(returntoManager);
 
