@@ -26,7 +26,7 @@ public class TellerScreen extends JFrame {
         stopButton.addActionListener(e -> {dispose(); new CustomerScreen();});
         reviewButton.addActionListener(e ->{ dispose();
             try {
-                new ReviewAccountsScreen();
+                new ReviewCustomersScreen();
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
