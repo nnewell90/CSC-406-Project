@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -172,24 +173,24 @@ public class Database implements Runnable {
     }
 
     // The function for restoring information from the database (.txts) back to the system
-    private static void restoreFromDatabase() {
+    public static void restoreFromDatabase() {
         lock.lock();
         // Accounts
-        loadFromFile(abstractAccounts, abstractAccountList);
+        loadFromFile(abstractAccounts, abstractAccountList, AbstractAccount.class);
 
-        loadFromFile(savingAccounts, savingsAccountList);
-        loadFromFile(simpleSavingsAccounts, simpleSavingsAccountList);
-        loadFromFile(cdSavingsAccounts, cdSavingsAccountList);
+        loadFromFile(savingAccounts, savingsAccountList, SavingsAccount.class);
+        loadFromFile(simpleSavingsAccounts, simpleSavingsAccountList, SavingsAccount.SimpleSavingsAccount.class);
+        loadFromFile(cdSavingsAccounts, cdSavingsAccountList, SavingsAccount.CDSavingsAccount.class);
 
-        loadFromFile(checkingAccounts, checkingAccountList);
+        loadFromFile(checkingAccounts, checkingAccountList, CheckingAccount.class);
 
-        loadFromFile(loanAccounts, loanAccountList);
-        loadFromFile(shortOrLongLoans, shortOrLongLoanList);
-        loadFromFile(CCAccounts, CCList);
+        loadFromFile(loanAccounts, loanAccountList, LoanAccount.class);
+        loadFromFile(shortOrLongLoans, shortOrLongLoanList, LoanAccount.ShortOrLong.class);
+        loadFromFile(CCAccounts, CCList, LoanAccount.CC.class);
 
         // Non-accounts
-        loadFromFile(customers, customerList);
-        loadFromFile(atmCards, atmCardList);
+        loadFromFile(customers, customerList, Customer.class);
+        loadFromFile(atmCards, atmCardList, ATMCard.class);
 
         // Each customer has an arrayList of their own accounts, restore that list so they can view it
         restoreCustomerAccounts();
@@ -229,8 +230,7 @@ public class Database implements Runnable {
         fromFileString is called on a string to turn that string into an object, so line is the first parameter
         The second parameter is just a dummy parameter because I was getting a warning about needing a second parameter for invoke()
      */
-    private static <T>void loadFromFile(String fileName, ArrayList<T> list) {
-        Class clazz = list.getFirst().getClass();
+    private static <T>void loadFromFile(String fileName, ArrayList<T> list, Class<?> clazz) {
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             String line;
             Method fromFileString = clazz.getDeclaredMethod("fromFileString", String.class); // !!! Every account class must include the functon "public ClassName fromFileString(){...}"
@@ -259,5 +259,16 @@ public class Database implements Runnable {
         } catch (Exception e) {
             System.out.println("Error storing to file: " + fileName + " :" + e.getMessage());
         }
+    }
+
+    //Added this method so I could grab a specific customer from the
+    //customerList arrayList.
+    public static Customer getCustomer(String ssn) {
+        for (Customer c : customerList) {
+            if (Objects.equals(c.getSSN(), ssn)) {
+                return c;
+            }
+        }
+        return null;
     }
 }

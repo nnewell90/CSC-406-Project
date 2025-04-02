@@ -8,6 +8,9 @@ public class MainMenu extends JFrame {
     private String lastScreen = "MainMenu"; // Default to Main Menu
 
     public MainMenu() {
+
+        Database.restoreFromDatabase();
+
         setTitle("Main Menu");
         setSize(500, 500);
         setLayout(new GridLayout(4, 1));
