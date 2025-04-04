@@ -6,7 +6,7 @@ public class CreateAccountScreen extends JFrame {
 
     public CreateAccountScreen(Customer customer) {
         setTitle("New Account for " + customer.getFirstName() + " " + customer.getLastName());
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(500, 500);
 
         JPanel formPanel = new JPanel();
