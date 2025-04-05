@@ -21,7 +21,7 @@ public class CheckingAccount extends AbstractAccount{
     }
 
     // Constructor used when creating a new account for the first time
-    public CheckingAccount(String customerID, Date accountCreationDate, String abstractAccountType, double initialBalance, AccountType type) {
+    public CheckingAccount(String customerID, Date accountCreationDate, AbstractAccount.AccountType abstractAccountType, double initialBalance, AccountType type) {
         // Some logic for checking if an account with type GoldDiamond has the minimum funds
         // This could also be done at the end, just depends on how we want to implement it
 
@@ -34,7 +34,7 @@ public class CheckingAccount extends AbstractAccount{
     }
 
     // Constructor used when restoring accounts
-    public CheckingAccount(String customerID, Date accountCreationDate, String abstractAccountType, double balance, int overdraftsThisMonth, AccountType type, long accountID, long overdraftAccountID, ArrayList<String> stopPaymentArrayPassed) {
+    public CheckingAccount(String customerID, Date accountCreationDate, AbstractAccount.AccountType abstractAccountType, double balance, int overdraftsThisMonth, AccountType type, long accountID, long overdraftAccountID, ArrayList<String> stopPaymentArrayPassed) {
         super(customerID, accountCreationDate, abstractAccountType, accountID);
         setBalance(balance);
         setAccountSpecificType(type);
@@ -46,13 +46,30 @@ public class CheckingAccount extends AbstractAccount{
         }
     }
 
+    // Deletes an account from the entire system, including the database
     public static void deleteAccount(CheckingAccount account) {
-        // Functionality for deleting an account
+        // Unlink the account from an overdraft account if one exists
+        if (account.overdraftAccount != null) {
+            account.removeOverdraftAccount();
+        }
+
+        // Remove the account from the list of customer accounts
+        Customer customer = Database.getCustomerFromList(account.getCustomerID());
+        if (customer != null) {
+            customer.removeAccountFromCustomerAccounts(account.getAccountID());
+        }
+
+        // Remove the account from the lists in the database
+        Database.removeItemFromList(Database.checkingAccountList, account);
+        Database.removeItemFromList(Database.abstractAccountList, account);
+
+        // Finally, fully delete the account
+        account = null;
     }
 
     @Override
-    public String getAccountType() {
-        return ("Savings Account " + accountSpecificType.toString());
+    public AbstractAccount.AccountType getAccountType() {
+        return AbstractAccount.AccountType.CheckingAccount;
     }
 
     @Override
@@ -84,7 +101,7 @@ public class CheckingAccount extends AbstractAccount{
         // Abstract stuff
         String customerID = split[0];
         Date accountCreationDate = new Date(Long.parseLong(split[1]));
-        String abstractAccountType = split[2];
+        AbstractAccount.AccountType abstractAccountType = AbstractAccount.AccountType.valueOf(split[2]);
         long accountID = Long.parseLong(split[3]);
 
         // Specific stuff
@@ -225,7 +242,7 @@ public class CheckingAccount extends AbstractAccount{
         this.accountSpecificType = accountType;
     }
 
-    public String getAccountSpecificType() {
+    public AbstractAccount.AccountType getAccountSpecificType() {
         return accountType;
     }
 
@@ -240,7 +257,7 @@ public class CheckingAccount extends AbstractAccount{
     }
 
     public void removeOverdraftAccount() {
-        overdraftAccount.setOverdraftForAccount(null);
+        overdraftAccount.removeOverdraftForAccount();
         this.overdraftAccount = null;
     }
 

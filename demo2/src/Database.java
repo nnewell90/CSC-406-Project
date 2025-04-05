@@ -102,8 +102,35 @@ public class Database implements Runnable {
         return null;
     }
 
+    // Gets a customer from the customer list
+    public static Customer getCustomerFromList(String customerID) {
+        for (Customer customer : customerList) {
+            if (customer.customerID.equals(customerID)) {
+                return customer;
+            }
+        }
+
+        // Some invalid ID was given for a customer
+        // Probably give some warning message here
+        return null;
+    }
+
+    // Gets a customer from the customer list
+    public static ATMCard getATMCardFromList(String customerID) {
+        for (ATMCard c : atmCardList) {
+            if (c.getCustomer().getCustomerID().equals(customerID)) {
+                return c;
+            }
+        }
+
+        // Some invalid ID was given for a customer
+        // Probably give some warning message here
+        return null;
+    }
+
+
     // Gets all the accounts for one customer
-    public static ArrayList<AbstractAccount> getAllAccountsOfCustomer(String customerID) {
+    public static ArrayList<Long> getAllAccountsOfCustomer(String customerID) {
         for (Customer customer : customerList) {
             if (customer.getCustomerID().equals(customerID)) {
                 return customer.getCustomerAccounts();
@@ -117,24 +144,34 @@ public class Database implements Runnable {
 
     // Restores the internal accounts of each customer to their associated objects
     // This function is called when information needs to be restored from the database
+    /*
+    This will also set the AbstractAccount field accountIDCounter to the next highest value
+    Since this function runs on every account, it is convenient to do it here
+     */
     private static void restoreCustomerAccounts() {
         // This is inefficient with the way I have written the database, but I'm leaving it for now just to finish it
 
         // Savings accounts
         // Simple savings
         for (SavingsAccount.SimpleSavingsAccount a : simpleSavingsAccountList) { // Check every entry in the list
+            if (a.getAccountID() > AbstractAccount.accountIDCounter) {
+                AbstractAccount.accountIDCounter = a.getAccountID();
+            }
             for (Customer c : customerList) { // Check for every customer
                 if (a.getCustomerID().equals(c.getCustomerID())) {
-                    c.addAccountToCustomerAccounts(a);
+                    c.addAccountToCustomerAccounts(a.getAccountID());
                     break; // Once a match has been found, move to the next account in the accountList
                 }
             }
         }
         // CD
         for (SavingsAccount.CDSavingsAccount a : cdSavingsAccountList) { // Check every entry in the list
+            if (a.getAccountID() > AbstractAccount.accountIDCounter) {
+                AbstractAccount.accountIDCounter = a.getAccountID();
+            }
             for (Customer c : customerList) { // Check for every customer
                 if (a.getCustomerID().equals(c.getCustomerID())) {
-                    c.addAccountToCustomerAccounts(a);
+                    c.addAccountToCustomerAccounts(a.getAccountID());
                     break; // Once a match has been found, move to the next account in the accountList
                 }
             }
@@ -142,9 +179,12 @@ public class Database implements Runnable {
 
         // Checking accounts
         for (CheckingAccount a : checkingAccountList) { // Check every entry in the list
+            if (a.getAccountID() > AbstractAccount.accountIDCounter) {
+                AbstractAccount.accountIDCounter = a.getAccountID();
+            }
             for (Customer c : customerList) { // Check for every customer
                 if (a.getCustomerID().equals(c.getCustomerID())) {
-                    c.addAccountToCustomerAccounts(a);
+                    c.addAccountToCustomerAccounts(a.getAccountID());
                     break; // Once a match has been found, move to the next account in the accountList
                 }
             }
@@ -153,22 +193,30 @@ public class Database implements Runnable {
         // Loan accounts
         // ShortOrLong
         for (LoanAccount.ShortOrLong a : shortOrLongLoanList) { // Check every entry in the list
+            if (a.getAccountID() > AbstractAccount.accountIDCounter) {
+                AbstractAccount.accountIDCounter = a.getAccountID();
+            }
             for (Customer c : customerList) { // Check for every customer
                 if (a.getCustomerID().equals(c.getCustomerID())) {
-                    c.addAccountToCustomerAccounts(a);
+                    c.addAccountToCustomerAccounts(a.getAccountID());
                     break; // Once a match has been found, move to the next account in the accountList
                 }
             }
         }
         // CC
         for (LoanAccount.CC a : CCList) { // Check every entry in the list
+            if (a.getAccountID() > AbstractAccount.accountIDCounter) {
+                AbstractAccount.accountIDCounter = a.getAccountID();
+            }
             for (Customer c : customerList) { // Check for every customer
                 if (a.getCustomerID().equals(c.getCustomerID())) {
-                    c.addAccountToCustomerAccounts(a);
+                    c.addAccountToCustomerAccounts(a.getAccountID());
                     break; // Once a match has been found, move to the next account in the accountList
                 }
             }
         }
+        // Finally, increment the AccountIDCounter by one so the next account can be made correctly
+        AbstractAccount.incrementAccountIDCounter();
     }
 
     // The function for restoring information from the database (.txts) back to the system
@@ -237,7 +285,6 @@ public class Database implements Runnable {
             while ((line = reader.readLine()) != null) {
                 T temp = (T) fromFileString.invoke(null, line);
                 list.add(temp);
-                AbstractAccount.incrementAccountIDCounter(); // See note in AbstractAccount for why this is necessary
             }
         } catch (Exception e) {
             System.out.println("Error loading from file: " + fileName + " :"+ e.getMessage());
