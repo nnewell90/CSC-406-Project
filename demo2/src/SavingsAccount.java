@@ -373,9 +373,22 @@ public class SavingsAccount extends AbstractAccount {
             this.dueDate = dueDate;
         }
 
-        public void withdraw(int amount) {
-            // !!! The paper specifies some punishment for withdrawing early, but it doesn't state what that is
+        public void withdrawBeforeDueDate(int amount) {
             super.withdraw(amount);
+            deleteAccount(this);
+        }
+
+        // Withdraw your funds after the due date, but before the rollover period
+        // !!! This deletes the account
+        public void withdrawAfterDueDate(int amount) {
+            calcAndAddInterest();
+            super.withdraw(amount);
+            deleteAccount(this);
+        }
+
+        public void rollOver(int numberOfMonthsForNewCycle, double newRate, Date newDueDate) {
+            interestRate = newRate;
+            dueDate = newDueDate;
         }
     }
 }

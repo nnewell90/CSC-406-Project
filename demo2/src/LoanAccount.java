@@ -38,17 +38,16 @@ public class LoanAccount extends AbstractAccount {
         this.missedPayment = missedPayment;
     }
 
-    public double getMonthlyPaymentOnLoanYearly(int numOfYearsTotal, double balance, double rate) {
+    public double getMonthlyPaymentOnLoanWithYearlyRate(int numOfYearsTotal, double balance, double rate) {
         int numOfMonthsTotal = numOfYearsTotal * 12;
         double monthlyPrinciple = balance/numOfMonthsTotal;
-        double monthlyInterest = (balance/2) * numOfYearsTotal * rate;
+        double monthlyInterest = (balance/2) * numOfYearsTotal * rate; // /2 comes from Pickett's sheet, but I'm not sure what it is for
         return monthlyPrinciple + monthlyInterest;
     }
 
-    public double getMonthlyPaymentOnLoanMonthly(int numOfMonthsTotal, double balance, double rate) {
-        double monthlyPrinciple = balance/numOfMonthsTotal;
-        double monthlyInterest = (balance/2) * numOfMonthsTotal * rate;
-        return monthlyPrinciple + monthlyInterest;
+    public double getMonthlyPaymentOnLoanWithMonthlyRate(double balance, double rate) {
+        double monthlyInterest = (balance/2) * rate; // /2 comes from Pickett's sheet, but I'm not sure what it is for
+        return balance + monthlyInterest;
     }
 
     @Override
@@ -200,7 +199,7 @@ public class LoanAccount extends AbstractAccount {
             //  If a check needs to be done, it needs to happen before this constructor call
 
             // Do calculation for monthly payment
-            this.fixedPayment = getMonthlyPaymentOnLoanYearly(numOfYearsTotal, balance, rate);
+            this.fixedPayment = getMonthlyPaymentOnLoanWithYearlyRate(numOfYearsTotal, balance, rate);
 
             // this.fixedPayment = fixedPaymentValue; For now, keep the fixedPaymentValue input, but it will be corrected here
             currentPaymentDue = fixedPaymentValue + fixedPaymentValue * rate;
@@ -508,9 +507,9 @@ public class LoanAccount extends AbstractAccount {
             return sumOfChargesThisMonth / daysInMonth;
         }
 
+        // Check to see if there needs to be a finance charge added to this month's payment
         public void monthPaymentCheck() {
-            boolean fullyPaid = isFinanceChargeAddedToTotal();
-            if (fullyPaid) { // !!! Change these for swing
+            if (isFinanceChargeAddedToTotal()) { // !!! Change these for swing
                 System.out.println("Credit card fully paid off this month, no finance charge added");
             } else {
                 System.out.println("Credit card not paid off this month, adding finance charge to total");
