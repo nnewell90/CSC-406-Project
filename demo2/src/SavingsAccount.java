@@ -7,20 +7,20 @@ public class SavingsAccount extends AbstractAccount {
     double balance;
 
     // Normal constructor
-    public SavingsAccount(String customerID, Date accountCreationDate, String accountType, double initialBalance) {
+    public SavingsAccount(String customerID, Date accountCreationDate, AccountType accountType, double initialBalance) {
         super(customerID, accountCreationDate, accountType);
         setBalance(initialBalance);
     }
 
     // Restore from database constructor
-    public SavingsAccount(String customerID, Date accountCreationDate, String accountType, double balance, long accountID) {
+    public SavingsAccount(String customerID, Date accountCreationDate, AccountType accountType, double balance, long accountID) {
         super(customerID, accountCreationDate, accountType, accountID);
         setBalance(balance);
     }
 
     @Override
-    public String getAccountType() {
-        return "Savings Account";
+    public AccountType getAccountType() {
+        return AccountType.SavingsAccount;
     }
 
     @Override
@@ -46,7 +46,7 @@ public class SavingsAccount extends AbstractAccount {
         // Abstract stuff
         String customerID = split[0];
         Date accountCreationDate = new Date(Long.parseLong(split[1]));
-        String abstractAccountType = split[2];
+        AccountType abstractAccountType = AccountType.valueOf(split[2]);
         long accountID = Long.parseLong(split[3]);
 
         // Specific
@@ -84,11 +84,11 @@ public class SavingsAccount extends AbstractAccount {
         ArrayList<String> stopPaymentArray; // Used to stop checks from going through
 
         public SimpleSavingsAccount(String customerID, Date accountCreationDate, int initialBalance) {
-            super(customerID, accountCreationDate, "Simple Savings Account", initialBalance);
+            super(customerID, accountCreationDate, AccountType.SimpleSavingsAccount, initialBalance);
         }
 
-        public SimpleSavingsAccount(String customerID, Date accountCreationDate, String accountType, long accountID, double balance, double interestRate, long overdraftAccountID, ArrayList<String> stopPaymentArrayPassed) {
-            super(customerID, accountCreationDate, accountType, balance, accountID);
+        public SimpleSavingsAccount(String customerID, Date accountCreationDate, AccountType abstractAccountType, long accountID, double balance, double interestRate, long overdraftAccountID, ArrayList<String> stopPaymentArrayPassed) {
+            super(customerID, accountCreationDate, abstractAccountType, balance, accountID);
             setBalance(balance);
             setInterestRate(interestRate);
             stopPaymentArray = new ArrayList<>(stopPaymentArrayPassed);
@@ -99,9 +99,30 @@ public class SavingsAccount extends AbstractAccount {
             }
         }
 
+        // Deletes an account from the entire system, including the database
+        public static void deleteAccount(SimpleSavingsAccount account) {
+            // Unlink the account from an overdraft account if one exists
+            if (account.overdraftForAccount != null) {
+                account.overdraftForAccount.removeOverdraftAccount();
+            }
+
+            // Remove the account from the list of customer accounts
+            Customer customer = Database.getCustomerFromList(account.getCustomerID());
+            if (customer != null) {
+                customer.removeAccountFromCustomerAccounts(account.getAccountID());
+            }
+
+            // Remove the account from the lists in the database
+            Database.removeItemFromList(Database.simpleSavingsAccountList, account);
+            Database.removeItemFromList(Database.abstractAccountList, account);
+
+            // Finally, fully delete the account
+            account = null;
+        }
+
         @Override
-        public String getAccountType() {
-            return "Simple Savings Account";
+        public AccountType getAccountType() {
+            return AccountType.SimpleSavingsAccount;
         }
 
         @Override
@@ -132,7 +153,7 @@ public class SavingsAccount extends AbstractAccount {
             // Abstract stuff
             String customerID = split[0];
             Date accountCreationDate = new Date(Long.parseLong(split[1]));
-            String abstractAccountType = split[2];
+            AccountType abstractAccountType = AccountType.valueOf(split[2]);
             long accountID = Long.parseLong(split[3]);
 
             // Specific
@@ -148,7 +169,6 @@ public class SavingsAccount extends AbstractAccount {
             }
 
             return new SimpleSavingsAccount(customerID, accountCreationDate, abstractAccountType, accountID, balance, interestRate, overdraftAccountID, stopPaymentArrayPassed);
-
         }
 
         public void setOverdraftForAccount(CheckingAccount overdraftForAccount) {
@@ -258,21 +278,38 @@ public class SavingsAccount extends AbstractAccount {
         Date dueDate;
 
         public CDSavingsAccount(String customerID, Date accountCreationDate, double initialBalance, double interestRate, Date dueDate) {
-            super(customerID, accountCreationDate, "CD", initialBalance);
+            super(customerID, accountCreationDate, AccountType.CDSavingsAccount, initialBalance);
             this.interestRate = interestRate;
             this.dueDate = dueDate;
         }
 
         public CDSavingsAccount(String customerID, Date accountCreationDate, long accountID, double balance, double interestRate, Date dueDate) {
-            super(customerID, accountCreationDate, "CD", accountID);
+            super(customerID, accountCreationDate, AccountType.CDSavingsAccount, accountID);
             this.balance = balance;
             this.interestRate = interestRate;
             this.dueDate = dueDate;
         }
 
+        // Deletes an account from the entire system, including the database
+        public static void deleteAccount(CDSavingsAccount account) {
+
+            // Remove the account from the list of customer accounts
+            Customer customer = Database.getCustomerFromList(account.getCustomerID());
+            if (customer != null) {
+                customer.removeAccountFromCustomerAccounts(account.getAccountID());
+            }
+
+            // Remove the account from the lists in the database
+            Database.removeItemFromList(Database.cdSavingsAccountList, account);
+            Database.removeItemFromList(Database.abstractAccountList, account);
+
+            // Finally, fully delete the account
+            account = null;
+        }
+
         @Override
-        public String getAccountType() {
-            return "CD Savings Account";
+        public AccountType getAccountType() {
+            return AccountType.CDSavingsAccount;
         }
 
         @Override
@@ -300,7 +337,7 @@ public class SavingsAccount extends AbstractAccount {
             // Abstract stuff
             String customerID = split[0];
             Date accountCreationDate = new Date(Long.parseLong(split[1]));
-            String abstractAccountType = split[2]; // This is ignored
+            String abstractAccountType = split[2]; // This is ignored, it is handled in the constructor
             long accountID = Long.parseLong(split[3]);
 
             // Specific

@@ -16,7 +16,7 @@ public class Customer {
     String customerID;
 
     // Holds the accounts that each customer owns
-    ArrayList<AbstractAccount> customerAccounts = new ArrayList<>();
+    ArrayList<Long> customerAccountIDs = new ArrayList<>();
 
     // Constructor
     public Customer(String SSN, String address, String city, String state, String zip, String firstName, String lastName) {
@@ -31,6 +31,21 @@ public class Customer {
         setFirstName(firstName);
         setLastName(lastName);
         setCustomerID(SSN);
+    }
+
+    // Deletes a customer from the entire system, including the database
+    public static void deleteCustomer(Customer customer) {
+
+        // Remove each account the customer has from the database
+        for (Long accountID : customer.getCustomerAccounts()) {
+
+        }
+
+        // Remove the account from the lists in the database
+        Database.removeItemFromList(Database.customerList, customer);
+
+        // Finally, fully delete the account
+        customer = null;
     }
 
 
@@ -113,8 +128,8 @@ public class Customer {
         toReturn += ";" + getCustomerID();
 
         // Customer's accounts (Uses IDs)
-        for (AbstractAccount a : customerAccounts) {
-            toReturn += ";" + a.getAccountID();
+        for (Long accountID : customerAccountIDs) {
+            toReturn += ";" + accountID;
         }
 
         return toReturn;
@@ -139,12 +154,16 @@ public class Customer {
     }
 
     // Adds an account to the accounts customers have
-    public void addAccountToCustomerAccounts(AbstractAccount account) {
-        customerAccounts.add(account);
+    public void addAccountToCustomerAccounts(long accountID) {
+        customerAccountIDs.add(accountID);
+    }
+
+    public void removeAccountFromCustomerAccounts(long accountID) {
+        customerAccountIDs.remove(accountID);
     }
 
     // Gets the entire list of customer accounts
-    public ArrayList<AbstractAccount> getCustomerAccounts() {
-        return customerAccounts;
+    public ArrayList<Long> getCustomerAccounts() {
+        return customerAccountIDs;
     }
 }

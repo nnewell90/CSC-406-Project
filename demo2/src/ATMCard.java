@@ -18,6 +18,12 @@ public class ATMCard {
         this.checkingAccount = checkingAccount;
     }
 
+    // Delete an ATM card from the database
+    public static void deleteATMCard(ATMCard card) {
+        Database.removeItemFromList(Database.atmCardList, card);
+        card = null;
+    }
+
     public void withdraw(int amount) {
         if (numOfWithdrawalsToday < 2) {
             numOfWithdrawalsToday++;
@@ -31,6 +37,10 @@ public class ATMCard {
             // !!! Change for Swing
             System.out.println("You have already withdrawn the maximum amount of times today.");
         }
+    }
+
+    public void setNumOfWithdrawalsToday(int numOfWithdrawalsToday) {
+        this.numOfWithdrawalsToday = numOfWithdrawalsToday;
     }
 
     public int getNumOfWithdrawalsToday() {
