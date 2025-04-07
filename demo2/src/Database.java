@@ -130,16 +130,18 @@ public class Database implements Runnable {
 
 
     // Gets all the accounts for one customer
-    public static ArrayList<Long> getAllAccountsOfCustomer(String customerID) {
-        for (Customer customer : customerList) {
-            if (customer.getCustomerID().equals(customerID)) {
-                return customer.getCustomerAccounts();
+    public static ArrayList<AbstractAccount> getAllAccountsOfCustomer(ArrayList<Long> customerAccountIDs) {
+        ArrayList<AbstractAccount> toReturn = new ArrayList<>();
+        for (Long ID : customerAccountIDs) {
+            for (AbstractAccount a : abstractAccountList) {
+                if (a.getAccountID() == ID) {
+                    toReturn.add(a);
+                    break;
+                }
             }
         }
 
-        // We have been given some ID for a customer that doesn't exist
-        // Probably give some warning message here
-        return null;
+        return toReturn;
     }
 
     // Restores the internal accounts of each customer to their associated objects
