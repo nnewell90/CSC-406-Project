@@ -10,7 +10,7 @@ public class InsertCheckScreen extends JFrame {
         l2.setBounds(100, 100, 120, 80);
         add(l1);
         add(l2);
-        setSize(500, 200); // changed width to fit text
+        setSize(500, 500); // changed width to fit text
 
         setLayout(new GridLayout(4, 1));
 

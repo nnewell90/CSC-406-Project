@@ -15,7 +15,10 @@ public class AccountStatusScreen extends JFrame {
 
         JButton returntoCustomerScreen = new JButton("Return to Customer Screen");
 
-        returntoCustomerScreen.addActionListener(e -> new CustomerScreen());
+        returntoCustomerScreen.addActionListener(e -> {
+            dispose();
+            new CustomerScreen();
+        });
         add(returntoCustomerScreen);
 
         setVisible(true);

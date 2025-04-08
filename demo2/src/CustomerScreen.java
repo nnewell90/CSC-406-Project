@@ -1,10 +1,13 @@
 import javax.swing.*;
 import java.awt.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class CustomerScreen extends JFrame {
     public CustomerScreen() {
         setTitle("Customer Screen");
-        setSize(300, 200);
+        setSize(500, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(4, 1));
 
@@ -27,8 +30,9 @@ public class CustomerScreen extends JFrame {
             new InsertCheckScreen();
         });
         returnButton.addActionListener(e -> {
+            saveUIState("MainMenu");
             dispose();
-            new SystemControllerScreen();
+            new MainMenu();
         });
 
 
@@ -38,5 +42,13 @@ public class CustomerScreen extends JFrame {
         add(returnButton);
 
         setVisible(true);
+    }
+    private void saveUIState(String state) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("ui_state.txt"))) {
+            writer.write(state);
+            System.out.println("UI state saved: " + state);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
