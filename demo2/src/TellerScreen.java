@@ -23,11 +23,12 @@ public class TellerScreen extends JFrame {
 
         newCustomerButton.addActionListener(e ->{ dispose(); new NewCustomerScreen();});  // creates new customer
         newAccountButton.addActionListener(e -> {dispose(); new NewAccountScreen();});
+        linkButton.addActionListener(e -> {dispose(); new LinkAccountsScreen();});
         withdrawButton.addActionListener(e -> {dispose(); new WithdrawScreen();});
         depositButton.addActionListener(e -> {dispose(); new DepositScreen();});
         closeButton.addActionListener(e -> {dispose(); new CloseAccountScreen();});
-        stopButton.addActionListener(e -> {dispose(); new CustomerScreen();});
-        reviewButton.addActionListener(e ->{ dispose();
+        stopButton.addActionListener(e -> {dispose(); new StopPayScreen();});
+        reviewButton.addActionListener(e -> { dispose();
             try {
                 new ReviewCustomersScreen();
             } catch (IOException ex) {

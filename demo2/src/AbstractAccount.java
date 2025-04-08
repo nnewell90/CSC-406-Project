@@ -8,12 +8,28 @@ abstract public class AbstractAccount {
     // Data
     protected String customerID;
     protected Date accountCreationDate;
-    protected String accountType;
+    // protected String accountType;
+    protected AccountType accountType;
     static long accountIDCounter = 0;
-    long accountID; // Accounts need IDs so if a customer holds multiple of the same type the correct one can be retrieved
+    long accountID; // Accounts need IDs,
+    // so if a customer holds multiple of the same type, the correct one can be retrieved
+
+    // The different types of accounts possible in the system
+    public enum AccountType {
+        // Checking
+        CheckingAccount,
+        // Savings
+        SavingsAccount,
+        SimpleSavingsAccount,
+        CDSavingsAccount,
+        // Loans
+        LoanAccount,
+        ShortOrLongLoanAccount,
+        CCLoanAccount
+    }
 
     // Methods
-    public AbstractAccount(String customerID, Date accountCreationDate, String accountType) {
+    public AbstractAccount(String customerID, Date accountCreationDate, AccountType accountType) {
         this.customerID = customerID;
         this.accountCreationDate = accountCreationDate;
         this.accountType = accountType;
@@ -22,7 +38,7 @@ abstract public class AbstractAccount {
     }
 
     // Constructor used when accounts are being restored, meaning they have already been created
-    public AbstractAccount(String customerID, Date accountCreationDate, String accountType, long accountID) {
+    public AbstractAccount(String customerID, Date accountCreationDate, AccountType accountType, long accountID) {
         this.customerID = customerID;
         this.accountCreationDate = accountCreationDate;
         this.accountType = accountType;
@@ -37,7 +53,7 @@ abstract public class AbstractAccount {
         return accountCreationDate;
     }
 
-    public abstract String getAccountType();
+    public abstract AccountType getAccountType();
 
     public long getAccountID() {
         return accountID;

@@ -21,7 +21,7 @@ public class CheckingAccount extends AbstractAccount{
     }
 
     // Constructor used when creating a new account for the first time
-    public CheckingAccount(String customerID, Date accountCreationDate, String abstractAccountType, double initialBalance, AccountType type) {
+    public CheckingAccount(String customerID, Date accountCreationDate, AbstractAccount.AccountType abstractAccountType, double initialBalance, AccountType type) {
         // Some logic for checking if an account with type GoldDiamond has the minimum funds
         // This could also be done at the end, just depends on how we want to implement it
 
@@ -34,7 +34,7 @@ public class CheckingAccount extends AbstractAccount{
     }
 
     // Constructor used when restoring accounts
-    public CheckingAccount(String customerID, Date accountCreationDate, String abstractAccountType, double balance, int overdraftsThisMonth, AccountType type, long accountID, long overdraftAccountID, ArrayList<String> stopPaymentArrayPassed) {
+    public CheckingAccount(String customerID, Date accountCreationDate, AbstractAccount.AccountType abstractAccountType, double balance, int overdraftsThisMonth, AccountType type, long accountID, long overdraftAccountID, ArrayList<String> stopPaymentArrayPassed) {
         super(customerID, accountCreationDate, abstractAccountType, accountID);
         setBalance(balance);
         setAccountSpecificType(type);
@@ -46,13 +46,30 @@ public class CheckingAccount extends AbstractAccount{
         }
     }
 
+    // Deletes an account from the entire system, including the database
     public static void deleteAccount(CheckingAccount account) {
-        // Functionality for deleting an account
+        // Unlink the account from an overdraft account if one exists
+        if (account.overdraftAccount != null) {
+            account.removeOverdraftAccount();
+        }
+
+        // Remove the account from the list of customer accounts
+        Customer customer = Database.getCustomerFromList(account.getCustomerID());
+        if (customer != null) {
+            customer.removeAccountFromCustomerAccounts(account.getAccountID());
+        }
+
+        // Remove the account from the lists in the database
+        Database.removeItemFromList(Database.checkingAccountList, account);
+        Database.removeItemFromList(Database.abstractAccountList, account);
+
+        // Finally, fully delete the account
+        account = null;
     }
 
     @Override
-    public String getAccountType() {
-        return ("Savings Account " + accountSpecificType.toString());
+    public AbstractAccount.AccountType getAccountType() {
+        return AbstractAccount.AccountType.CheckingAccount;
     }
 
     @Override
@@ -84,7 +101,7 @@ public class CheckingAccount extends AbstractAccount{
         // Abstract stuff
         String customerID = split[0];
         Date accountCreationDate = new Date(Long.parseLong(split[1]));
-        String abstractAccountType = split[2];
+        AbstractAccount.AccountType abstractAccountType = AbstractAccount.AccountType.valueOf(split[2]);
         long accountID = Long.parseLong(split[3]);
 
         // Specific stuff
@@ -115,14 +132,48 @@ public class CheckingAccount extends AbstractAccount{
     public void deposit(double amount) {
         balance += amount;
         balance -= getTransactionFee(false);
+        if (accountSpecificType == AccountType.TMB) {
+            if (balance >= minimumBalanceGoldDiamond) {
+                setAccountSpecificType(AccountType.GoldDiamond);
+            }
+        } else { // AccountType is GoldDiamond
+            if (balance < minimumBalanceGoldDiamond) {
+                setAccountSpecificType(AccountType.TMB);
+            }
+        }
     }
 
     public void withdraw(double amount) {
         if (balance >= amount) {
             balance -= amount;
             balance -= getTransactionFee(false);
+            if (accountSpecificType == AccountType.TMB) {
+                if (balance >= minimumBalanceGoldDiamond) {
+                    setAccountSpecificType(AccountType.GoldDiamond);
+                }
+            }
         } else {
-            System.out.println("Insufficient Balance"); // !!! Swing will need to change this
+            boolean overdraftFail = false;
+
+            // Check for a SavingsAccount (Overdraft account)
+            if (overdraftAccount != null) {
+                if (overdraftAccount.getBalance() >= amount) { // Enough money in the overdraft account
+                    // Withdraw from overdraft, deposit in checking, then withdraw from checking
+                    overdraftAccount.withdraw(amount);
+                    deposit(amount);
+                    balance -= amount;
+                } else { // Not enough money in the overdraft account
+                    overdraftFail = true;
+                }
+            } else { // No overdraft account
+                overdraftFail = true;
+            }
+
+            // If an overdraft couldn't be resolved
+            if (overdraftFail) {
+                balance -= 25; // $25 charge
+                System.out.println("Insufficient funds: Withdrawal denied, $25 Overdraft Service charged to account");
+            }
         }
     }
 
@@ -131,6 +182,11 @@ public class CheckingAccount extends AbstractAccount{
         if (balance >= amount) {
             balance -= amount;
             balance -= getTransactionFee(true);
+            if (accountSpecificType == AccountType.TMB) {
+                if (balance >= minimumBalanceGoldDiamond) {
+                    setAccountSpecificType(AccountType.GoldDiamond);
+                }
+            }
         } else {
             System.out.println("Insufficient Balance"); // !!! Swing will need to change this
         }
@@ -186,7 +242,7 @@ public class CheckingAccount extends AbstractAccount{
         this.accountSpecificType = accountType;
     }
 
-    public String getAccountSpecificType() {
+    public AbstractAccount.AccountType getAccountSpecificType() {
         return accountType;
     }
 
@@ -201,7 +257,7 @@ public class CheckingAccount extends AbstractAccount{
     }
 
     public void removeOverdraftAccount() {
-        overdraftAccount.setOverdraftForAccount(null);
+        overdraftAccount.removeOverdraftForAccount();
         this.overdraftAccount = null;
     }
 

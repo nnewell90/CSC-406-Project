@@ -20,10 +20,11 @@ public class LinkAccountsScreen extends JFrame {
 
 
 
-        returntoTellerScreen.addActionListener(e -> new TellerScreen());
+        returntoTellerScreen.addActionListener(e -> {dispose(); new TellerScreen();});
         add(accountNumber1Field);
         add(accountNumber2Field);
         add(returntoTellerScreen);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 
         setVisible(true);

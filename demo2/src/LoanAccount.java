@@ -15,7 +15,7 @@ public class LoanAccount extends AbstractAccount {
     
     
     // Regular constructor
-    public LoanAccount(String customerID, Date accountCreationDate, String accountType, double balance, double rate, double currentPaymentDue) {
+    public LoanAccount(String customerID, Date accountCreationDate, AccountType accountType, double balance, double rate, double currentPaymentDue) {
         super(customerID, accountCreationDate, accountType);
         this.balance = balance;
         this.rate = rate;
@@ -27,7 +27,7 @@ public class LoanAccount extends AbstractAccount {
     }
 
     // Reading from database constructor
-    public LoanAccount(String customerID, Date accountCreationDate, String accountType, long accountID, double balance, double rate, double currentPaymentDue, Date paymentDueDate, Date notifiedOfPaymentDate, Date lastPaymentMadeDate, boolean missedPayment) {
+    public LoanAccount(String customerID, Date accountCreationDate, AccountType accountType, long accountID, double balance, double rate, double currentPaymentDue, Date paymentDueDate, Date notifiedOfPaymentDate, Date lastPaymentMadeDate, boolean missedPayment) {
         super(customerID, accountCreationDate, accountType, accountID);
         this.balance = balance;
         this.rate = rate;
@@ -38,9 +38,22 @@ public class LoanAccount extends AbstractAccount {
         this.missedPayment = missedPayment;
     }
 
+    public double getMonthlyPaymentOnLoanYearly(int numOfYearsTotal, double balance, double rate) {
+        int numOfMonthsTotal = numOfYearsTotal * 12;
+        double monthlyPrinciple = balance/numOfMonthsTotal;
+        double monthlyInterest = (balance/2) * numOfYearsTotal * rate;
+        return monthlyPrinciple + monthlyInterest;
+    }
+
+    public double getMonthlyPaymentOnLoanMonthly(int numOfMonthsTotal, double balance, double rate) {
+        double monthlyPrinciple = balance/numOfMonthsTotal;
+        double monthlyInterest = (balance/2) * numOfMonthsTotal * rate;
+        return monthlyPrinciple + monthlyInterest;
+    }
+
     @Override
-    public String getAccountType() {
-        return "Generic Loan Account";
+    public AccountType getAccountType() {
+        return AccountType.LoanAccount;
     }
 
     @Override
@@ -71,7 +84,7 @@ public class LoanAccount extends AbstractAccount {
         // Abstract stuff
         String customerID = split[0];
         Date accountCreationDate = new Date(Long.parseLong(split[1]));
-        String abstractAccountType = split[2];
+        AccountType abstractAccountType = AccountType.valueOf(split[2]);
         long accountID = Long.parseLong(split[3]);
 
         // Specific stuff
@@ -169,16 +182,27 @@ public class LoanAccount extends AbstractAccount {
 
         // boolean problemAccount;      missedPayment
         int numOfYearsTotal; // 15/30 for Long, 5 for short
+        int numOfMonthsTotal; // Some multiple of the above
 
 
         // Regular constructor
-        public ShortOrLong(String customerID, Date accountCreationDate, String accountType, double loanTotalValue, double rate, double fixedPaymentValue, Date finalPaymentDate, int numOfYears) {
+        public ShortOrLong(String customerID, Date accountCreationDate, AccountType accountType, double loanTotalValue, double rate, double fixedPaymentValue, Date finalPaymentDate, int numOfYears) {
             super(customerID, accountCreationDate, accountType, loanTotalValue, rate, fixedPaymentValue + fixedPaymentValue * rate);
             this.loanTotal = loanTotalValue; // This does NOT change as the user pays
             balance = loanTotalValue; // Initially set the total amount to pay to the given total;
             // this changes as the user pays, this is the amount of the loan left to pay
             this.rate = rate;
-            this.fixedPayment = fixedPaymentValue;
+            amountPaidThisMonth = 0; // No payment yet when an account is created
+            lateFees = 0;
+            missedPayment = false;
+            numOfYearsTotal = numOfYears; // !!! Maybe some logic for checking for 5/15/30
+            numOfMonthsTotal = numOfYearsTotal * 12;
+            //  If a check needs to be done, it needs to happen before this constructor call
+
+            // Do calculation for monthly payment
+            this.fixedPayment = getMonthlyPaymentOnLoanYearly(numOfYearsTotal, balance, rate);
+
+            // this.fixedPayment = fixedPaymentValue; For now, keep the fixedPaymentValue input, but it will be corrected here
             currentPaymentDue = fixedPaymentValue + fixedPaymentValue * rate;
             
             paymentDueDate = finalPaymentDate;
@@ -195,16 +219,10 @@ public class LoanAccount extends AbstractAccount {
             
             notifiedOfPaymentDate = accountCreationDate; // Since there has been no payment yet, just set it to the creation date
             lastPaymentMadeDate = accountCreationDate; // Same as above
-            
-            amountPaidThisMonth = 0; // No payment yet when an account is created
-            lateFees = 0;
-            missedPayment = false;
-            numOfYearsTotal = numOfYears; // !!! Maybe some logic for checking for 5/15/30
-                //  If a check needs to be done, it needs to happen before this constructor call
         }
 
         // Reading from database constructor
-        public ShortOrLong(String customerID, Date accountCreationDate, String accountType, long accountID, double loanTotalValue, double rate, Date paymentDueDate, Date notifiedOfPaymentDate, Date thisPaymentDueDate, Date lastPaymentMadeDate, double fixedPaymentValue, double currentPaymentDue, double balance, double lateFees, double amountPaidThisMonth, boolean missedPayment, int numOfYearsTotal) {
+        public ShortOrLong(String customerID, Date accountCreationDate, AccountType accountType, long accountID, double loanTotalValue, double rate, Date paymentDueDate, Date notifiedOfPaymentDate, Date thisPaymentDueDate, Date lastPaymentMadeDate, double fixedPaymentValue, double currentPaymentDue, double balance, double lateFees, double amountPaidThisMonth, boolean missedPayment, int numOfYearsTotal, int numOfMonthsTotal) {
             // Reminder that balance stands for how much is left to pay off, NOT the total value of the loan
             // This will return the total balance to pay off, not the value assigned to balance
             super(customerID, accountCreationDate, accountType, accountID, balance + lateFees, rate, currentPaymentDue, paymentDueDate, notifiedOfPaymentDate, lastPaymentMadeDate, missedPayment);
@@ -214,11 +232,29 @@ public class LoanAccount extends AbstractAccount {
             this.loanTotal = loanTotalValue;
             this.lateFees = lateFees;
             this.numOfYearsTotal = numOfYearsTotal;
+            this.numOfMonthsTotal = numOfMonthsTotal;
+        }
+
+        // Deletes an account from the entire system, including the database
+        public static void deleteAccount(ShortOrLong account) {
+
+            // Remove the account from the list of customer accounts
+            Customer customer = Database.getCustomerFromList(account.getCustomerID());
+            if (customer != null) {
+                customer.removeAccountFromCustomerAccounts(account.getAccountID());
+            }
+
+            // Remove the account from the lists in the database
+            Database.removeItemFromList(Database.shortOrLongLoanList, account);
+            Database.removeItemFromList(Database.abstractAccountList, account);
+
+            // Finally, fully delete the account
+            account = null;
         }
 
         @Override
-        public String getAccountType() {
-            return "Short or Long term Loan Account";
+        public AccountType getAccountType() {
+            return AccountType.ShortOrLongLoanAccount;
         }
 
         @Override
@@ -247,6 +283,7 @@ public class LoanAccount extends AbstractAccount {
             toReturn += ";" + getLoanTotal();
             toReturn += ";" + getLateFees();
             toReturn += ";" + getNumOfYearsTotal();
+            toReturn += ";" + getNumOfMonthsTotal();
 
             return toReturn;
         }
@@ -257,7 +294,7 @@ public class LoanAccount extends AbstractAccount {
             // Abstract stuff
             String customerID = split[0];
             Date accountCreationDate = new Date(Long.parseLong(split[1]));
-            String abstractAccountType = split[2];
+            AccountType abstractAccountType = AccountType.valueOf(split[2]);
             long accountID = Long.parseLong(split[3]);
 
             // Generic loan info
@@ -276,8 +313,9 @@ public class LoanAccount extends AbstractAccount {
             double loanTotal = Double.parseDouble(split[14]);
             double lateFees = Double.parseDouble(split[15]);
             int numOfYearsTotal = Integer.parseInt(split[16]);
+            int numOfMonthsTotal = Integer.parseInt(split[17]);
 
-            return new ShortOrLong(customerID, accountCreationDate, abstractAccountType, accountID, loanTotal, rate, paymentDueDate, notifiedOfPaymentDate, thisPaymentDueDate, lastPaymentMadeDate, fixedPayment, currentPaymentDue, balance, lateFees, amountPaidThisMonth, missedPayment, numOfYearsTotal);
+            return new ShortOrLong(customerID, accountCreationDate, abstractAccountType, accountID, loanTotal, rate, paymentDueDate, notifiedOfPaymentDate, thisPaymentDueDate, lastPaymentMadeDate, fixedPayment, currentPaymentDue, balance, lateFees, amountPaidThisMonth, missedPayment, numOfYearsTotal, numOfMonthsTotal);
         }
 
         public void makePayment(double amount, Date dayOfPay) {
@@ -301,7 +339,7 @@ public class LoanAccount extends AbstractAccount {
         // also sets if this is a problem customer, and resets payment information
         public void updatePayPeriod() {
             monthPaymentCheck();
-            int tempMonth = thisPaymentDueDate.getMonth();
+            int tempMonth = thisPaymentDueDate.getMonth(); // (0-11 is January-December)
             tempMonth++;
             // Update the next payment date
             if (tempMonth == 12) { // If the next month is 12, roll over to the next year
@@ -364,7 +402,14 @@ public class LoanAccount extends AbstractAccount {
         public void setLateFees(double lateFees) {
             this.lateFees = lateFees;
         }
-        
+
+        public int getNumOfMonthsTotal() {
+            return numOfMonthsTotal;
+        }
+
+        public void setNumOfMonthsTotal(int numOfMonthsTotal) {
+            this.numOfMonthsTotal = numOfMonthsTotal;
+        }
     }
 
     static class CC extends LoanAccount {
@@ -380,7 +425,7 @@ public class LoanAccount extends AbstractAccount {
         // Regular constructor
         // Balance should start at 0,
         // rate may also be 0 because I don't see any specifications for a rate on CCs
-        public CC(String customerID, Date accountCreationDate, String accountType, double balance, double rate, double currentPaymentDue, double limit) {
+        public CC(String customerID, Date accountCreationDate, AccountType accountType, double balance, double rate, double currentPaymentDue, double limit) {
             super(customerID, accountCreationDate, accountType, balance, rate, currentPaymentDue);
             this.limit = limit;
             financeCharge = 0;
@@ -391,12 +436,29 @@ public class LoanAccount extends AbstractAccount {
 
         // Reading from database constructor
         // Reminder that balance is the total charge for this account
-        public CC(String customerID, Date accountCreationDate, String accountType, long accountID, double balance, double rate, double currentPaymentDue, Date paymentDueDate, Date notifiedOfPaymentDate, Date lastPaymentMadeDate, boolean missedPayment, double limit, double financeCharge, double sumOfChargesThisMonth, ArrayList<String> chargeMessages) {
+        public CC(String customerID, Date accountCreationDate, AccountType accountType, long accountID, double balance, double rate, double currentPaymentDue, Date paymentDueDate, Date notifiedOfPaymentDate, Date lastPaymentMadeDate, boolean missedPayment, double limit, double financeCharge, double sumOfChargesThisMonth, ArrayList<String> chargeMessages) {
             super(customerID, accountCreationDate, accountType, accountID, balance, rate, currentPaymentDue, paymentDueDate, notifiedOfPaymentDate, lastPaymentMadeDate, missedPayment);
             this.limit = limit;
             this.financeCharge = financeCharge;
             this.sumOfChargesThisMonth = sumOfChargesThisMonth;
             this.chargeMessages = chargeMessages;
+        }
+
+        // Deletes an account from the entire system, including the database
+        public static void deleteAccount(CC account) {
+
+            // Remove the account from the list of customer accounts
+            Customer customer = Database.getCustomerFromList(account.getCustomerID());
+            if (customer != null) {
+                customer.removeAccountFromCustomerAccounts(account.getAccountID());
+            }
+
+            // Remove the account from the lists in the database
+            Database.removeItemFromList(Database.CCList, account);
+            Database.removeItemFromList(Database.abstractAccountList, account);
+
+            // Finally, fully delete the account
+            account = null;
         }
 
         public void charge(double amount, String description, Date dayOfCharge) {
@@ -455,9 +517,24 @@ public class LoanAccount extends AbstractAccount {
             }
         }
 
+        // Returns charge messages as a string
+        public String getChargeMessagesString() {
+            String initialString = """
+                    Charge History for Credit Card
+                    
+                    """;
+            StringBuilder allMessages = new StringBuilder(initialString);
+
+            for (String message : chargeMessages) {
+                allMessages.append(message).append("\n");
+            }
+
+            return allMessages.toString();
+        }
+
         @Override
-        public String getAccountType() {
-            return "Credit Card";
+        public AccountType getAccountType() {
+            return AccountType.CCLoanAccount;
         }
 
         @Override
@@ -497,7 +574,7 @@ public class LoanAccount extends AbstractAccount {
             // Abstract stuff
             String customerID = split[0];
             Date accountCreationDate = new Date(Long.parseLong(split[1]));
-            String abstractAccountType = split[2];
+            AccountType abstractAccountType = AccountType.valueOf(split[2]);
             long accountID = Long.parseLong(split[3]);
 
             // Generic loan info
@@ -546,7 +623,8 @@ public class LoanAccount extends AbstractAccount {
             this.sumOfChargesThisMonth = sumOfChargesThisMonth;
         }
 
-        public ArrayList<String> getChargeMessages() {
+        // Returns the array of charge messages
+        public ArrayList<String> getChargeMessagesArray() {
             return chargeMessages;
         }
 

@@ -32,7 +32,7 @@ public class CustomerDetailsScreen extends JFrame {
         headerPanel.add(subHeader);
 
         //List of Current Accounts the customer holds
-        JList<String> list = new JList<>((customer.customerAccounts).toArray(new String[0]));
+        JList<String> list = new JList<>((customer.getCustomerAccounts()).toArray(new String[0]));
         JScrollPane scrollPane = new JScrollPane(list);
 
         //Button to go create a new account for the customer
@@ -59,7 +59,7 @@ public class CustomerDetailsScreen extends JFrame {
 
         //add statements...
         add(bottomPanel, BorderLayout.SOUTH);
-        add(scrollPane, BorderLayout.CENTER);
+       add(scrollPane, BorderLayout.CENTER);
         add(headerPanel, BorderLayout.NORTH);
         setVisible(true);
     }
