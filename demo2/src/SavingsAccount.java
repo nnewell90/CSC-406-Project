@@ -80,11 +80,14 @@ public class SavingsAccount extends AbstractAccount {
 
         // Data
         double interestRate;
-        CheckingAccount overdraftForAccount; // The checking account this account is an overdraft for
+        // CheckingAccount overdraftForAccount; // The checking account this account is an overdraft for
+        long overdraftForAccountID; // ID for the checking account this account is an overdraft for
         ArrayList<String> stopPaymentArray; // Used to stop checks from going through
 
         public SimpleSavingsAccount(String customerID, Date accountCreationDate, int initialBalance) {
             super(customerID, accountCreationDate, AccountType.SimpleSavingsAccount, initialBalance);
+            overdraftForAccountID = -1;
+            stopPaymentArray = new ArrayList<>();
         }
 
         public SimpleSavingsAccount(String customerID, Date accountCreationDate, AccountType abstractAccountType, long accountID, double balance, double interestRate, long overdraftAccountID, ArrayList<String> stopPaymentArrayPassed) {
@@ -93,17 +96,18 @@ public class SavingsAccount extends AbstractAccount {
             setInterestRate(interestRate);
             stopPaymentArray = new ArrayList<>(stopPaymentArrayPassed);
             if (overdraftAccountID > -1) {
-                setOverdraftForAccount((CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, overdraftAccountID));
+                overdraftForAccountID = overdraftAccountID;
             } else {
-                overdraftForAccount = null;
+                overdraftForAccountID = -1;
             }
         }
 
         // Deletes an account from the entire system, including the database
         public static void deleteAccount(SimpleSavingsAccount account) {
             // Unlink the account from an overdraft account if one exists
-            if (account.overdraftForAccount != null) {
-                account.overdraftForAccount.removeOverdraftAccount();
+            if (account.overdraftForAccountID != -1) {
+                CheckingAccount overdraftAccount = (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, account.overdraftForAccountID);
+                overdraftAccount.removeOverdraftAccount();
             }
 
             // Remove the account from the list of customer accounts
@@ -138,7 +142,11 @@ public class SavingsAccount extends AbstractAccount {
             // Specific account information
             toReturn += ";" + getBalance();
             toReturn += ";" + getInterestRate();
-            toReturn += ";" + overdraftForAccount.getAccountID();
+            if (overdraftForAccountID != -1) {
+                toReturn += ";" + overdraftForAccountID;
+            } else {
+                toReturn += ";" + "-1";
+            }
             for (String s : stopPaymentArray) {
                 toReturn += ";" + s;
             }
@@ -171,16 +179,30 @@ public class SavingsAccount extends AbstractAccount {
             return new SimpleSavingsAccount(customerID, accountCreationDate, abstractAccountType, accountID, balance, interestRate, overdraftAccountID, stopPaymentArrayPassed);
         }
 
-        public void setOverdraftForAccount(CheckingAccount overdraftForAccount) {
-            this.overdraftForAccount = overdraftForAccount;
+        public void setOverdraftForAccount(long overdraftForAccountID) {
+            CheckingAccount checkingAccount = (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, overdraftForAccountID);
+            if (checkingAccount != null) {
+                this.overdraftForAccountID = overdraftForAccountID;
+            } else {
+                // Some fail message
+            }
+        }
+
+        public long getOverdraftForAccountID() {
+            return overdraftForAccountID;
         }
 
         public CheckingAccount getOverdraftForAccount() {
-            return overdraftForAccount;
+            if (overdraftForAccountID != -1) {
+                return (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, overdraftForAccountID);
+            } else {
+                // Some fail message
+                return null;
+            }
         }
 
         public void removeOverdraftForAccount() {
-            this.overdraftForAccount = null;
+            overdraftForAccountID = -1;
         }
 
 

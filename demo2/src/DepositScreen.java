@@ -1,11 +1,11 @@
 import javax.swing.*;
 import java.awt.*;
 
-public class WithdrawScreen extends JFrame {
-    public WithdrawScreen() {
-        setTitle("Withdraw From Account");
-        Label l1 = new Label("Please enter the amount to withdraw:");
-        Label l2 = new Label("Please select an account type to withdraw from:");
+public class DepositScreen extends JFrame {
+    public DepositScreen() {
+        setTitle("Deposit To Account");
+        Label l1 = new Label("Please enter the amount to deposit:");
+        Label l2 = new Label("Please select an account type to deposit to:");
         l1.setBounds(100, 50, 120, 80);
         l2.setBounds(100, 100, 120, 80);
         add(l1);

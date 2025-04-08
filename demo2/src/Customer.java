@@ -31,6 +31,7 @@ public class Customer {
         setFirstName(firstName);
         setLastName(lastName);
         setCustomerID(SSN);
+        customerAccountIDs = new ArrayList<>();
     }
 
     // Deletes a customer from the entire system, including the database

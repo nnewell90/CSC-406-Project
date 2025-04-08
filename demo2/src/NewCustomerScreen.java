@@ -48,8 +48,12 @@ public class NewCustomerScreen extends JFrame {
                 createCustomer();
             }
         });
+        JButton returntoButton = new JButton("Return to Teller Screen");
+
+        returntoButton.addActionListener(e -> {dispose(); new TellerScreen();});
 
         add(submitButton);
+        add(returntoButton);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
     }
@@ -66,16 +70,24 @@ public class NewCustomerScreen extends JFrame {
         if (socialSecurityNumber.isEmpty() || fName.isEmpty() || lName.isEmpty() || streetAddress.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Must complete required fields.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
-        }
+        } else {
 
-        // Store the data to database
-        // might have to change txt name - not created yet!!!!!!!!!!!!
-        try (FileWriter writer = new FileWriter("customers.txt", true)) {
-            writer.write(socialSecurityNumber + ";" + streetAddress + ";" + resCity + ";" + resState + ";" + zipCode + ";" + fName + ";" + lName + "\n");
-            JOptionPane.showMessageDialog(this, "Customer Created Successfully!");
-            dispose();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error creating customer!", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+            //Create the Customer Object and add it to the Array List
+            //That way we can access the customer objects methods and what not later on
+            Customer customer = new Customer(socialSecurityNumber, streetAddress, resCity, resState, zipCode, fName, lName);
+            Database.addItemToList(Database.customerList, customer);
+
+            // Store the data to database
+            // might have to change txt name - not created yet!!!!!!!!!!!!
+            try (FileWriter writer = new FileWriter("database.txt", true)) {
+                writer.write(socialSecurityNumber + ";" + streetAddress + ";" + resCity + ";" + resState + ";" + zipCode + ";" + fName + ";" + lName + "\n");
+                JOptionPane.showMessageDialog(this, "Customer Created Successfully!");
+                //dispose();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error creating customer!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+        }//end of else
     }
+
 }
