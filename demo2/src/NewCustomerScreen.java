@@ -75,7 +75,7 @@ public class NewCustomerScreen extends JFrame {
             //Create the Customer Object and add it to the Array List
             //That way we can access the customer objects methods and what not later on
             Customer customer = new Customer(socialSecurityNumber, streetAddress, resCity, resState, zipCode, fName, lName);
-            Database.addAccountToList(Database.customerList, customer);
+            Database.addItemToList(Database.customerList, customer);
 
             // Store the data to database
             // might have to change txt name - not created yet!!!!!!!!!!!!

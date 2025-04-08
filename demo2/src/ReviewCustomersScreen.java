@@ -30,7 +30,7 @@ public class ReviewCustomersScreen extends JFrame{
 
         JButton returnButton = new JButton("Return to Teller Screen");
 
-        returnButton.addActionListener(e -> {dispose(); new TellerScreen();});
+        returnButton.addActionListener(e -> { dispose(); new TellerScreen();});
 
 
         add(header, BorderLayout.NORTH);

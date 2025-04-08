@@ -12,9 +12,11 @@ public class StopPayScreen extends JFrame {
 
         JTextField accountholderField = new JTextField(10);
         JButton returntoTellerScreen = new JButton("Return to Teller Screen");
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 
-        returntoTellerScreen.addActionListener(e -> new TellerScreen());
+
+        returntoTellerScreen.addActionListener(e -> {dispose(); new TellerScreen();});
         add(accountholderField);
 
 

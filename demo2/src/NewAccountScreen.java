@@ -19,15 +19,22 @@ public class NewAccountScreen extends JFrame {
         add(l2);
         add(accountLnameField);
 
-        // Account selection label
-        Label l3 = new Label("Select the account you wish to create:");
+        //social security label and textbox
+        Label l3 = new Label("Please enter the SSN of the account holder:");
+        JTextField accountSsnField = new JTextField(10);
         add(l3);
+        add(accountSsnField);
 
-        l1.setBounds(100, 50, 120, 80);
-        l2.setBounds(100, 100, 120, 80);
-        l3.setBounds(100, 150, 120, 80);
+        // Account selection label
+        Label l4 = new Label("Select the account you wish to create:");
+        add(l4);
 
-        setLayout(new GridLayout(4, 1));
+        l1.setBounds(100, 50, 60, 40);
+        l2.setBounds(100, 100, 60, 40);
+        l3.setBounds(100,150,60,40);
+        l4.setBounds(100, 200, 60, 40);
+
+        setLayout(new GridLayout(5, 1));
 
 
         // Radio buttons
