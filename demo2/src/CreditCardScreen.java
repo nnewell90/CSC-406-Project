@@ -19,6 +19,7 @@ public class CreditCardScreen extends JFrame {
         setLayout(new GridLayout(4, 1));
 
         JButton returntoCustomerr = new JButton("Return to Customer Screen");
+        JButton CCdetails = new JButton("Credit Card Details");
 
 
         returntoCustomerr.addActionListener(e -> {
@@ -26,7 +27,12 @@ public class CreditCardScreen extends JFrame {
             new CustomerScreen(); // opens the customer screen again
         });
 
+        CCdetails.addActionListener(e -> {dispose();
+        new CreditCardDetailScreen();
+        });
+
         add(returntoCustomerr);
+        add(CCdetails);
 
         setVisible(true);
     }
