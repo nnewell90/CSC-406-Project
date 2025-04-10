@@ -52,7 +52,7 @@ public class CreditCardDetailScreen extends JFrame {
 
         // Bottom buttons
         JButton submitButton = new JButton("Submit");
-        JButton returntoTellerScreen = new JButton("Return to Teller Screen");
+        JButton returntoTellerScreen = new JButton("Return to Credit Card Screen");
 
 
         /*ButtonGroup accountGroup = new ButtonGroup();
@@ -65,7 +65,7 @@ public class CreditCardDetailScreen extends JFrame {
         add(submitButton);
         add(returntoTellerScreen);
 
-        returntoTellerScreen.addActionListener(e -> {dispose(); new TellerScreen();});
+        returntoTellerScreen.addActionListener(e -> {dispose(); new CreditCardScreen();});
         submitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

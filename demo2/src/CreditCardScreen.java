@@ -16,10 +16,15 @@ public class CreditCardScreen extends JFrame {
         add(l2);
         add(l3);
         setSize(500, 500);
-        setLayout(new GridLayout(4, 1));
+        setLayout(new GridLayout(6, 1));
 
-        JButton returntoCustomerr = new JButton("Return to Customer Screen");
         JButton CCdetails = new JButton("Credit Card Details");
+        JButton returntoCustomerr = new JButton("Return to Customer Screen");
+
+
+        CCdetails.addActionListener(e -> {dispose();
+            new CreditCardDetailScreen();
+        });
 
 
         returntoCustomerr.addActionListener(e -> {
@@ -27,12 +32,8 @@ public class CreditCardScreen extends JFrame {
             new CustomerScreen(); // opens the customer screen again
         });
 
-        CCdetails.addActionListener(e -> {dispose();
-        new CreditCardDetailScreen();
-        });
-
-        add(returntoCustomerr);
         add(CCdetails);
+        add(returntoCustomerr);
 
         setVisible(true);
     }
