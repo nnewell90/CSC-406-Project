@@ -1,44 +1,80 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class DepositScreen extends JFrame {
+
+    JTextField SSN, amount, accountID;
+
     public DepositScreen() {
         setTitle("Deposit To Account");
-        Label l1 = new Label("Please enter the amount to deposit:");
-        Label l2 = new Label("Please select an account type to deposit to:");
-        l1.setBounds(100, 50, 120, 80);
-        l2.setBounds(100, 100, 120, 80);
-        add(l1);
-        add(l2);
-        setSize(500, 500);
-        setLayout(new GridLayout(4, 1));
+        setSize(500, 700);
+        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JTextField accountholderField = new JTextField(10);
-        JRadioButton checkingButton = new JRadioButton("Checking");
-        JRadioButton savingsButton = new JRadioButton("Savings");
-        JRadioButton cdButton = new JRadioButton("Certificate of Deposit");
-        JButton submitButton = new JButton("Submit");
-        JButton returntoTellerScreen = new JButton("Return to Teller Screen");
+        SSN = new JTextField(15);
+        add(new JLabel("Enter Customer SSN:"));
+        add(SSN);
 
+        accountID = new JTextField( 15);
+        add(new JLabel("Enter Account ID:"));
+        add(accountID);
 
-        ButtonGroup accountGroup = new ButtonGroup();
-        accountGroup.add(checkingButton);
-        accountGroup.add(savingsButton);
-        accountGroup.add(cdButton);
+        amount = new JTextField(15);
+        add(new JLabel("Enter Deposit Amount:"));
+        add(amount);
 
-        returntoTellerScreen.addActionListener(e -> {dispose(); new TellerScreen();});
-        add(accountholderField);
+        JButton submitButton = new JButton("Submit Deposit");
+        submitButton.addActionListener(e -> {
+            String ssnText = SSN.getText().trim();
+            long id = Long.parseLong(accountID.getText().trim());
+            double depositAmount = Double.parseDouble(amount.getText().trim());
 
+            makeDeposit(ssnText, depositAmount, id);
+            JOptionPane.showMessageDialog(this, "Deposit Successful!");
+            dispose();
+            new TellerScreen();
+        });
+        JButton returnToTellerScreen = new JButton("Return to Teller Screen");
+        returnToTellerScreen.addActionListener(e -> {dispose(); new TellerScreen();});
 
-        JPanel radioPanel = new JPanel();
-        radioPanel.add(checkingButton);
-        radioPanel.add(savingsButton);
-        radioPanel.add(cdButton);
-        add(radioPanel);
         add(submitButton);
-        add(returntoTellerScreen);
-
+        add(returnToTellerScreen);
 
         setVisible(true);
     }
+
+
+    //Method for makeDepot button.
+    //Method for
+    public void makeDeposit(String SSN, double amount, Long accountID) {
+        Customer customer = Database.getCustomer(SSN);
+
+        if(customer == null) {
+            JOptionPane.showMessageDialog(this, "Customer not found!");
+            return;
+        }
+
+        //Not sure how to get this method to work.
+//        AbstractAccount account = Database.getAccountFromList(customer.getCustomerAccounts(), accountID);
+        AbstractAccount account = Database.findAccountByID(accountID);
+        AbstractAccount.AccountType type = account.getAccountType();
+
+        if(account == null){
+            JOptionPane.showMessageDialog(this, "Account not found!");
+            return;
+        }
+
+        if (type == AbstractAccount.AccountType.CheckingAccount) {
+            CheckingAccount checkingAccount = (CheckingAccount) account;
+            checkingAccount.deposit(amount);
+        }else if (type == AbstractAccount.AccountType.SavingsAccount) {
+            SavingsAccount savingsAccount = (SavingsAccount) account;
+            savingsAccount.deposit(amount);
+        }else{
+            JOptionPane.showMessageDialog(this, "Account type not supported! Account type is " + type);
+        }
+
+    }//end of make deposit
+
 }

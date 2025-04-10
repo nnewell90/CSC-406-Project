@@ -9,7 +9,7 @@ public class ReviewCustomersScreen extends JFrame{
     public ReviewCustomersScreen() throws IOException {
         setTitle("Customers");
         setSize(500, 500);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
         JLabel header = new JLabel("Customers");

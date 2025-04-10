@@ -25,5 +25,15 @@ public class StopPayScreen extends JFrame {
 
         setVisible(true);
     }
+
+    //Fields that will need to be gotten from user are SSN for customer, accountID and stopPayNumber
+    public void stopPayment(String SSN, Long accountID, String stopPayNumber){
+        Customer customer = Database.getCustomer(SSN);
+//        CheckingAccount account = Database.getAccountFromList(customer.getCustomerAccounts(), accountID);
+        CheckingAccount account = (CheckingAccount) Database.findAccountByID(accountID);
+
+        account.addStopPaymentNumber(stopPayNumber);
+    }
+
 }
 

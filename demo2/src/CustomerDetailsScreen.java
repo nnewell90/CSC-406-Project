@@ -38,7 +38,7 @@ public class CustomerDetailsScreen extends JFrame {
         //Button to go create a new account for the customer
         JButton createAccount = new JButton("Create New Account");
         createAccount.setAlignmentX(Component.CENTER_ALIGNMENT);
-        createAccount.addActionListener(e -> {dispose(); new CreateAccountScreen(customer);});
+        createAccount.addActionListener(e -> {dispose(); new CreateAccountScreen();});
 
         //Return Button
         JButton returnButton = new JButton("Return to Customers");

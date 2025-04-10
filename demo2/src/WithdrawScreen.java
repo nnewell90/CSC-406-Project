@@ -41,4 +41,21 @@ public class WithdrawScreen extends JFrame {
 
         setVisible(true);
     }
+
+    public void makeWithdraw(String SSN, double amount, Long accountID){
+        Customer customer = Database.getCustomer(SSN);
+//        AbstractAccount account = Database.getAccountFromList(customer.getCustomerAccounts(), accountID);
+        AbstractAccount account = Database.findAccountByID(accountID);
+        AbstractAccount.AccountType type = account.accountType;
+
+        if (type == AbstractAccount.AccountType.SavingsAccount){
+            SavingsAccount savings = (SavingsAccount) account;
+            savings.withdraw(amount);
+        }else if (type == AbstractAccount.AccountType.CheckingAccount){
+            CheckingAccount checking = (CheckingAccount) account;
+            checking.withdraw(amount);
+        }
+
+    }
+
 }
