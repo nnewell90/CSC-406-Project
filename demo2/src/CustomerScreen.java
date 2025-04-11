@@ -9,7 +9,7 @@ public class CustomerScreen extends JFrame {
         setTitle("Customer Screen");
         setSize(500, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(new GridLayout(4, 1));
+        setLayout(new GridLayout(5, 1));
 
         JButton creditButton = new JButton("Credit Card");
         JButton reviewButton = new JButton("Review Account Status");
