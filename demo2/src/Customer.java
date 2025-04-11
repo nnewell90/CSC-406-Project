@@ -31,14 +31,26 @@ public class Customer {
         setFirstName(firstName);
         setLastName(lastName);
         setCustomerID(SSN);
+        customerAccountIDs = new ArrayList<>();
     }
 
     // Deletes a customer from the entire system, including the database
     public static void deleteCustomer(Customer customer) {
 
         // Remove each account the customer has from the database
-        for (Long accountID : customer.getCustomerAccounts()) {
+        ArrayList<AbstractAccount> accounts = customer.getCustomerAccountsAsAccounts();
 
+        for (AbstractAccount account : accounts) {
+            switch (account.getAccountType()) {
+                // Checking
+                case CheckingAccount -> CheckingAccount.deleteAccount((CheckingAccount) account);
+                // Savings
+                case SimpleSavingsAccount -> SavingsAccount.SimpleSavingsAccount.deleteAccount((SavingsAccount.SimpleSavingsAccount) account);
+                case CDSavingsAccount -> SavingsAccount.CDSavingsAccount.deleteAccount((SavingsAccount.CDSavingsAccount) account);
+                // Loan
+                case CCLoanAccount -> LoanAccount.CC.deleteAccount((LoanAccount.CC)account);
+                case ShortOrLongLoanAccount -> LoanAccount.ShortOrLong.deleteAccount((LoanAccount.ShortOrLong)account);
+            }
         }
 
         // Remove the account from the lists in the database
@@ -162,8 +174,13 @@ public class Customer {
         customerAccountIDs.remove(accountID);
     }
 
-    // Gets the entire list of customer accounts
-    public ArrayList<Long> getCustomerAccounts() {
+    // Gets the entire list of customer accounts as IDs
+    public ArrayList<Long> getCustomerAccountIDs() {
         return customerAccountIDs;
+    }
+
+    // Gets the entire list of customer accounts as accounts
+    public ArrayList<AbstractAccount> getCustomerAccountsAsAccounts() {
+        return Database.getAllAccountsOfCustomer(customerAccountIDs);
     }
 }
