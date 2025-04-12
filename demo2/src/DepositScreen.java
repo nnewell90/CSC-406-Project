@@ -45,34 +45,36 @@ public class DepositScreen extends JFrame {
     }
 
 
-    //Method for makeDepot button.
-    //Method for
+    //Method for makeDepot button...
     public void makeDeposit(String SSN, double amount, Long accountID) {
-        Customer customer = Database.getCustomer(SSN);
+        Customer customer = Database.getCustomerFromList(SSN);
 
         if(customer == null) {
             JOptionPane.showMessageDialog(this, "Customer not found!");
             return;
         }
 
-        //Not sure how to get this method to work.
-//        AbstractAccount account = Database.getAccountFromList(customer.getCustomerAccounts(), accountID);
-        AbstractAccount account = Database.findAccountByID(accountID);
-        AbstractAccount.AccountType type = account.getAccountType();
+        AbstractAccount account = Database.getAccountFromList(Database.abstractAccountList, accountID);
 
         if(account == null){
-            JOptionPane.showMessageDialog(this, "Account not found!");
+            JOptionPane.showMessageDialog(this, "Account not found, check credentials.");
             return;
         }
 
+        AbstractAccount.AccountType type = account.getAccountType();
         if (type == AbstractAccount.AccountType.CheckingAccount) {
             CheckingAccount checkingAccount = (CheckingAccount) account;
             checkingAccount.deposit(amount);
+            JOptionPane.showMessageDialog(this, "Deposit Successful!");
+            dispose();
+            new TellerScreen();
         }else if (type == AbstractAccount.AccountType.SavingsAccount) {
             SavingsAccount savingsAccount = (SavingsAccount) account;
             savingsAccount.deposit(amount);
+            JOptionPane.showMessageDialog(this, "Deposit Successful!");
+            dispose();
         }else{
-            JOptionPane.showMessageDialog(this, "Account type not supported! Account type is " + type);
+            JOptionPane.showMessageDialog(this, "Cannot make a deposit to a " + type);
         }
 
     }//end of make deposit

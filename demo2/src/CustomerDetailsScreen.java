@@ -8,7 +8,7 @@ public class CustomerDetailsScreen extends JFrame {
     public CustomerDetailsScreen(String selectedCustomer) {
 
         String ssn = selectedCustomer.substring(0,9);
-        Customer customer = Database.getCustomer(ssn);
+        Customer customer = Database.getCustomerFromList(ssn);
 
         setTitle("Customer Details");
         setSize(500, 500);

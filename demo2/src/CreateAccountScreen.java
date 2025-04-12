@@ -60,54 +60,69 @@ public class CreateAccountScreen extends JFrame {
         setVisible(true);
     }
 
+    /*
+     * Method that creates the Customer Account and adds it to the ArrayList's
+     * If the account is a Loan it opens up a new screen for creating Loan Accounts specifically
+     */
     public void createAccount() {
 
         //Pass Data values...
         String id = ID.getText().trim();
         String accountType = accountTypeComboBox.getSelectedItem().toString();
-        double deposit = Double.parseDouble(Deposit.getText().trim());
+        String deposit = Deposit.getText().trim();
+        String dateField = creationDate.getText().trim();
 
-        String dateString = creationDate.getText().trim();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-        LocalDate localDate = LocalDate.parse(dateString, formatter);
-        Date date = java.sql.Date.valueOf(localDate);
+        if(id.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid ID");
+        }else if(dateField.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid date");
+        }else if(deposit.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid deposit");
+        }else {
 
-        Customer customer = Database.getCustomerFromList(id);
-        if (customer == null) {
-            JOptionPane.showMessageDialog(this, "Customer not found");
-            return;
-        }
+            double depositNum = Double.parseDouble(Deposit.getText().trim());
+            String dateString = creationDate.getText().trim();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+            LocalDate localDate = LocalDate.parse(dateString, formatter);
+            Date date = java.sql.Date.valueOf(localDate);
 
-        //Check what specific type of account it is
-        CheckingAccount.AccountType specificType = null;
-        if(deposit >= 5000.00){
-            specificType = CheckingAccount.AccountType.GoldDiamond;
-        }else if (deposit <5000.00){
-            specificType = CheckingAccount.AccountType.TMB;
-        }
+            Customer customer = Database.getCustomerFromList(id);
+            if (customer == null) {
+                JOptionPane.showMessageDialog(this, "Customer not found, validate your customer ID");
+                return;
+            }else {
 
-        AbstractAccount account = null;
+                //create the account and add it to the list...
+                if (accountType.equals("Checking")) {
+                    //Check what specific type of Checking account it is...
+                    CheckingAccount.AccountType specificType = null;
+                    if (depositNum >= 5000.00) {
+                        specificType = CheckingAccount.AccountType.GoldDiamond;
+                    } else if (depositNum < 5000.00) {
+                        specificType = CheckingAccount.AccountType.TMB;
+                    }
+                    CheckingAccount account = new CheckingAccount(id, date, AbstractAccount.AccountType.CheckingAccount, depositNum, specificType);
+                    customer.addAccountToCustomerAccounts(account.getAccountID());
+                    Database.addItemToList(Database.abstractAccountList, account);
+                    Database.addItemToList(Database.checkingAccountList, account);
 
-        if(accountType == "Checking") {
-            account = new CheckingAccount(id, date, AbstractAccount.AccountType.CheckingAccount, deposit, specificType);
-        }else if (accountType == "Savings") {
-            account = new SavingsAccount(id, date, AbstractAccount.AccountType.SavingsAccount, deposit);
-        }else if(accountType == "Loan") {
-            dispose();
-            new CreateLoanAccountScreen(customer, date);
-        }
+                } else if (accountType.equals("Savings")) {
+                    SavingsAccount account = new SavingsAccount(id, date, AbstractAccount.AccountType.SavingsAccount, depositNum);
+                    customer.addAccountToCustomerAccounts(account.getAccountID());
+                    Database.addItemToList(Database.abstractAccountList, account);
+                    Database.addItemToList(Database.savingsAccountList, account);
 
-        //add account to list of customer accounts
-        if(account == null){
-            JOptionPane.showMessageDialog(this, "Cant find Account " + account.accountID);
-            return;
-        }
-        customer.addAccountToCustomerAccounts(account.getAccountID());
+                } else if (accountType.equals("Loan")) {
+                    dispose();
+                    new CreateLoanAccountScreen(customer, date);
+                }
 
-        //close screen and go back to Teller screen
-        dispose();
-        new TellerScreen();
+                //close screen and go back to Teller screen
+                JOptionPane.showMessageDialog(this, "Account created successfully");
+                dispose();
+                new TellerScreen();
+            }//end of customer check if/else
+        }//end of datafield check if/else
+    }//end of CreateAccount
 
-    }//end of Create Account
-
-}
+}//end of CreateAccountScreen

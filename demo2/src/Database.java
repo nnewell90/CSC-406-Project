@@ -308,31 +308,7 @@ public class Database implements Runnable {
         }
     }
 
-    //Added this method so I could grab a specific customer from the
-    //customerList arrayList.
-    public static Customer getCustomer(String ssn) {
-        for (Customer c : customerList) {
-            if (Objects.equals(c.getSSN(), ssn)) {
-                return c;
-            }
-        }
-        return null;
-    }
 
-    public static AbstractAccount findAccountByID(long accountID) {
-        // Search across all account lists
-        for (AbstractAccount a : abstractAccountList) {
-            if (a.accountID == accountID) return a;
-        }
-        for (CheckingAccount a : checkingAccountList) {
-            if (a.accountID == accountID) return a;
-        }
-        for (SavingsAccount a : savingsAccountList) {
-            if (a.accountID == accountID) return a;
-        }
-
-        return null;
-    }
 
 
 }
