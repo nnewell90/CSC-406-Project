@@ -12,8 +12,8 @@ public class CheckingAccount extends AbstractAccount{
     AccountType accountSpecificType;
     ArrayList<String> stopPaymentArray;
 
-    SavingsAccount.SimpleSavingsAccount overdraftAccount; // The overdraft account for this Checking account
-
+    // SavingsAccount.SimpleSavingsAccount overdraftAccount; // The overdraft account for this Checking account
+    long overDraftAccountID; // ID of the overdraft account for this Checking account
 
     public enum AccountType {
         TMB,
@@ -30,7 +30,7 @@ public class CheckingAccount extends AbstractAccount{
         setAccountSpecificType(type);
         overdraftsThisMonth = 0;
         stopPaymentArray = new ArrayList<>();
-        overdraftAccount = null;
+        overDraftAccountID = -1;
     }
 
     // Constructor used when restoring accounts
@@ -40,16 +40,16 @@ public class CheckingAccount extends AbstractAccount{
         setAccountSpecificType(type);
         stopPaymentArray = new ArrayList<>(stopPaymentArrayPassed);
         if (overdraftAccountID > -1) {
-            setOverdraftForAccount((SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.savingsAccountList, overdraftAccountID));
+            this.overDraftAccountID = overdraftAccountID;
         } else {
-            overdraftAccount = null;
+            overDraftAccountID = -1;
         }
     }
 
     // Deletes an account from the entire system, including the database
     public static void deleteAccount(CheckingAccount account) {
         // Unlink the account from an overdraft account if one exists
-        if (account.overdraftAccount != null) {
+        if (account.overDraftAccountID != -1) {
             account.removeOverdraftAccount();
         }
 
@@ -86,7 +86,12 @@ public class CheckingAccount extends AbstractAccount{
         toReturn += ";" + getBalance();
         toReturn += ";" + getOverdraftsThisMonth();
         toReturn += ";" + getAccountSpecificType();
-        toReturn += ";" + overdraftAccount.getAccountID(); // Get the account for the overdraft account
+        if (overDraftAccountID != -1) { // There may not be an overdraft account
+            toReturn += ";" + overDraftAccountID; // Get the account for the overdraft account
+        } else {
+            toReturn += ";" + "-1"; // -1 is the "does not exist" metric for
+        }
+
         for (String s : stopPaymentArray) {
             toReturn += ";" + s;
         }
@@ -156,7 +161,9 @@ public class CheckingAccount extends AbstractAccount{
             boolean overdraftFail = false;
 
             // Check for a SavingsAccount (Overdraft account)
-            if (overdraftAccount != null) {
+            if (overDraftAccountID != -1) {
+                SavingsAccount.SimpleSavingsAccount overdraftAccount = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
+
                 if (overdraftAccount.getBalance() >= amount) { // Enough money in the overdraft account
                     // Withdraw from overdraft, deposit in checking, then withdraw from checking
                     overdraftAccount.withdraw(amount);
@@ -242,23 +249,45 @@ public class CheckingAccount extends AbstractAccount{
         this.accountSpecificType = accountType;
     }
 
-    public AbstractAccount.AccountType getAccountSpecificType() {
-        return accountType;
+    public CheckingAccount.AccountType getAccountSpecificType() {
+        return accountSpecificType;
     }
 
     // Overdraft setting
-    public void setOverdraftForAccount(SavingsAccount.SimpleSavingsAccount overdraftAccount) {
-        this.overdraftAccount = overdraftAccount;
-        overdraftAccount.setOverdraftForAccount(this);
+    public void setOverdraftForAccount(long overDraftAccountID) {
+        SavingsAccount.SimpleSavingsAccount overdraftAccount = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
+        if (overdraftAccount != null) {
+            this.overDraftAccountID = overDraftAccountID;
+            overdraftAccount.setOverdraftForAccount(this.getAccountID());
+        } else {
+            // Some fail message
+        }
     }
 
-    public SavingsAccount getOverdraftAccount() {
-        return overdraftAccount;
+    // Returns the accountID for the overdraft account
+    public long getOverdraftAccountID() {
+        return overDraftAccountID;
+    }
+
+    // Returns the actual overdraft account
+    public SavingsAccount.SimpleSavingsAccount getOverDraftAccount() {
+        if (overDraftAccountID != -1) {
+            return (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
+        } else {
+            // Some fail message
+            return null;
+        }
     }
 
     public void removeOverdraftAccount() {
-        overdraftAccount.removeOverdraftForAccount();
-        this.overdraftAccount = null;
+        SavingsAccount.SimpleSavingsAccount overdraftAccount = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
+        if (overdraftAccount != null) {
+            overdraftAccount.removeOverdraftForAccount();
+            this.overDraftAccountID = -1;
+        } else {
+            // Some fail message
+        }
+
     }
 
     // Check stuff
@@ -312,7 +341,9 @@ public class CheckingAccount extends AbstractAccount{
                 boolean overdraftFail = false;
 
                 // Check for a SavingsAccount (Overdraft account)
-                if (overdraftAccount != null) {
+                if (overDraftAccountID != -1) {
+                    SavingsAccount.SimpleSavingsAccount overdraftAccount = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
+
                     if (overdraftAccount.getBalance() >= withdrawAmount) { // Enough money in the overdraft account
                         // Withdraw from overdraft, deposit in checking, then withdraw from checking
                         overdraftAccount.withdraw(withdrawAmount);
