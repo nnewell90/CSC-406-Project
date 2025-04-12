@@ -14,6 +14,11 @@ abstract public class AbstractAccount {
     long accountID; // Accounts need IDs,
     // so if a customer holds multiple of the same type, the correct one can be retrieved
 
+    // This is used to actually delete accounts
+    // Used for safe deletion, Java's garbage collector will eventually delete accounts;
+    // this is meant to act as a placeholder until it actually does.
+    boolean isDeleted = false;
+
     // The different types of accounts possible in the system
     public enum AccountType {
         // Checking
@@ -35,6 +40,7 @@ abstract public class AbstractAccount {
         this.accountType = accountType;
         incrementAccountIDCounter();
         this.accountID = accountIDCounter;
+        this.isDeleted = false;
     }
 
     // Constructor used when accounts are being restored, meaning they have already been created
@@ -43,19 +49,29 @@ abstract public class AbstractAccount {
         this.accountCreationDate = accountCreationDate;
         this.accountType = accountType;
         this.accountID = accountID;
+        this.isDeleted = false;
     }
 
     public String getCustomerID() {
+        if (isDeleted()) {
+            return null;
+        }
         return customerID;
     }
 
     public Date getAccountCreationDate() {
+        if (isDeleted()) {
+            return null;
+        }
         return accountCreationDate;
     }
 
     public abstract AccountType getAccountType();
 
     public long getAccountID() {
+        if (isDeleted()) {
+            return -1;
+        }
         return accountID;
     }
 
@@ -83,5 +99,17 @@ abstract public class AbstractAccount {
 
         // !!! Some error message
         return null;
+    }
+
+    public void setAccountType(AccountType accountType) {
+        this.accountType = accountType;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 }

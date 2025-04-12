@@ -7,24 +7,30 @@ public class SavingsAccount extends AbstractAccount {
     double balance;
 
     // Normal constructor
-    public SavingsAccount(String customerID, Date accountCreationDate, AccountType accountType, double initialBalance) {
-        super(customerID, accountCreationDate, accountType);
+    public SavingsAccount(String customerID, Date accountCreationDate, double initialBalance) {
+        super(customerID, accountCreationDate, AccountType.SavingsAccount);
         setBalance(initialBalance);
     }
 
     // Restore from database constructor
-    public SavingsAccount(String customerID, Date accountCreationDate, AccountType accountType, double balance, long accountID) {
-        super(customerID, accountCreationDate, accountType, accountID);
+    public SavingsAccount(String customerID, Date accountCreationDate, double balance, long accountID) {
+        super(customerID, accountCreationDate, AccountType.SavingsAccount, accountID);
         setBalance(balance);
     }
 
     @Override
     public AccountType getAccountType() {
+        if (isDeleted()) {
+            return null;
+        }
         return AccountType.SavingsAccount;
     }
 
     @Override
     public String toFileString() {
+        if (isDeleted()) {
+            return null;
+        }
         String toReturn = "";
 
         // Abstract account information
@@ -52,7 +58,7 @@ public class SavingsAccount extends AbstractAccount {
         // Specific
         double balance = Double.parseDouble(split[4]);
 
-        return new SavingsAccount(customerID, accountCreationDate, abstractAccountType, balance, accountID);
+        return new SavingsAccount(customerID, accountCreationDate, balance, accountID);
     }
 
     public void setBalance(double balance) {
@@ -60,14 +66,23 @@ public class SavingsAccount extends AbstractAccount {
     }
 
     public double getBalance() {
+        if (isDeleted()) {
+            return Double.NaN;
+        }
         return balance;
     }
 
     public void deposit(double amount) {
+        if (isDeleted()) {
+            return;
+        }
         balance += amount;
     }
 
     public void withdraw(double amount) {
+        if (isDeleted()) {
+            return;
+        }
         if (balance > amount) {
             balance -= amount;
         } else {
@@ -84,14 +99,19 @@ public class SavingsAccount extends AbstractAccount {
         long overdraftForAccountID; // ID for the checking account this account is an overdraft for
         ArrayList<String> stopPaymentArray; // Used to stop checks from going through
 
+        boolean linkedToATMCard;
+
         public SimpleSavingsAccount(String customerID, Date accountCreationDate, int initialBalance) {
-            super(customerID, accountCreationDate, AccountType.SimpleSavingsAccount, initialBalance);
+            super(customerID, accountCreationDate, initialBalance);
+            setAccountType(AccountType.SimpleSavingsAccount);
             overdraftForAccountID = -1;
             stopPaymentArray = new ArrayList<>();
+            linkedToATMCard = false;
         }
 
-        public SimpleSavingsAccount(String customerID, Date accountCreationDate, AccountType abstractAccountType, long accountID, double balance, double interestRate, long overdraftAccountID, ArrayList<String> stopPaymentArrayPassed) {
-            super(customerID, accountCreationDate, abstractAccountType, balance, accountID);
+        public SimpleSavingsAccount(String customerID, Date accountCreationDate, long accountID, double balance, double interestRate, long overdraftAccountID, boolean linkedToATMCard, ArrayList<String> stopPaymentArrayPassed) {
+            super(customerID, accountCreationDate, balance, accountID);
+            setAccountType(AccountType.SimpleSavingsAccount);
             setBalance(balance);
             setInterestRate(interestRate);
             stopPaymentArray = new ArrayList<>(stopPaymentArrayPassed);
@@ -100,10 +120,15 @@ public class SavingsAccount extends AbstractAccount {
             } else {
                 overdraftForAccountID = -1;
             }
+            this.linkedToATMCard = linkedToATMCard;
         }
 
         // Deletes an account from the entire system, including the database
         public static void deleteAccount(SimpleSavingsAccount account) {
+            if (account.isDeleted()) {
+                return;
+            }
+
             // Unlink the account from an overdraft account if one exists
             if (account.overdraftForAccountID != -1) {
                 CheckingAccount overdraftAccount = (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, account.overdraftForAccountID);
@@ -116,12 +141,18 @@ public class SavingsAccount extends AbstractAccount {
                 customer.removeAccountFromCustomerAccounts(account.getAccountID());
             }
 
+            // Remove the ATM card from the system
+            if (account.isLinkedToATMCard()) {
+                ATMCard card = Database.getATMCardFromList(account.getAccountID());
+                ATMCard.deleteATMCard(card);
+            }
+
             // Remove the account from the lists in the database
             Database.removeItemFromList(Database.simpleSavingsAccountList, account);
             Database.removeItemFromList(Database.abstractAccountList, account);
 
             // Finally, fully delete the account
-            account = null;
+            account.setDeleted(true);
         }
 
         @Override
@@ -131,6 +162,9 @@ public class SavingsAccount extends AbstractAccount {
 
         @Override
         public String toFileString() {
+            if (isDeleted()) {
+                return null;
+            }
             String toReturn = "";
 
             // Abstract account information
@@ -147,6 +181,9 @@ public class SavingsAccount extends AbstractAccount {
             } else {
                 toReturn += ";" + "-1";
             }
+
+            toReturn += ";" + linkedToATMCard;
+
             for (String s : stopPaymentArray) {
                 toReturn += ";" + s;
             }
@@ -170,16 +207,21 @@ public class SavingsAccount extends AbstractAccount {
             long overdraftAccountID = -1; // Have to do it this way because of later comparison
             overdraftAccountID = Long.parseLong(split[6]);
 
+            boolean linkedToAtmCard = Boolean.parseBoolean(split[7]);
+
             // Now make an aList of the held stopped checks
             ArrayList<String> stopPaymentArrayPassed = new ArrayList<>();
-            if (split.length > 7) {
+            if (split.length > 8) {
                 stopPaymentArrayPassed.addAll(Arrays.asList(split).subList(7, split.length));
             }
 
-            return new SimpleSavingsAccount(customerID, accountCreationDate, abstractAccountType, accountID, balance, interestRate, overdraftAccountID, stopPaymentArrayPassed);
+            return new SimpleSavingsAccount(customerID, accountCreationDate, accountID, balance, interestRate, overdraftAccountID, linkedToAtmCard, stopPaymentArrayPassed);
         }
 
         public void setOverdraftForAccount(long overdraftForAccountID) {
+            if (isDeleted()) {
+                return;
+            }
             CheckingAccount checkingAccount = (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, overdraftForAccountID);
             if (checkingAccount != null) {
                 this.overdraftForAccountID = overdraftForAccountID;
@@ -192,7 +234,22 @@ public class SavingsAccount extends AbstractAccount {
             return overdraftForAccountID;
         }
 
+        public boolean isLinkedToATMCard() {
+            return linkedToATMCard;
+        }
+
+        public void setLinkedToATMCard(boolean linkedToATMCard) {
+            this.linkedToATMCard = linkedToATMCard;
+        }
+
+        public ATMCard getATMCard() {
+            return Database.getATMCardFromList(getAccountID());
+        }
+
         public CheckingAccount getOverdraftForAccount() {
+            if (isDeleted()) {
+                return null;
+            }
             if (overdraftForAccountID != -1) {
                 return (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, overdraftForAccountID);
             } else {
@@ -209,7 +266,9 @@ public class SavingsAccount extends AbstractAccount {
         // Check stuff
         // Add this check to the array of checks to stop payments for
         public void addStopPaymentNumber(String checkNumber) {
-
+            if (isDeleted()) {
+                return;
+            }
             boolean validNumber = validateCheckNumber(checkNumber);
 
             // Now actually add a number
@@ -240,6 +299,9 @@ public class SavingsAccount extends AbstractAccount {
 
         // Withdraw via a check rather than by card
         public void withdrawByCheck(int withdrawAmount, String checkNumber) {
+            if (isDeleted()) {
+                return;
+            }
             boolean validNumber = validateCheckNumber(checkNumber);
             boolean stopPayment = false;
 
@@ -279,7 +341,7 @@ public class SavingsAccount extends AbstractAccount {
             this.interestRate = interestRate;
         }
 
-        // Calculates and adds the interest for am account
+        // Calculates and adds the interest for an account
         public void calcAndAddInterest() {
             balance += balance * interestRate;
         }
@@ -300,13 +362,15 @@ public class SavingsAccount extends AbstractAccount {
         Date dueDate;
 
         public CDSavingsAccount(String customerID, Date accountCreationDate, double initialBalance, double interestRate, Date dueDate) {
-            super(customerID, accountCreationDate, AccountType.CDSavingsAccount, initialBalance);
+            super(customerID, accountCreationDate, initialBalance);
+            setAccountType(AccountType.CDSavingsAccount);
             this.interestRate = interestRate;
             this.dueDate = dueDate;
         }
 
         public CDSavingsAccount(String customerID, Date accountCreationDate, long accountID, double balance, double interestRate, Date dueDate) {
-            super(customerID, accountCreationDate, AccountType.CDSavingsAccount, accountID);
+            super(customerID, accountCreationDate, accountID);
+            setAccountType(AccountType.CDSavingsAccount);
             this.balance = balance;
             this.interestRate = interestRate;
             this.dueDate = dueDate;
@@ -314,7 +378,9 @@ public class SavingsAccount extends AbstractAccount {
 
         // Deletes an account from the entire system, including the database
         public static void deleteAccount(CDSavingsAccount account) {
-
+            if (account.isDeleted()) {
+                return;
+            }
             // Remove the account from the list of customer accounts
             Customer customer = Database.getCustomerFromList(account.getCustomerID());
             if (customer != null) {
@@ -336,6 +402,9 @@ public class SavingsAccount extends AbstractAccount {
 
         @Override
         public String toFileString() {
+            if (isDeleted()) {
+                return null;
+            }
             String toReturn = "";
 
             // Abstract account information
@@ -371,6 +440,9 @@ public class SavingsAccount extends AbstractAccount {
         }
 
         public double getBalance() {
+            if (isDeleted()) {
+                return Double.NaN;
+            }
             return super.getBalance();
         }
 

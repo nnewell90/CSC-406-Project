@@ -11,45 +11,61 @@ public class CheckingAccount extends AbstractAccount{
 
     AccountType accountSpecificType;
     ArrayList<String> stopPaymentArray;
+    
+    boolean linkedToATMCard;
 
     // SavingsAccount.SimpleSavingsAccount overdraftAccount; // The overdraft account for this Checking account
     long overDraftAccountID; // ID of the overdraft account for this Checking account
 
     public enum AccountType {
         TMB,
-        GoldDiamond // Minimum balance needs to be enforced somehow, not sure where
+        GoldDiamond
     }
 
     // Constructor used when creating a new account for the first time
-    public CheckingAccount(String customerID, Date accountCreationDate, AbstractAccount.AccountType abstractAccountType, double initialBalance, AccountType type) {
-        // Some logic for checking if an account with type GoldDiamond has the minimum funds
-        // This could also be done at the end, just depends on how we want to implement it
-
-        super(customerID, accountCreationDate, abstractAccountType);
+    public CheckingAccount(String customerID, Date accountCreationDate, double initialBalance) {
+        super(customerID, accountCreationDate, AbstractAccount.AccountType.CheckingAccount);
+        setAccountType(AbstractAccount.AccountType.CheckingAccount); // This is probably unnecessary
         setBalance(initialBalance);
-        setAccountSpecificType(type);
+        if (initialBalance < minimumBalanceGoldDiamond) {
+            setAccountSpecificType(AccountType.TMB);
+        } else {
+            setAccountSpecificType(AccountType.GoldDiamond);
+        }
         overdraftsThisMonth = 0;
         stopPaymentArray = new ArrayList<>();
         overDraftAccountID = -1;
+        linkedToATMCard = false;
     }
 
     // Constructor used when restoring accounts
-    public CheckingAccount(String customerID, Date accountCreationDate, AbstractAccount.AccountType abstractAccountType, double balance, int overdraftsThisMonth, AccountType type, long accountID, long overdraftAccountID, ArrayList<String> stopPaymentArrayPassed) {
-        super(customerID, accountCreationDate, abstractAccountType, accountID);
+    public CheckingAccount(String customerID, Date accountCreationDate, double balance, int overdraftsThisMonth, long accountID, long overdraftAccountID, boolean linkedToATMCard, ArrayList<String> stopPaymentArrayPassed) {
+        super(customerID, accountCreationDate, AbstractAccount.AccountType.CheckingAccount, accountID);
+        setAccountType(AbstractAccount.AccountType.CheckingAccount);
         setBalance(balance);
-        setAccountSpecificType(type);
+        if (balance < minimumBalanceGoldDiamond) {
+            setAccountSpecificType(AccountType.TMB);
+        } else {
+            setAccountSpecificType(AccountType.GoldDiamond);
+        }
         stopPaymentArray = new ArrayList<>(stopPaymentArrayPassed);
         if (overdraftAccountID > -1) {
             this.overDraftAccountID = overdraftAccountID;
         } else {
             overDraftAccountID = -1;
         }
+        this.linkedToATMCard = linkedToATMCard;
+        setOverdraftsThisMonth(overdraftsThisMonth);
     }
 
     // Deletes an account from the entire system, including the database
     public static void deleteAccount(CheckingAccount account) {
+        if (account.isDeleted()) {
+            return;
+        }
+
         // Unlink the account from an overdraft account if one exists
-        if (account.overDraftAccountID != -1) {
+        if (account.getOverdraftAccountID() != -1) {
             account.removeOverdraftAccount();
         }
 
@@ -59,12 +75,18 @@ public class CheckingAccount extends AbstractAccount{
             customer.removeAccountFromCustomerAccounts(account.getAccountID());
         }
 
+        // Remove the ATM card from the system
+        if (account.isLinkedToATMCard()) {
+            ATMCard card = Database.getATMCardFromList(account.getAccountID());
+            ATMCard.deleteATMCard(card);
+        }
+
         // Remove the account from the lists in the database
         Database.removeItemFromList(Database.checkingAccountList, account);
         Database.removeItemFromList(Database.abstractAccountList, account);
 
         // Finally, fully delete the account
-        account = null;
+        account.setDeleted(true);
     }
 
     @Override
@@ -74,6 +96,9 @@ public class CheckingAccount extends AbstractAccount{
 
     @Override
     public String toFileString() {
+        if (isDeleted()) {
+            return null;
+        }
         String toReturn = "";
 
         // Abstract account information
@@ -92,6 +117,8 @@ public class CheckingAccount extends AbstractAccount{
             toReturn += ";" + "-1"; // -1 is the "does not exist" metric for
         }
 
+        toReturn += ";" + isLinkedToATMCard();
+        
         for (String s : stopPaymentArray) {
             toReturn += ";" + s;
         }
@@ -116,17 +143,22 @@ public class CheckingAccount extends AbstractAccount{
         long overdraftAccountID = -1; // -1 used as N/A placeholder, used in constructor
         overdraftAccountID = Long.parseLong(split[7]);
 
+        boolean linkedToATMCard = Boolean.parseBoolean(split[8]);
+
         // Now make an aList of the held stopped checks
         ArrayList<String> stopPaymentArrayPassed = new ArrayList<>();
-        if (split.length > 8) {
+        if (split.length > 9) {
             stopPaymentArrayPassed.addAll(Arrays.asList(split).subList(8, split.length));
         }
 
         // Return an account made from this information
-        return new CheckingAccount(customerID, accountCreationDate, abstractAccountType, balance, overdraftsThisMonth, accountSpecificType, accountID, overdraftAccountID, stopPaymentArrayPassed);
+        return new CheckingAccount(customerID, accountCreationDate, balance, overdraftsThisMonth, accountID, overdraftAccountID, linkedToATMCard, stopPaymentArrayPassed);
     }
 
     public double getBalance() {
+        if (isDeleted()) {
+            return Double.NaN;
+        }
         return balance;
     }
 
@@ -135,6 +167,9 @@ public class CheckingAccount extends AbstractAccount{
     }
 
     public void deposit(double amount) {
+        if (isDeleted()) {
+            return;
+        }
         balance += amount;
         balance -= getTransactionFee(false);
         if (accountSpecificType == AccountType.TMB) {
@@ -149,6 +184,9 @@ public class CheckingAccount extends AbstractAccount{
     }
 
     public void withdraw(double amount) {
+        if (isDeleted()) {
+            return;
+        }
         if (balance >= amount) {
             balance -= amount;
             balance -= getTransactionFee(false);
@@ -161,7 +199,7 @@ public class CheckingAccount extends AbstractAccount{
             boolean overdraftFail = false;
 
             // Check for a SavingsAccount (Overdraft account)
-            if (overDraftAccountID != -1) {
+            if (overDraftAccountID != -1) { // One exists
                 SavingsAccount.SimpleSavingsAccount overdraftAccount = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
 
                 if (overdraftAccount.getBalance() >= amount) { // Enough money in the overdraft account
@@ -169,7 +207,19 @@ public class CheckingAccount extends AbstractAccount{
                     overdraftAccount.withdraw(amount);
                     deposit(amount);
                     balance -= amount;
-                } else { // Not enough money in the overdraft account
+                } else if (balance + overdraftAccount.getBalance() >= amount) { // Not enough in the individual accounts; check them together
+                    // Remove funds from the CheckingAccount, update "amount" with the amount gotten from the account
+                    amount -= balance;
+                    balance = 0.0;
+                    setAccountSpecificType(AccountType.TMB);
+
+                    // Now do the regular withdrawal procedure
+                    double withFee = amount + 0.75; // Include a transfer fee for correct values
+                    overdraftAccount.withdraw(withFee);
+                    deposit(withFee);
+                    balance -= amount;
+
+                } else { // Not enough money between both accounts
                     overdraftFail = true;
                 }
             } else { // No overdraft account
@@ -186,6 +236,9 @@ public class CheckingAccount extends AbstractAccount{
 
     // Not 100% sure how this needs to work, for now just a simple function
     public void transfer(double amount /*, AbstractAccount transferToAccount*/) {
+        if (isDeleted()) {
+            return;
+        }
         if (balance >= amount) {
             balance -= amount;
             balance -= getTransactionFee(true);
@@ -225,6 +278,9 @@ public class CheckingAccount extends AbstractAccount{
 
     // Calculates and adds the interest for a GoldDiamond account
     public void calcAndAddInterest() {
+        if (isDeleted()) {
+            return;
+        }
         balance += balance * interestRate;
     }
 
@@ -250,11 +306,17 @@ public class CheckingAccount extends AbstractAccount{
     }
 
     public CheckingAccount.AccountType getAccountSpecificType() {
+        if (isDeleted()) {
+            return null;
+        }
         return accountSpecificType;
     }
 
     // Overdraft setting
     public void setOverdraftForAccount(long overDraftAccountID) {
+        if (isDeleted()) {
+            return;
+        }
         SavingsAccount.SimpleSavingsAccount overdraftAccount = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
         if (overdraftAccount != null) {
             this.overDraftAccountID = overDraftAccountID;
@@ -269,8 +331,26 @@ public class CheckingAccount extends AbstractAccount{
         return overDraftAccountID;
     }
 
+    public boolean isLinkedToATMCard() {
+        return linkedToATMCard;
+    }
+
+    public void setLinkedToATMCard(boolean linkedToATMCard) {
+        this.linkedToATMCard = linkedToATMCard;
+    }
+
+    public ATMCard getLinkedATMCard() {
+        if (isDeleted()) {
+            return null;
+        }
+        return Database.getATMCardFromList(getAccountID());
+    }
+
     // Returns the actual overdraft account
     public SavingsAccount.SimpleSavingsAccount getOverDraftAccount() {
+        if (isDeleted()) {
+            return null;
+        }
         if (overDraftAccountID != -1) {
             return (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
         } else {
@@ -293,6 +373,9 @@ public class CheckingAccount extends AbstractAccount{
     // Check stuff
     // Add this check to the array of checks to stop payments for
     public void addStopPaymentNumber(String checkNumber) {
+        if (isDeleted()) {
+            return;
+        }
         if (validateCheckNumber(checkNumber)) {
             stopPaymentArray.add(checkNumber);
             balance -= 25; // $25 charge
@@ -319,7 +402,10 @@ public class CheckingAccount extends AbstractAccount{
     }
 
     // Withdraw via a check rather than by card
-    public void withdrawByCheck(int withdrawAmount, String checkNumber) {
+    public void withdrawByCheck(int amount, String checkNumber) {
+        if (isDeleted()) {
+            return;
+        }
         boolean stopPayment = false;
 
         // Check if the check is valid and if it is contained in the "stop payment" list
@@ -336,20 +422,30 @@ public class CheckingAccount extends AbstractAccount{
         if (!stopPayment) {
 
             // First check to see if this will cause an overdraft
-            if (withdrawAmount > balance) {
+            if (amount > balance) {
 
                 boolean overdraftFail = false;
 
                 // Check for a SavingsAccount (Overdraft account)
-                if (overDraftAccountID != -1) {
+                if (overDraftAccountID != -1) { // One exists
                     SavingsAccount.SimpleSavingsAccount overdraftAccount = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
 
-                    if (overdraftAccount.getBalance() >= withdrawAmount) { // Enough money in the overdraft account
+                    if (overdraftAccount.getBalance() >= amount) { // Enough money in the overdraft account
                         // Withdraw from overdraft, deposit in checking, then withdraw from checking
-                        overdraftAccount.withdraw(withdrawAmount);
-                        deposit(withdrawAmount);
-                        balance -= withdrawAmount;
-                    } else { // Not enough money in the overdraft account
+                        overdraftAccount.withdraw(amount);
+                        deposit(amount);
+                        balance -= amount;
+                    } else if (balance + overdraftAccount.getBalance() >= amount) { // Not enough in the individual accounts; check them together
+                        // Remove funds from the CheckingAccount, update "amount" with the amount gotten from the account
+                        amount -= balance;
+                        balance = 0.0;
+
+                        // Now do the regular withdrawal procedure
+                        overdraftAccount.withdraw(amount);
+                        deposit(amount);
+                        balance -= amount;
+
+                    } else { // Not enough money between both accounts
                         overdraftFail = true;
                     }
                 } else { // No overdraft account
@@ -359,11 +455,11 @@ public class CheckingAccount extends AbstractAccount{
                 // If an overdraft couldn't be resolved
                 if (overdraftFail) {
                     balance -= 25; // $25 charge
-                    System.out.println("Insufficient funds: Check returned unpaid, $25 Overdraft Service charged to account");
+                    System.out.println("Insufficient funds: Withdrawal denied, $25 Overdraft Service charged to account");
                 }
 
             } else { // Enough funds in Checking to cover amount
-                balance -= withdrawAmount;
+                balance -= amount;
             }
 
         }

@@ -74,6 +74,14 @@ public class Database implements Runnable {
     public static <T>void addItemToList(ArrayList<T> list, T item) {
         if (!list.contains(item)) {
             list.add(item);
+
+            // If this is an Account, add it to the abstractAccountList, which is used for searching elsewhere
+            if (item instanceof AbstractAccount) {
+                if (!abstractAccountList.contains(item)) { // Safety check to make sure there aren't duplicates
+                    abstractAccountList.add((AbstractAccount) item);
+                }
+            }
+
         } else {
             // This will need to be changed to work with Swing
             System.out.println("Item already exists in the database: Doing nothing");
@@ -116,10 +124,10 @@ public class Database implements Runnable {
         return null;
     }
 
-    // Gets a customer from the customer list
-    public static ATMCard getATMCardFromList(String customerID) {
+    // Gets a ATMCard from the ATMCard list
+    public static ATMCard getATMCardFromList(long accountID) {
         for (ATMCard c : atmCardList) {
-            if (c.getCustomer().getCustomerID().equals(customerID)) {
+            if (c.getAccountID() == accountID) {
                 return c;
             }
         }
