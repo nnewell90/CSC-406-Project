@@ -103,13 +103,11 @@ public class CreateAccountScreen extends JFrame {
                     }
                     CheckingAccount account = new CheckingAccount(id, date, AbstractAccount.AccountType.CheckingAccount, depositNum, specificType);
                     customer.addAccountToCustomerAccounts(account.getAccountID());
-                    Database.addItemToList(Database.abstractAccountList, account);
                     Database.addItemToList(Database.checkingAccountList, account);
 
                 } else if (accountType.equals("Savings")) {
                     SavingsAccount account = new SavingsAccount(id, date, AbstractAccount.AccountType.SavingsAccount, depositNum);
                     customer.addAccountToCustomerAccounts(account.getAccountID());
-                    Database.addItemToList(Database.abstractAccountList, account);
                     Database.addItemToList(Database.savingsAccountList, account);
 
                 } else if (accountType.equals("Loan")) {

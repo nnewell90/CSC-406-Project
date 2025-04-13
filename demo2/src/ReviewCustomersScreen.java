@@ -15,8 +15,8 @@ public class ReviewCustomersScreen extends JFrame{
         JLabel header = new JLabel("Customers");
         header.setFont(new Font("Arial", Font.BOLD, 15));
 
-        List<String> customerList = Files.readAllLines(Paths.get("customers.txt"));
-        JList<String> list = new JList<>(( customerList).toArray(new String[0]));
+        List<String> customerList = Files.readAllLines(Paths.get("database.txt"));
+        JList<String> list = new JList<>((customerList).toArray(new String[0]));
         JScrollPane scrollPane = new JScrollPane(list);
 
         list.addListSelectionListener(e -> {
