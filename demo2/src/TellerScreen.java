@@ -7,7 +7,7 @@ import java.io.IOException;
 public class TellerScreen extends JFrame {
     public TellerScreen() {
         setTitle("Teller Screen");
-        setSize(300, 200);
+        setSize(500, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(4, 1));
 

@@ -2,67 +2,68 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileWriter;
 
 public class LinkAccountsScreen extends JFrame {
+    private JTextField account1, account2;
+
     public LinkAccountsScreen() {
-        setTitle("Link Accounts");
-        Label l1 = new Label("Please enter the Checking Account number:");
-        Label l2 = new Label("Please enter the Savings Account number you want to Link:");
-        l1.setBounds(100, 50, 120, 80);
-        l2.setBounds(100, 100, 120, 80);
-        add(l1);
-        add(l2);
+        setTitle("New Customer");
         setSize(500, 500);
-        setLayout(new GridLayout(4, 1));
+        setLayout(new GridLayout(4, 2)); // change this for fields?
 
-        JTextField checkingAccountField = new JTextField(10);
-        JTextField savingsAccountField = new JTextField(10);
+        // Labels and text fields
+        add(new JLabel("Please enter your checking account number: "));
+        account1 = new JTextField();
+        add(account1);
 
-        String CA = checkingAccountField.getText().trim();
-        String SA = savingsAccountField.getText().trim();
-        JButton returnToTellerScreen = new JButton("Return to Teller Screen");
+        add(new JLabel("Please enter your savings account number: "));
+        account2 = new JTextField();
+        add(account2);
+
+
         JButton submitButton = new JButton("Link Accounts");
-        submitButton.addActionListener(e -> LinkAccounts(CA, SA));
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                linkAccounts();
+            }
+        });
+        JButton returntoButton = new JButton("Return to Teller Screen");
 
+        returntoButton.addActionListener(e -> {dispose(); new TellerScreen();});
 
-
-
-        returnToTellerScreen.addActionListener(e -> {dispose(); new TellerScreen();});
-        add(checkingAccountField);
-        add(savingsAccountField);
-        add(returnToTellerScreen);
         add(submitButton);
+        add(returntoButton);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-
         setVisible(true);
     }
 
-    //Method for linking a checking account to a savings account
-    public void LinkAccounts(String CheckAccount, String SaveAccount) {
+    private void linkAccounts() {
+        String checkingAccount = account1.getText().trim();
+        String savingsAccount = account2.getText().trim();
 
-        if (CheckAccount.isEmpty() || SaveAccount.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter the required fields.");
+        if (checkingAccount.isEmpty() || savingsAccount.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Must complete required fields.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         } else {
-            Long account1 = Long.parseLong(CheckAccount);
-            Long account2 = Long.parseLong(SaveAccount);
 
+            //Create the Customer Object and add it to the Array List
+            //That way we can access the customer objects methods and what not later on
+           // Account account = new Account(account1,account2);
+            //Database.addItemToList(Database.accountList, account);
 
-            CheckingAccount checkingAccount = (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, account1);
-            SavingsAccount savingsAccount = (SavingsAccount) Database.getAccountFromList(Database.savingsAccountList, account2);
-
-            if(checkingAccount == null) {
-                JOptionPane.showMessageDialog(this, "Checking Account not found, double-check account ID");
-            } else if(savingsAccount == null) {
-                JOptionPane.showMessageDialog(this, "Saving Account not found, double-check account ID");
-            }else {
-                //Link the Savings account to the Checking account
-                checkingAccount.overdraftAccount = (SavingsAccount.SimpleSavingsAccount) savingsAccount;
-                JOptionPane.showMessageDialog(this, "Accounts have been Linked Successfully!");
-                dispose();
-                new TellerScreen();
+            // Store the data to database
+            // might have to change txt name - not created yet!!!!!!!!!!!!
+            try (FileWriter writer = new FileWriter("customers.txt", true)) {
+                writer.write(account1 + ";" + account2 + ";" + "\n");
+                JOptionPane.showMessageDialog(this, "Accounts Linked Successfully!");
+                //dispose();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error linking accounts!", "Error", JOptionPane.ERROR_MESSAGE);
             }
-        }
-    }//end of linkAccounts
+
+        }//end of else
+    }
 
 }

@@ -4,8 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class StopPayScreen extends JFrame {
-    private JTextField accountNum;
+    private JTextField account;
     private JTextField check;
+
 
     public StopPayScreen() {
 
@@ -18,8 +19,8 @@ public class StopPayScreen extends JFrame {
 
         // Labels and text fields
         add(new JLabel("Please enter the customer's account number: "));
-        accountNum = new JTextField();
-        add(accountNum);
+        account = new JTextField();
+        add(account);
 
         add(new JLabel("Please enter the check number to stop: "));
         check = new JTextField();
@@ -47,36 +48,29 @@ public class StopPayScreen extends JFrame {
     }
 
     private void stopPayment() {
-        String accountNumber = accountNum.getText().trim();
+        String accountNumbe = account.getText().trim();
         String checkNumber = check.getText().trim();
 
-        if (accountNumber.isEmpty() || checkNumber.isEmpty()) {
+        if (accountNumbe.isEmpty() || checkNumber.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Must complete required fields.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         } else {
 
-            long number = Long.parseLong(accountNumber);     //Cast the account Number string to a long
-            CheckingAccount account = (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, number);
+            //Create the Customer Object and add it to the Array List
+            //That way we can access the customer objects methods and what not later on
+            // Account account = new Account(account1,account2);
+            //Database.addItemToList(Database.accountList, account);
 
-            //Prolly don't need to access th customer but in case...
-            Customer customer = Database.getCustomerFromList(account.customerID);
-
-            //perform stop payment only if checkNumber is valid
-            if(account.validateCheckNumber(checkNumber)) {
-                account.addStopPaymentNumber(checkNumber);
-            }else{
-                JOptionPane.showMessageDialog(this, "Check number is invalid. Check Credentials",
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            }
-
-            try{
+            // Store the data to database
+            // might have to change txt name - not created yet!!!!!!!!!!!!
+            try{ /*(FileWriter writer = new FileWriter("customers.txt", true)) {
+                writer.write(withdraw + ";" + account + ";" + ssn + ";" + "\n");*/
                 JOptionPane.showMessageDialog(this, "Stop Pay of Check Completed!");
-                dispose();
+                //dispose();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Error Stopping Check!", "Error", JOptionPane.ERROR_MESSAGE);
             }
 
         }//end of else
     }
-
 }

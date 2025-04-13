@@ -32,7 +32,7 @@ public class CustomerDetailsScreen extends JFrame {
         headerPanel.add(subHeader);
 
         //List of Current Accounts the customer holds
-        JList<String> list = new JList<>((customer.getCustomerAccounts()).toArray(new String[0]));
+        JList<String> list = new JList<>((customer.getCustomerAccountIDs()).toArray(new String[0]));
         JScrollPane scrollPane = new JScrollPane(list);
 
         //Button to go create a new account for the customer
