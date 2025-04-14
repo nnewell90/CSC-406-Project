@@ -50,7 +50,7 @@ public class Database implements Runnable {
     static String shortOrLongLoans = "shortOrLongLoans.txt";
     static String CCAccounts = "CCAccounts.txt";
 
-    static String customers = "customers.txt";
+    static String customers = "database.txt";
     static String atmCards = "atmCards.txt";
 
     // Methods
@@ -248,7 +248,7 @@ public class Database implements Runnable {
     }
 
     // The function for storing information to the database (.txts) from the system
-    private static void storeToDatabase() {
+    protected static void storeToDatabase() {
         lock.lock();
         storeToFile(abstractAccounts, abstractAccountList);
 

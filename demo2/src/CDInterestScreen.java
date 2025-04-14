@@ -20,20 +20,25 @@ public class CDInterestScreen extends JFrame {
         accountID = new JTextField(10);
         add(accountID);
 
-        JTextField loanRateField = new JTextField(10);
         JButton returntoManager = new JButton("Return to Manager Screen");
 
         JButton submit = new JButton("Change Rate");
         submit.addActionListener(e -> {changeRate();});
 
         returntoManager.addActionListener(e -> {dispose(); new ManagerScreen();});
-        add(loanRateField);
+        add(submit);
         add(returntoManager);
 
         setVisible(true);
     }
 
     private void changeRate(){
+
+        if(rate.getText().isEmpty() || accountID.getText().isEmpty()){
+            JOptionPane.showMessageDialog(null, "Please enter Rate and Account ID");
+            return;
+        }
+
         double rateValue = Double.parseDouble(rate.getText());
         Long id = Long.parseLong(accountID.getText());
 

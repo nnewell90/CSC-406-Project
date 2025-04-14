@@ -22,40 +22,37 @@ public class LoanInterestScreen extends JFrame {
 
         JButton submit = new JButton("Change Rate");
         submit.addActionListener(e -> {changeRate();});
-        JTextField loanRateField = new JTextField(10);
         JButton returntoManager = new JButton("Return to Manager Screen");
 
         add(submit);
         returntoManager.addActionListener(e -> {dispose(); new ManagerScreen(); });
-        add(loanRateField);
         add(returntoManager);
 
         setVisible(true);
     }
 
     private void changeRate(){
-        double rateValue = Double.parseDouble(rate.getText());
-        Long id = Long.parseLong(accountID.getText());
 
         if(rate.getText().isEmpty() || accountID.getText().isEmpty()){
             JOptionPane.showMessageDialog(null, "Please enter Rate and Account ID");
+            return;
+        }
+
+        double rateValue = Double.parseDouble(rate.getText());
+        long id = Long.parseLong(accountID.getText());
+
+        AbstractAccount account = Database.getAccountFromList(Database.abstractAccountList, id);
+        if(account == null){
+            JOptionPane.showMessageDialog(null, "Account not found");
         }else{
-
-            AbstractAccount account = Database.getAccountFromList(Database.abstractAccountList, id);
-            if(account == null){
-                JOptionPane.showMessageDialog(null, "Account not found");
-            }else{
-
-                if(account.getAccountType() == AbstractAccount.AccountType.LoanAccount){
-                    LoanAccount loanAccount = (LoanAccount) account;
-                    loanAccount.setRate(rateValue);
-                    JOptionPane.showMessageDialog(null, "Rate has been changed to " + rateValue);
-                    dispose();
-                    new ManagerScreen();
-                }else {
-                    JOptionPane.showMessageDialog(null, "Account type is not LoanAccount");
-                }
-
+            if(account.getAccountType() == AbstractAccount.AccountType.LoanAccount){
+                LoanAccount loanAccount = (LoanAccount) account;
+                loanAccount.setRate(rateValue);
+                JOptionPane.showMessageDialog(null, "Rate has been changed to " + rateValue);
+                dispose();
+                new ManagerScreen();
+            }else {
+                JOptionPane.showMessageDialog(null, "Account type is not LoanAccount");
             }
 
         }

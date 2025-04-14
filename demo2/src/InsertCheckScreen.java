@@ -1,43 +1,89 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class InsertCheckScreen extends JFrame {
-    public InsertCheckScreen() {
-        setTitle("Deposit Checks");
-        Label l1 = new Label("Please Enter the Amount of the Check:");
-        Label l2 = new Label("Select the account you want to deposit to:");
-        l1.setBounds(100, 50, 120, 80);
-        l2.setBounds(100, 100, 120, 80);
-        add(l1);
-        add(l2);
-        setSize(500, 500); // changed width to fit text
 
+    private JTextField deposit, ssn, account;
+
+    public InsertCheckScreen() {
+
+        setTitle("Deposit a Check");
+        setSize(700, 700);
         setLayout(new GridLayout(4, 1));
 
-        JTextField amountField = new JTextField(10);
-        JRadioButton checkingButton = new JRadioButton("Checking");
-        JRadioButton savingsButton = new JRadioButton("Savings");
-        JButton returntoCustomerScreen = new JButton("Return to Customer Screen");
+        // Labels and text fields
+        add(new JLabel("Please enter your Customer ID (SSN): "));
+        ssn = new JTextField();
+        add(ssn);
+
+        add(new JLabel("Please enter check amount: "));
+        deposit = new JTextField();
+        add(deposit);
 
 
-        ButtonGroup accountGroup = new ButtonGroup();
-        accountGroup.add(checkingButton);
-        accountGroup.add(savingsButton);
+        add(new JLabel("Please enter the account number you wish to deposit to: "));
+        account = new JTextField();
+        add(account);
 
-        returntoCustomerScreen.addActionListener(e -> {
-            dispose(); // close CustomerScreen
-            new CustomerScreen(); // reopens CustomerScreen
+        JButton submitButton = new JButton("Deposit to Account");
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                depositAccount();
+            }
         });
-        add(amountField);
+        JButton returntoButton = new JButton("Return to Teller Screen");
 
+        returntoButton.addActionListener(e -> {
+            dispose();
+            new CustomerScreen();
+        });
 
-        JPanel radioPanel = new JPanel();
-        radioPanel.add(checkingButton);
-        radioPanel.add(savingsButton);
-        add(radioPanel);
-        add(returntoCustomerScreen);
-
-
+        add(submitButton);
+        add(returntoButton);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
     }
+
+    private void depositAccount() {
+
+        String SSN = ssn.getText().trim();
+        double amount = Double.parseDouble(deposit.getText().trim());
+        long accountID = Long.parseLong(account.getText().trim());
+
+        Customer customer = Database.getCustomerFromList(SSN);
+
+        if (customer == null) {
+            JOptionPane.showMessageDialog(this, "Customer not found");
+            return;
+        }
+
+        AbstractAccount account = Database.getAccountFromList(Database.abstractAccountList, accountID);
+
+        if(account == null) {
+            JOptionPane.showMessageDialog(this, "Account not found");
+            return;
+        }
+        AbstractAccount.AccountType type = account.getAccountType();
+        if (type == AbstractAccount.AccountType.CheckingAccount) {
+            CheckingAccount checkingAccount = (CheckingAccount) account;
+            checkingAccount.deposit(amount);
+            JOptionPane.showMessageDialog(this, "Deposit Successful!");
+            dispose();
+            new CustomerScreen();
+        }else if (type == AbstractAccount.AccountType.SavingsAccount) {
+            SavingsAccount savingsAccount = (SavingsAccount) account;
+            savingsAccount.deposit(amount);
+            JOptionPane.showMessageDialog(this, "Deposit Successful!");
+            dispose();
+            new CustomerScreen();
+        }else{
+            JOptionPane.showMessageDialog(this, "Cannot make a deposit to a " + type);
+        }
+
+    }
+
+
 }

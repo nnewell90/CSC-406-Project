@@ -10,11 +10,8 @@ public class DepositScreen extends JFrame {
 
     public DepositScreen() {
 
-        setTitle("Withdraw From Account");
-        /*Label l1 = new Label("Please select an account type to withdraw from:");
-        l1.setBounds(100, 50, 120, 80);
-        add(l1);*/
-        setSize(500, 500);
+        setTitle("Deposit to Account");
+        setSize(700, 700);
         setLayout(new GridLayout(4, 1));
 
         // Labels and text fields
@@ -52,30 +49,41 @@ public class DepositScreen extends JFrame {
     }
 
     private void depositAccount() {
-        String withdrawAccount = deposit.getText().trim();
-        String accountNumber = account.getText().trim();
-        String socialsecurity = ssn.getText().trim();
 
-        if (withdrawAccount.isEmpty() || accountNumber.isEmpty() || socialsecurity.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Must complete required fields.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        } else {
+        String SSN = ssn.getText().trim();
+        double amount = Double.parseDouble(deposit.getText().trim());
+        long accountID = Long.parseLong(account.getText().trim());
 
-            //Create the Customer Object and add it to the Array List
-            //That way we can access the customer objects methods and what not later on
-            // Account account = new Account(account1,account2);
-            //Database.addItemToList(Database.accountList, account);
+        Customer customer = Database.getCustomerFromList(SSN);
 
-            // Store the data to database
-            // might have to change txt name - not created yet!!!!!!!!!!!!
-            try{ /*(FileWriter writer = new FileWriter("customers.txt", true)) {
-                writer.write(withdraw + ";" + account + ";" + ssn + ";" + "\n");*/
-                JOptionPane.showMessageDialog(this, "Deposit Completed Successfully!");
-                //dispose();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Error Despositing to Account!", "Error", JOptionPane.ERROR_MESSAGE);
-            }
+       if (customer == null) {
+           JOptionPane.showMessageDialog(this, "Customer not found");
+           return;
+       }
 
-        }//end of else
+       AbstractAccount account = Database.getAccountFromList(Database.abstractAccountList, accountID);
+
+       if(account == null) {
+           JOptionPane.showMessageDialog(this, "Account not found");
+           return;
+       }
+       AbstractAccount.AccountType type = account.getAccountType();
+        if (type == AbstractAccount.AccountType.CheckingAccount) {
+            CheckingAccount checkingAccount = (CheckingAccount) account;
+            checkingAccount.deposit(amount);
+            JOptionPane.showMessageDialog(this, "Deposit Successful!");
+            dispose();
+            new TellerScreen();
+        }else if (type == AbstractAccount.AccountType.SavingsAccount) {
+            SavingsAccount savingsAccount = (SavingsAccount) account;
+            savingsAccount.deposit(amount);
+            JOptionPane.showMessageDialog(this, "Deposit Successful!");
+            dispose();
+            new TellerScreen();
+        }else{
+            JOptionPane.showMessageDialog(this, "Cannot make a deposit to a " + type);
+        }
+
     }
+
 }

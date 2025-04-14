@@ -110,7 +110,7 @@ public class WithdrawScreen extends JFrame {
                 if(linkedSavings != null) {
 
                     //check there is enough in checking and savings
-                    if(checking.balance+linkedSavings.balance > amount) {//if there isn't...
+                    if(checking.balance+linkedSavings.balance < amount) {//if there isn't...
                         JOptionPane.showMessageDialog(this, "Insufficient funds in both checking and linked Savings!");
                     }else if (checking.balance+linkedSavings.balance >= amount){//if there is enough in the savings
                         //perform the withdrawal but pull from linked savings
@@ -129,20 +129,20 @@ public class WithdrawScreen extends JFrame {
 
         }else if (type == AbstractAccount.AccountType.CDSavingsAccount){//if withdrawing from a CD
             SavingsAccount.CDSavingsAccount cdAccount = (SavingsAccount.CDSavingsAccount) account;
-            Date Date = new Date();
+            Date today = new Date();
 
             //Don't let them withdraw too much from the cd account
             if (cdAccount.balance >= amount) {
 
-                if (Date.after(cdAccount.dueDate) || Date.equals(cdAccount.dueDate)) {
+                if (today.after(cdAccount.dueDate) || today.equals(cdAccount.dueDate)) {
 
                     cdAccount.withdraw(amount);
                     JOptionPane.showMessageDialog(this, "Withdraw successful!");
                     dispose();
                     new TellerScreen();
-                }else if(Date.before(cdAccount.dueDate)) {//if they withdraw before the maturation date, proceed but penalize
-
-                    //TODO apply penalty for withdrawing before the due date!!!**************************************************************************
+                }else if(today.before(cdAccount.dueDate)) {//if they withdraw before the maturation date, proceed but penalize
+                    
+                    //apply "penalty"
                     cdAccount.withdraw(amount);
                     JOptionPane.showMessageDialog(this, "Withdraw successful! However, " +
                             "Penalty was applied for withdrawing before " + cdAccount.dueDate);

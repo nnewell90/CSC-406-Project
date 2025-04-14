@@ -61,18 +61,15 @@ public class StopPayScreen extends JFrame {
             //perform stop payment only if checkNumber is valid
             if(account != null && account.validateCheckNumber(checkNumber)) {
                 account.addStopPaymentNumber(checkNumber);
-            }else if (account == null) {
-                JOptionPane.showMessageDialog(this, "Account doesnt exist!");
-            }else if(!account.validateCheckNumber(checkNumber)) {
-                JOptionPane.showMessageDialog(this, "Check number is invalid!");
-            }
-
-            try{
                 JOptionPane.showMessageDialog(this, "Stop Pay of Check Completed!");
                 dispose();
                 new TellerScreen();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Error Stopping Check!", "Error", JOptionPane.ERROR_MESSAGE);
+            }else if (account == null) {
+                JOptionPane.showMessageDialog(this, "Account doesnt exist!");
+            }if(account.getAccountType() != AbstractAccount.AccountType.CheckingAccount) {
+                JOptionPane.showMessageDialog(this, "Account is not a Checking Account!");
+            }else if(!account.validateCheckNumber(checkNumber)) {
+                JOptionPane.showMessageDialog(this, "Check number is invalid!");
             }
 
         }//end of else

@@ -8,7 +8,7 @@ public class LinkAccountsScreen extends JFrame {
     private JTextField checkingAccount, savingsAccount;
 
     public LinkAccountsScreen() {
-        setTitle("New Customer");
+        setTitle("Link Accounts");
         setSize(500, 500);
         setLayout(new GridLayout(4, 2)); // change this for fields?
 
@@ -42,14 +42,14 @@ public class LinkAccountsScreen extends JFrame {
 
     //Method for linking a checking account to a savings account
     public void LinkAccounts() {
-        String CheckAccount = checkingAccount.getText();
-        String SaveAccount = savingsAccount.getText();
+        String checkAccount = checkingAccount.getText();
+        String saveAccount = savingsAccount.getText();
 
-        if (CheckAccount.isEmpty() || SaveAccount.isEmpty()) {
+        if (checkAccount.isEmpty() || saveAccount.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter the required fields.");
         } else {
-            Long account1 = Long.parseLong(CheckAccount);
-            Long account2 = Long.parseLong(SaveAccount);
+            Long account1 = Long.parseLong(checkAccount);
+            Long account2 = Long.parseLong(saveAccount);
 
 
             CheckingAccount checkingAccount = (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, account1);
@@ -61,12 +61,12 @@ public class LinkAccountsScreen extends JFrame {
                 JOptionPane.showMessageDialog(this, "Saving Account not found, double-check account ID");
             }else {
                 //Link the Savings account to the Checking account
-                checkingAccount.overDraftAccountID = account2;
+                checkingAccount.setOverdraftForAccount(account2);
                 JOptionPane.showMessageDialog(this, "Accounts have been Linked Successfully!");
                 dispose();
                 new TellerScreen();
             }
         }
-    }//end of linkAccounts
+    }
 
 }

@@ -3,6 +3,7 @@ import javax.swing.*;
 
 public class CloseAccountScreen extends JFrame {
     JTextField ssnField, accountIDField;
+
     public CloseAccountScreen() {
         setTitle("Close an Account");
         Label l1 = new Label("Please enter the Account ID you want closed: ");
@@ -19,10 +20,13 @@ public class CloseAccountScreen extends JFrame {
 
         //ButtonGroup accountGroup = new ButtonGroup();
 
-        submitButton.addActionListener(e -> {closeAccount();});
-        returntoTellerScreen.addActionListener(e -> {dispose(); new TellerScreen();});
-        add(accountIDField);
-
+        submitButton.addActionListener(e -> {
+            closeAccount();
+        });
+        returntoTellerScreen.addActionListener(e -> {
+            dispose();
+            new TellerScreen();
+        });
 
 
         add(submitButton);
@@ -34,50 +38,44 @@ public class CloseAccountScreen extends JFrame {
 
     private void closeAccount() {
 
-        if(accountIDField.getText().isEmpty()) {
+        if (accountIDField.getText().isEmpty()) {
             JOptionPane.showMessageDialog(null, "Please Enter Account ID");
-        }else {
+        } else {
 
             Long accountID = Long.parseLong(accountIDField.getText());
             AbstractAccount account = Database.getAccountFromList(Database.abstractAccountList, accountID);
 
-            if(account == null) {
+            if (account == null) {
                 JOptionPane.showMessageDialog(null, "Account Not Found, check Credentials");
-            }else if(account!=null){
+            } else if (account != null) {
 
-            if(account.accountType == AbstractAccount.AccountType.CheckingAccount){
-                CheckingAccount checkingAccount = (CheckingAccount) account;
-                CheckingAccount.deleteAccount(checkingAccount);
-                JOptionPane.showMessageDialog(null, "Account #" + accountID +" Deleted");
-                dispose();
-                new TellerScreen();
-            }else if(account.accountType == AbstractAccount.AccountType.SavingsAccount){
-
-                if(account instanceof SavingsAccount.SimpleSavingsAccount) {
-                    SavingsAccount.SimpleSavingsAccount ssa = (SavingsAccount.SimpleSavingsAccount) account;
-                    SavingsAccount.SimpleSavingsAccount.deleteAccount(ssa);
-                    JOptionPane.showMessageDialog(null, "Account #" + accountID +" Deleted");
+                if (account.accountType == AbstractAccount.AccountType.CheckingAccount) {
+                    CheckingAccount checkingAccount = (CheckingAccount) account;
+                    CheckingAccount.deleteAccount(checkingAccount);
+                    JOptionPane.showMessageDialog(null, "Account #" + accountID + " Deleted");
                     dispose();
                     new TellerScreen();
+                } else if (account.accountType == AbstractAccount.AccountType.SavingsAccount) {
+
+                    if (account instanceof SavingsAccount.SimpleSavingsAccount) {
+                        SavingsAccount.SimpleSavingsAccount ssa = (SavingsAccount.SimpleSavingsAccount) account;
+                        SavingsAccount.SimpleSavingsAccount.deleteAccount(ssa);
+                        JOptionPane.showMessageDialog(null, "Account #" + accountID + " Deleted");
+                        dispose();
+                        new TellerScreen();
+                    } else if (account instanceof SavingsAccount.CDSavingsAccount) {
+                        SavingsAccount.CDSavingsAccount cda = (SavingsAccount.CDSavingsAccount) account;
+                        SavingsAccount.CDSavingsAccount.deleteAccount(cda);
+                        JOptionPane.showMessageDialog(null, "Account #" + accountID + " Deleted");
+                        dispose();
+                        new TellerScreen();
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Cannot delete this type of account.");
                 }
-                else if(account instanceof SavingsAccount.CDSavingsAccount) {
-                    SavingsAccount.CDSavingsAccount cda = (SavingsAccount.CDSavingsAccount) account;
-                    SavingsAccount.CDSavingsAccount.deleteAccount(cda);
-                    JOptionPane.showMessageDialog(null, "Account #" + accountID +" Deleted");
-                    dispose();
-                    new TellerScreen();
-                }
-            }else if(account.accountType != AbstractAccount.AccountType.CheckingAccount || account.accountType != AbstractAccount.AccountType.SavingsAccount){
-                JOptionPane.showMessageDialog(null, "Account Type Error");
+
             }
-
-            }else if(account == null){
-                JOptionPane.showMessageDialog(null, "Account Not Found, check Credentials");
-            }
-
-
         }
-
     }
 
 }
