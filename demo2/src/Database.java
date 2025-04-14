@@ -74,6 +74,14 @@ public class Database implements Runnable {
     public static <T>void addItemToList(ArrayList<T> list, T item) {
         if (!list.contains(item)) {
             list.add(item);
+
+            // If this is an Account, add it to the abstractAccountList, which is used for searching elsewhere
+            if (item instanceof AbstractAccount) {
+                if (!abstractAccountList.contains(item)) { // Safety check to make sure there aren't duplicates
+                    abstractAccountList.add((AbstractAccount) item);
+                }
+            }
+
         } else {
             // This will need to be changed to work with Swing
             System.out.println("Item already exists in the database: Doing nothing");
@@ -116,10 +124,10 @@ public class Database implements Runnable {
         return null;
     }
 
-    // Gets a customer from the customer list
-    public static ATMCard getATMCardFromList(String customerID) {
+    // Gets a ATMCard from the ATMCard list
+    public static ATMCard getATMCardFromList(long accountID) {
         for (ATMCard c : atmCardList) {
-            if (c.getCustomer().getCustomerID().equals(customerID)) {
+            if (c.getAccountID() == accountID) {
                 return c;
             }
         }
@@ -248,22 +256,22 @@ public class Database implements Runnable {
     }
 
     // The function for storing information to the database (.txts) from the system
-    protected static void storeToDatabase() {
+    public static void storeToDatabase() {
         lock.lock();
-        storeToFile(abstractAccounts, abstractAccountList);
+        storeToFile(abstractAccounts, abstractAccountList, AbstractAccount.class);
 
-        storeToFile(savingAccounts, savingsAccountList);
-        storeToFile(simpleSavingsAccounts, simpleSavingsAccountList);
-        storeToFile(cdSavingsAccounts, cdSavingsAccountList);
+        storeToFile(savingAccounts, savingsAccountList, SavingsAccount.class);
+        storeToFile(simpleSavingsAccounts, simpleSavingsAccountList, SavingsAccount.SimpleSavingsAccount.class);
+        storeToFile(cdSavingsAccounts, cdSavingsAccountList, SavingsAccount.CDSavingsAccount.class);
 
-        storeToFile(checkingAccounts, checkingAccountList);
+        storeToFile(checkingAccounts, checkingAccountList, CheckingAccount.class);
 
-        storeToFile(loanAccounts, loanAccountList);
-        storeToFile(shortOrLongLoans, shortOrLongLoanList);
-        storeToFile(CCAccounts, CCList);
+        storeToFile(loanAccounts, loanAccountList, LoanAccount.class);
+        storeToFile(shortOrLongLoans, shortOrLongLoanList, LoanAccount.ShortOrLong.class);
+        storeToFile(CCAccounts, CCList, LoanAccount.CC.class);
 
-        storeToFile(customers, customerList);
-        storeToFile(atmCards, atmCardList);
+        storeToFile(customers, customerList, Customer.class);
+        storeToFile(atmCards, atmCardList, ATMCard.class);
         lock.unlock();
     }
 
@@ -281,13 +289,15 @@ public class Database implements Runnable {
         The second parameter is just a dummy parameter because I was getting a warning about needing a second parameter for invoke()
      */
     private static <T>void loadFromFile(String fileName, ArrayList<T> list, Class<?> clazz) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(fileName));
             String line;
             Method fromFileString = clazz.getDeclaredMethod("fromFileString", String.class); // !!! Every account class must include the functon "public ClassName fromFileString(){...}"
             while ((line = reader.readLine()) != null) {
                 T temp = (T) fromFileString.invoke(null, line);
                 list.add(temp);
             }
+            reader.close();
         } catch (Exception e) {
             System.out.println("Error loading from file: " + fileName + " :"+ e.getMessage());
         }
@@ -297,14 +307,16 @@ public class Database implements Runnable {
     /*
     Similar logic to above but a print writer rather than a buffered reader
      */
-    private static <T>void storeToFile(String fileName, ArrayList<T> list) {
-        Class clazz = list.getFirst().getClass();
-        try (PrintWriter writer = new PrintWriter(new FileWriter(fileName))) {
+    private static <T>void storeToFile(String fileName, ArrayList<T> list, Class<?> clazz) {
+        // Class clazz = list.getFirst().getClass();
+        try {
+            PrintWriter writer = new PrintWriter(new FileWriter(fileName));
             Method toFileString = clazz.getDeclaredMethod("toFileString"); // !!! Same as above but for this function
             for (T item : list) {
                 String temp = (String) toFileString.invoke(item);
                 writer.println(temp);
             }
+            writer.close();
         } catch (Exception e) {
             System.out.println("Error storing to file: " + fileName + " :" + e.getMessage());
         }

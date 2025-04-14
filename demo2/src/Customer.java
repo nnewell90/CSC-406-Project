@@ -18,6 +18,9 @@ public class Customer {
     // Holds the accounts that each customer owns
     ArrayList<Long> customerAccountIDs = new ArrayList<>();
 
+    // For safe deletion
+    boolean isDeleted = false;
+
     // Constructor
     public Customer(String SSN, String address, String city, String state, String zip, String firstName, String lastName) {
         // First search to make sure a duplicate user isn't being created!
@@ -36,6 +39,9 @@ public class Customer {
 
     // Deletes a customer from the entire system, including the database
     public static void deleteCustomer(Customer customer) {
+        if (customer.isDeleted()) {
+            return;
+        }
 
         // Remove each account the customer has from the database
         ArrayList<AbstractAccount> accounts = customer.getCustomerAccountsAsAccounts();
@@ -57,7 +63,7 @@ public class Customer {
         Database.removeItemFromList(Database.customerList, customer);
 
         // Finally, fully delete the account
-        customer = null;
+        customer.setDeleted(true);
     }
 
 
@@ -118,6 +124,9 @@ public class Customer {
     }
 
     public String getCustomerID() {
+        if (isDeleted()) { // This is the only getter that will check this since it is used often
+            return null;
+        }
         return customerID;
     }
 
@@ -125,8 +134,19 @@ public class Customer {
         this.customerID = customerID;
     }
 
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
+
     // These two are for database purposes
     public String toFileString() {
+        if (isDeleted) {
+            return null;
+        }
         String toReturn = "";
 
         // Basic data
@@ -167,20 +187,32 @@ public class Customer {
 
     // Adds an account to the accounts customers have
     public void addAccountToCustomerAccounts(long accountID) {
+        if (isDeleted()) {
+            return;
+        }
         customerAccountIDs.add(accountID);
     }
 
     public void removeAccountFromCustomerAccounts(long accountID) {
+        if (isDeleted()) {
+            return;
+        }
         customerAccountIDs.remove(accountID);
     }
 
     // Gets the entire list of customer accounts as IDs
     public ArrayList<Long> getCustomerAccountIDs() {
+        if (isDeleted()) {
+            return null;
+        }
         return customerAccountIDs;
     }
 
     // Gets the entire list of customer accounts as accounts
     public ArrayList<AbstractAccount> getCustomerAccountsAsAccounts() {
+        if (isDeleted()) {
+            return null;
+        }
         return Database.getAllAccountsOfCustomer(customerAccountIDs);
     }
 }

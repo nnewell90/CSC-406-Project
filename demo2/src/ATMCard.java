@@ -1,37 +1,79 @@
 public class ATMCard {
     // Data
     int numOfWithdrawalsToday = 0;
-    Customer customer;
-    SavingsAccount savingsAccount;
-    CheckingAccount checkingAccount;
+    String customerID;
+    long accountID;
+    boolean forChecking = false; // Is this an ATM card for a CheckingAccount?
+    // true = checking
+    // false = savings
 
-    public ATMCard(Customer customer, SavingsAccount savingsAccount) {
-        // Has to be a simpleSavings account, no CDs
-        if (savingsAccount.getClass() == SavingsAccount.SimpleSavingsAccount.class) {
-            this.customer = customer;
-            this.savingsAccount = savingsAccount;
+    // For safe deletion
+    boolean isDeleted = false;
+
+    public ATMCard(String customerID, long accountID) {
+        this.customerID = customerID;
+        this.accountID = accountID;
+
+        // Find the actual account this is linked to and set the boolean based on that
+        for (CheckingAccount c : Database.checkingAccountList) {
+            if (c.getAccountID() == accountID) {
+                forChecking = true;
+                c.setLinkedToATMCard(true);
+                break;
+            }
         }
+        if (!forChecking) { // The account wasn't a checkingAccount, so do logic for a SimpleSavingsAccount
+            for (SavingsAccount.SimpleSavingsAccount c : Database.simpleSavingsAccountList) {
+                if (c.getAccountID() == accountID) {
+                    forChecking = false; // Should be redundant
+                    c.setLinkedToATMCard(true);
+                    break;
+                }
+            }
+        }
+
     }
 
-    public ATMCard(Customer customer, CheckingAccount checkingAccount) {
-        this.customer = customer;
-        this.checkingAccount = checkingAccount;
+    public ATMCard(String customerID, long accountID, boolean forChecking, int numOfWithdrawalsToday) {
+        this.customerID = customerID;
+        this.accountID = accountID;
+        this.forChecking = forChecking;
+        this.numOfWithdrawalsToday = numOfWithdrawalsToday;
     }
 
     // Delete an ATM card from the database
     public static void deleteATMCard(ATMCard card) {
+        if (card.isDeleted()) {
+            return;
+        }
+        if (card.forChecking) {
+            CheckingAccount checkingAccount = (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, card.getAccountID());
+            checkingAccount.setLinkedToATMCard(false);
+        } else {
+            SavingsAccount.SimpleSavingsAccount savingsAccount = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, card.getAccountID());
+            savingsAccount.setLinkedToATMCard(false);
+        }
         Database.removeItemFromList(Database.atmCardList, card);
-        card = null;
+        card.setDeleted(true);
     }
 
     public void withdraw(int amount) {
+        if (isDeleted()) {
+            return;
+        }
         if (numOfWithdrawalsToday < 2) {
             numOfWithdrawalsToday++;
-            if (savingsAccount != null) {
-                savingsAccount.withdraw(amount);
-            }
-            if (checkingAccount != null) {
-                checkingAccount.withdraw(amount);
+
+            if (forChecking) {
+                CheckingAccount checkingAccount = (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, accountID);
+                if (checkingAccount != null) {
+                    checkingAccount.withdraw(amount);
+                }
+            } else {
+                SavingsAccount.SimpleSavingsAccount savingsAccount = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, accountID);
+                if (savingsAccount != null) {
+                    savingsAccount.withdraw(amount);
+                }
             }
         } else {
             // !!! Change for Swing
@@ -47,30 +89,53 @@ public class ATMCard {
         return numOfWithdrawalsToday;
     }
 
-    public Customer getCustomer() {
-        return customer;
+    public String getCustomerID() {
+        return customerID;
     }
 
-    public SavingsAccount getSavingsAccount() {
-        return savingsAccount;
+    public void setCustomerID(String customerID) {
+        this.customerID = customerID;
     }
 
-    public CheckingAccount getCheckingAccount() {
-        return checkingAccount;
+    public long getAccountID() {
+        return accountID;
+    }
+
+    public void setAccountID(long accountID) {
+        this.accountID = accountID;
+    }
+
+    public boolean isForChecking() {
+        return forChecking;
+    }
+
+    public void setForChecking(boolean forChecking) {
+        this.forChecking = forChecking;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 
     public String toFileString() {
+        if (isDeleted()) {
+            return null;
+        }
         String toReturn = "";
 
-        toReturn += customer.getCustomerID();
-        if (savingsAccount != null) {
-            toReturn += ";" + "Savings";
-            toReturn += ";" + savingsAccount.getAccountID();
-        }
-        if (checkingAccount != null) {
+        toReturn += getCustomerID();
+        if (forChecking) {
             toReturn += ";" + "Checking";
-            toReturn += ";" + checkingAccount.getAccountID();
+        } else {
+            toReturn += ";" + "Savings";
         }
+        toReturn += ";" + getAccountID();
+
+        toReturn += ";" + getNumOfWithdrawalsToday();
 
         return toReturn;
     }
@@ -80,27 +145,21 @@ public class ATMCard {
 
         // Get the customer object
         String customerID = split[0];
-        Customer customer = null;
-        for (Customer c : Database.customerList) {
-            if (c.getCustomerID().equals(customerID)) {
-                customer = c;
-                break;
-            }
+
+        // See what kind of account there is
+        boolean forChecking;
+        if (split[1].equals("Savings")) {
+            forChecking = false;
+        } else { // Must be a checking account
+            forChecking = true;
         }
 
-        // Get the savings/checking account
-        SavingsAccount savingsAccount;
-        CheckingAccount checkingAccount;
-
+        // Get the savings/checking accountID
         long accountID = Long.parseLong(split[2]);
 
-        if (split[1].equals("Savings")) {
-            savingsAccount = (SavingsAccount) Database.getAccountFromList(Database.savingsAccountList, accountID);
-            return new ATMCard(customer, savingsAccount);
-        } else { // Must be a checking account
-            checkingAccount = (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, accountID);
-            return new ATMCard(customer, checkingAccount);
-        }
+        // Get the number of withdrawals
+        int numOfWithdrawalsToday = Integer.parseInt(split[3]);
 
+        return new ATMCard(customerID, accountID, forChecking, numOfWithdrawalsToday);
     }
 }
