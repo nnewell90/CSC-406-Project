@@ -4,7 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class StopPayScreen extends JFrame {
-    private JTextField account;
+    private JTextField accountNUM;
     private JTextField check;
 
 
@@ -19,8 +19,8 @@ public class StopPayScreen extends JFrame {
 
         // Labels and text fields
         add(new JLabel("Please enter the customer's account number: "));
-        account = new JTextField();
-        add(account);
+        accountNUM = new JTextField();
+        add(accountNUM);
 
         add(new JLabel("Please enter the check number to stop: "));
         check = new JTextField();
@@ -48,29 +48,31 @@ public class StopPayScreen extends JFrame {
     }
 
     private void stopPayment() {
-        String accountNumbe = account.getText().trim();
+        String accountNumber = accountNUM.getText().trim();
         String checkNumber = check.getText().trim();
 
-        if (accountNumbe.isEmpty() || checkNumber.isEmpty()) {
+        if (accountNumber.isEmpty() || checkNumber.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Must complete required fields.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
         } else {
 
-            //Create the Customer Object and add it to the Array List
-            //That way we can access the customer objects methods and what not later on
-            // Account account = new Account(account1,account2);
-            //Database.addItemToList(Database.accountList, account);
+            long number = Long.parseLong(accountNumber);
+            CheckingAccount account = (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, number);
 
-            // Store the data to database
-            // might have to change txt name - not created yet!!!!!!!!!!!!
-            try{ /*(FileWriter writer = new FileWriter("customers.txt", true)) {
-                writer.write(withdraw + ";" + account + ";" + ssn + ";" + "\n");*/
+            //perform stop payment only if checkNumber is valid
+            if(account != null && account.validateCheckNumber(checkNumber)) {
+                account.addStopPaymentNumber(checkNumber);
                 JOptionPane.showMessageDialog(this, "Stop Pay of Check Completed!");
-                //dispose();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Error Stopping Check!", "Error", JOptionPane.ERROR_MESSAGE);
+                dispose();
+                new TellerScreen();
+            }else if (account == null) {
+                JOptionPane.showMessageDialog(this, "Account doesnt exist!");
+            }if(account.getAccountType() != AbstractAccount.AccountType.CheckingAccount) {
+                JOptionPane.showMessageDialog(this, "Account is not a Checking Account!");
+            }else if(!account.validateCheckNumber(checkNumber)) {
+                JOptionPane.showMessageDialog(this, "Check number is invalid!");
             }
 
         }//end of else
     }
+
 }
