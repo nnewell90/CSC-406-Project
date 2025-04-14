@@ -9,13 +9,13 @@ public class MainMenu extends JFrame {
 
     public MainMenu() {
 
-        Database.restoreFromDatabase();
+        Database.restoreFromDatabase();//load data from txt files into arrayList
 
         setTitle("Main Menu");
         setSize(500, 500);
         setLayout(new GridLayout(4, 1));
 
-        //here is where our las screen is gonna be loaded from
+        //here is where our last screen is gonna be loaded from
         lastScreen = loadUIState();
 
         // If the last screen before the system went down was the NOT MainMenu, open that instead
@@ -27,6 +27,7 @@ public class MainMenu extends JFrame {
         JButton tellerButton = new JButton("Teller Screen");
         JButton managerButton = new JButton("Manager Screen");
         JButton customerButton = new JButton("Customer Screen");
+        JButton CheckPoint = new JButton("Check Point Restart");
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -51,6 +52,11 @@ public class MainMenu extends JFrame {
             dispose();
         });
 
+        CheckPoint.addActionListener(e -> {
+            saveData();
+        });
+
+        add(CheckPoint);
         add(tellerButton);
         add(managerButton);
         add(customerButton);
@@ -64,6 +70,12 @@ public class MainMenu extends JFrame {
         });
 
         setVisible(true);
+    }
+
+    //for the "Check-point Restart"
+    private void saveData(){
+        Database.storeToDatabase();
+        JOptionPane.showMessageDialog(null, "Data Saved");
     }
 
     // Save the last screen, ONLY if it isn't the MainMenu

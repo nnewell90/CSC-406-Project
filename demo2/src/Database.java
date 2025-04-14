@@ -50,7 +50,7 @@ public class Database implements Runnable {
     static String shortOrLongLoans = "shortOrLongLoans.txt";
     static String CCAccounts = "CCAccounts.txt";
 
-    static String customers = "customers.txt";
+    static String customers = "database.txt";
     static String atmCards = "atmCards.txt";
 
     // Methods
@@ -322,14 +322,7 @@ public class Database implements Runnable {
         }
     }
 
-    //Added this method so I could grab a specific customer from the
-    //customerList arrayList.
-    public static Customer getCustomer(String ssn) {
-        for (Customer c : customerList) {
-            if (Objects.equals(c.getSSN(), ssn)) {
-                return c;
-            }
-        }
-        return null;
-    }
+
+
+
 }

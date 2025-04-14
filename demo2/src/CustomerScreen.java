@@ -23,7 +23,7 @@ public class CustomerScreen extends JFrame {
         });
         reviewButton.addActionListener(e -> {
             dispose();
-            new AccountStatusScreen();
+            new CustomerSignIn();
         });
         checkButton.addActionListener(e -> {
             dispose();
