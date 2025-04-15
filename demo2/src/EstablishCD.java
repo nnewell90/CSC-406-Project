@@ -9,6 +9,9 @@ public class EstablishCD extends JFrame {
 
     public EstablishCD() {
         setTitle("Establish Certificates of Deposit");
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setSize(500, 500);
+        setLayout(new GridLayout(5,1));  // Changed this for better layout
 
         add(new JLabel("Customer SSN:"));
         customerSSN = new JTextField(10);
@@ -26,9 +29,6 @@ public class EstablishCD extends JFrame {
         dueDate = new JTextField(10);
         add(dueDate);
 
-
-        setSize(500, 500);
-        setLayout(new GridLayout(4,2));
 
 
         JButton returntoManager = new JButton("Return to Manager Screen");
@@ -77,8 +77,5 @@ public class EstablishCD extends JFrame {
         dispose();
         new ManagerScreen();
 
-
-
     }
-
 }
