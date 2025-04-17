@@ -171,7 +171,7 @@ public class Database implements Runnable {
     public static void restoreFromDatabase() {
         lock.lock();
         // Accounts
-        loadFromFile(abstractAccounts, abstractAccountList, AbstractAccount.class);
+        loadAbstractAccounts(abstractAccounts, abstractAccountList);
 
         loadFromFile(savingAccounts, savingsAccountList, SavingsAccount.class);
         loadFromFile(simpleSavingsAccounts, simpleSavingsAccountList, SavingsAccount.SimpleSavingsAccount.class);
@@ -239,6 +239,44 @@ public class Database implements Runnable {
             System.out.println("Error loading from file: " + fileName + " :"+ e.getMessage());
         }
     }
+
+    // Loading to the abstractAccount list has some special logic for loading properly
+    private static <T>void loadAbstractAccounts(String fileName, ArrayList<T> list) {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(fileName));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] split = line.split(";");
+                String classType = split[2];
+                Class clazz = AbstractAccount.class; // This will be changed to some actual AccountType
+                switch (classType) {
+                    case "CheckingAccount":
+                        clazz = CheckingAccount.class;
+                    break;
+                    case "SimpleSavingsAccount":
+                        clazz = SavingsAccount.SimpleSavingsAccount.class;
+                        break;
+                    case "CDSavingsAccount":
+                        clazz = SavingsAccount.CDSavingsAccount.class;
+                        break;
+                    case "ShortOrLongLoanAccount":
+                        clazz = LoanAccount.ShortOrLong.class;
+                        break;
+                    case "CCLoanAccount":
+                        clazz = LoanAccount.CC.class;
+                        break;
+                }
+
+                Method fromFileString = clazz.getDeclaredMethod("fromFileString", String.class);
+                T temp = (T) fromFileString.invoke(null, line);
+                list.add(temp);
+            }
+            reader.close();
+        } catch (Exception e) {
+            System.out.println("Error loading from file: " + fileName + " :"+ e.getMessage());
+        }
+    }
+
 
     // Writes to a .txt file
     /*
