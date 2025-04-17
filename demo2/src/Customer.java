@@ -245,4 +245,10 @@ public class Customer {
         }
         return Database.getAllAccountsOfCustomer(customerAccountIDs);
     }
+
+    @Override
+    public String toString() {
+        return toFileString();
+    }
+
 }

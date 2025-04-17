@@ -47,8 +47,7 @@ public class CustomerSignIn extends JFrame {
             return;
         }
 
-        String userID = customerID.getText();
-        new CustomerDetailsScreen(userID);
+        new CustomerDetailsScreen(customer);
         dispose();
     }
 }

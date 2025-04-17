@@ -1,1 +1,1 @@
-1;Mon Apr 14 08:56:28 CDT 2025;SimpleSavingsAccount;1;5000.0;0.0;-1;false
+1;Mon Apr 14 08:56:28 CDT 2025;SimpleSavingsAccount;1;5000.0;0.0;-1;false;false

@@ -76,16 +76,27 @@ public class NewCustomerScreen extends JFrame {
             //That way we can access the customer objects methods and what not later on
             Customer customer = new Customer(socialSecurityNumber, streetAddress, resCity, resState, zipCode, fName, lName);
             Database.addItemToList(Database.customerList, customer);
+            JOptionPane.showMessageDialog(this, "Customer Created Successfully!");
+            dispose();
+            new TellerScreen();
 
-            // Store the data to database
-            // might have to change txt name - not created yet!!!!!!!!!!!!
-            try (FileWriter writer = new FileWriter("database.txt", true)) {
-                writer.write(socialSecurityNumber + ";" + streetAddress + ";" + resCity + ";" + resState + ";" + zipCode + ";" + fName + ";" + lName + "\n");
-                JOptionPane.showMessageDialog(this, "Customer Created Successfully!");
-                //dispose();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Error creating customer!", "Error", JOptionPane.ERROR_MESSAGE);
-            }
+            /*
+             * - James Foster
+             * I commented out the logic below because I didn't think it was required for us to add new customers
+             * to the database upon creation, but instead only when the checkpoint restart is called.
+             * if were supposed to, we should be using Josh's toFileString method because of the way he wrote it.
+             *
+             */
+
+//            // Store the data to database
+//            // might have to change txt name - not created yet!!!!!!!!!!!!
+//            try (FileWriter writer = new FileWriter("database.txt", true)) {
+//                writer.write(socialSecurityNumber + ";" + streetAddress + ";" + resCity + ";" + resState + ";" + zipCode + ";" + fName + ";" + lName + "\n");
+//                JOptionPane.showMessageDialog(this, "Customer Created Successfully!");
+//                //dispose();
+//            } catch (Exception e) {
+//                JOptionPane.showMessageDialog(this, "Error creating customer!", "Error", JOptionPane.ERROR_MESSAGE);
+//            }
 
         }//end of else
     }

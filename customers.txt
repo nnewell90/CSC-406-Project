@@ -1,0 +1,30 @@
+423453245; 114 North 4th; Clarksdale; MO; 64493; Ronald; Jones; 0; N; N
+345653425; 1805 Jules; St. Joseph; MO; 64503; Mark; Ingrem; 1; Y; Y
+423148894; 2109 Sylvania; St. Joseph; MO; 64501; Sherry; Harrison; 0; N; N
+677879013; 4305 West 3rd; Wathena; KS; 54910; John; Morgeson; 1; Y; Y
+345599870; 221 South Highly; St. Joseph; MO; 64503; Gary; Gilkerson; 1; Y; Y
+423567890; 335 Jules; St. Joseph; MO; 64503; Mary; Francis; 1; Y; Y
+345812332; 1402 Mocking Bird; St. Joseph; MO; 64502; Carolyn; Johnson; 0; N; N
+345879912; 2105 Senior Dr.; St. Joseph; MO; 64503; Larry; Waite; 1; Y; Y
+423168945; 1801 Lovers Ln; St. Joseph; MO; 64502; Marilyn; Macklin; 0; N; N
+235445789; 2508 Stonecrest; St. Joseph; MO; 64501; Lana; McGlynn; 1; Y; Y
+436789213; 4156 N. Mulbury; St. Joseph; MO; 64502; John; Munzer; 1; Y; Y
+233435656; 1525 Kioa; Ellwood; KS; 56708; Mary; White; 1; Y; Y
+435678787; 8902 Martha Ln; Gower; MO; 63301; Jerry; Gronius; 0; N; N
+563432913; 1532 Lovers Ln; St. Joseph; MO; 64502; Martin; Williams; 1; Y; Y
+345679898; 703 Park Ln; St. Joseph; MO; 64501; Broderick; Jones; 1; Y; Y
+423453245; 114 North 4th; Clarksdale; MO; 64493; Ronald; Jones; 0; N; N
+345653425; 1805 Jules; St. Joseph; MO; 64503; Mark; Ingrem; 1; Y; Y
+423148894; 2109 Sylvania; St. Joseph; MO; 64501; Sherry; Harrison; 0; N; N
+677879013; 4305 West 3rd; Wathena; KS; 54910; John; Morgeson; 1; Y; Y
+345599870; 221 South Highly; St. Joseph; MO; 64503; Gary; Gilkerson; 1; Y; Y
+423567890; 335 Jules; St. Joseph; MO; 64503; Mary; Francis; 1; Y; Y
+345812332; 1402 Mocking Bird; St. Joseph; MO; 64502; Carolyn; Johnson; 0; N; N
+345879912; 2105 Senior Dr.; St. Joseph; MO; 64503; Larry; Waite; 1; Y; Y
+423168945; 1801 Lovers Ln; St. Joseph; MO; 64502; Marilyn; Macklin; 0; N; N
+235445789; 2508 Stonecrest; St. Joseph; MO; 64501; Lana; McGlynn; 1; Y; Y
+436789213; 4156 N. Mulbury; St. Joseph; MO; 64502; John; Munzer; 1; Y; Y
+233435656; 1525 Kioa; Ellwood; KS; 56708; Mary; White; 1; Y; Y
+435678787; 8902 Martha Ln; Gower; MO; 63301; Jerry; Gronius; 0; N; N
+563432913; 1532 Lovers Ln; St. Joseph; MO; 64502; Martin; Williams; 1; Y; Y
+345679898; 703 Park Ln; St. Joseph; MO; 64501; Broderick; Jones; 1; Y; Y
