@@ -38,10 +38,15 @@ public class Customer {
     }
 
     // Deletes a customer from the entire system, including the database
-    public static void deleteCustomer(Customer customer) {
+    public static double deleteCustomer(Customer customer) {
         if (customer.isDeleted()) {
-            return;
+            return Double.NaN;
         }
+
+        // The amount of money the customer owes the bank, or what the bank owes the customer
+        // A positive value means the customer needs to pay the bank
+        // A negative value means the bank needs to pay the customer
+        double oweOrOwed = 0.0;
 
         // Remove each account the customer has from the database
         ArrayList<AbstractAccount> accounts = customer.getCustomerAccountsAsAccounts();
@@ -49,21 +54,43 @@ public class Customer {
         for (AbstractAccount account : accounts) {
             switch (account.getAccountType()) {
                 // Checking
-                case CheckingAccount -> CheckingAccount.deleteAccount((CheckingAccount) account);
+                case CheckingAccount -> {
+                    CheckingAccount temp = (CheckingAccount) account;
+                    oweOrOwed -= temp.getBalance(); // The user is owed this
+                    CheckingAccount.deleteAccount((CheckingAccount) account);
+                }
                 // Savings
-                case SimpleSavingsAccount -> SavingsAccount.SimpleSavingsAccount.deleteAccount((SavingsAccount.SimpleSavingsAccount) account);
-                case CDSavingsAccount -> SavingsAccount.CDSavingsAccount.deleteAccount((SavingsAccount.CDSavingsAccount) account);
+                case SimpleSavingsAccount -> {
+                    SavingsAccount.SimpleSavingsAccount temp = (SavingsAccount.SimpleSavingsAccount) account;
+                    oweOrOwed -= temp.getBalance(); // The user is owed this
+                    SavingsAccount.SimpleSavingsAccount.deleteAccount((SavingsAccount.SimpleSavingsAccount) account);
+                }
+                case CDSavingsAccount -> {
+                    SavingsAccount.CDSavingsAccount temp = (SavingsAccount.CDSavingsAccount) account;
+                    oweOrOwed -= temp.getBalance(); // The user is owed this
+                    SavingsAccount.CDSavingsAccount.deleteAccount((SavingsAccount.CDSavingsAccount) account);
+                }
                 // Loan
-                case CCLoanAccount -> LoanAccount.CC.deleteAccount((LoanAccount.CC)account);
-                case ShortOrLongLoanAccount -> LoanAccount.ShortOrLong.deleteAccount((LoanAccount.ShortOrLong)account);
+                case CCLoanAccount -> {
+                    LoanAccount.CC temp = (LoanAccount.CC) account;
+                    oweOrOwed += temp.getBalance(); // The bank is owed this
+                    LoanAccount.CC.deleteAccount((LoanAccount.CC)account);
+                }
+                case ShortOrLongLoanAccount -> {
+                    LoanAccount.ShortOrLong temp = (LoanAccount.ShortOrLong) account;
+                    oweOrOwed += temp.getBalance(); // The bank is owed this
+                    LoanAccount.ShortOrLong.deleteAccount((LoanAccount.ShortOrLong)account);
+                }
             }
         }
 
         // Remove the account from the lists in the database
-        Database.removeItemFromList(Database.customerList, customer);
+        // Database.removeItemFromList(Database.customerList, customer);
+            // No longer remove from the database so we can retain customer information
 
-        // Finally, fully delete the account
+        // Finally, fully delete the account and return the amount the bank/user owes to the other
         customer.setDeleted(true);
+        return oweOrOwed;
     }
 
 
@@ -158,6 +185,7 @@ public class Customer {
         toReturn += ";" + getFirstName();
         toReturn += ";" + getLastName();
         toReturn += ";" + getCustomerID();
+        toReturn += ";" + isDeleted();
 
         // Customer's accounts (Uses IDs)
         for (Long accountID : customerAccountIDs) {
@@ -179,10 +207,12 @@ public class Customer {
         String firstName = split[5];
         String lastName = split[6];
         // String customerID = split[7]; // This is set in the constructor
+        boolean isDeleted = Boolean.parseBoolean(split[8]);
 
         // Customer accounts are restored from the database, don't do it here
-
-        return new Customer(SSN, address, city, state, zip, firstName, lastName);
+        Customer temp = new Customer(SSN, address, city, state, zip, firstName, lastName);
+        temp.setDeleted(isDeleted);
+        return temp;
     }
 
     // Adds an account to the accounts customers have
