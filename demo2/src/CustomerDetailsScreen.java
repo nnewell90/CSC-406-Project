@@ -1,14 +1,16 @@
 import javax.swing.*;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.io.IOException;
 
+//This screen displays a list of accounts associated with a customer.
 public class CustomerDetailsScreen extends JFrame {
 
 
     public CustomerDetailsScreen(String selectedCustomer) {
 
         String ssn = selectedCustomer.substring(0,9);
-        Customer customer = Database.getCustomer(ssn);
+        Customer customer = Database.getCustomerFromList(ssn);
 
         setTitle("Customer Details");
         setSize(500, 500);
@@ -16,6 +18,7 @@ public class CustomerDetailsScreen extends JFrame {
         setLayout(new BorderLayout());
 
         //Name
+        assert customer != null;
         JLabel header = new JLabel(customer.getFirstName() + " " + customer.getLastName());
         header.setFont(new Font("Arial", Font.BOLD, 15));
 
@@ -32,13 +35,20 @@ public class CustomerDetailsScreen extends JFrame {
         headerPanel.add(subHeader);
 
         //List of Current Accounts the customer holds
-        JList<String> list = new JList<>((customer.getCustomerAccountIDs()).toArray(new String[0]));
+        JList<Long> list = new JList<>((customer.getCustomerAccountIDs()).toArray(new Long[0]));
         JScrollPane scrollPane = new JScrollPane(list);
+
+        list.addListSelectionListener(e -> {
+            if(!e.getValueIsAdjusting()) {
+                String id = list.getSelectedValue().toString();
+                new AccountDetailsScreen(id);
+            }
+        });
 
         //Button to go create a new account for the customer
         JButton createAccount = new JButton("Create New Account");
         createAccount.setAlignmentX(Component.CENTER_ALIGNMENT);
-        createAccount.addActionListener(e -> {dispose(); new CreateAccountScreen(customer);});
+        createAccount.addActionListener(e -> { new CreateAccountScreen();});
 
         //Return Button
         JButton returnButton = new JButton("Return to Customers");

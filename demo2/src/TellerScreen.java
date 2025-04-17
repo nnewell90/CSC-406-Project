@@ -22,7 +22,7 @@ public class TellerScreen extends JFrame {
         JButton returnButton = new JButton("Return to Main Menu");
 
         newCustomerButton.addActionListener(e ->{ dispose(); new NewCustomerScreen();});  // creates new customer
-        newAccountButton.addActionListener(e -> {dispose(); new NewAccountScreen();});
+        newAccountButton.addActionListener(e -> {dispose(); new CreateAccountScreen();});
         linkButton.addActionListener(e -> {dispose(); new LinkAccountsScreen();});
         withdrawButton.addActionListener(e -> {dispose(); new WithdrawScreen();});
         depositButton.addActionListener(e -> {dispose(); new DepositScreen();});

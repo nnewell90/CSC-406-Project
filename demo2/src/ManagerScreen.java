@@ -17,8 +17,8 @@ public class ManagerScreen extends JFrame {
         JButton checksButton = new JButton("Checks Processing");
         JButton returnButton = new JButton("Return to Main Menu");
 
-        loanButton.addActionListener(e -> {dispose(); new LoanInterest();});
-        cdButton.addActionListener(e -> {dispose(); new CDInterest();});
+        loanButton.addActionListener(e -> {dispose(); new LoanInterestScreen();});
+        cdButton.addActionListener(e -> {dispose(); new CDInterestScreen();});
         cdmanageButton.addActionListener(e -> {dispose(); new EstablishCD();});
         checksButton.addActionListener(e -> {dispose(); new ProcessCheck();});
         returnButton.addActionListener(e -> {saveUIState("MainMenu"); new MainMenu();dispose();});
