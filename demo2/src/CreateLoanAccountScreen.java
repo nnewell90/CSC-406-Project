@@ -20,7 +20,7 @@ public class CreateLoanAccountScreen {
         String id = customer.getCustomerID();
         AbstractAccount.AccountType accountType = AbstractAccount.AccountType.LoanAccount;
 
-        LoanAccount lnAccount = new LoanAccount(id, date, accountType, balance, rate, currentPaymentDue);
+        LoanAccount lnAccount = new LoanAccount(id, date, balance, rate, currentPaymentDue);
     }
 
 }
