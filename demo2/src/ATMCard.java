@@ -137,6 +137,8 @@ public class ATMCard {
 
         toReturn += ";" + getNumOfWithdrawalsToday();
 
+        toReturn += ";" + isDeleted();
+
         return toReturn;
     }
 
@@ -160,6 +162,10 @@ public class ATMCard {
         // Get the number of withdrawals
         int numOfWithdrawalsToday = Integer.parseInt(split[3]);
 
-        return new ATMCard(customerID, accountID, forChecking, numOfWithdrawalsToday);
+        boolean isDeleted = Boolean.parseBoolean(split[4]);
+
+        ATMCard temp = new ATMCard(customerID, accountID, forChecking, numOfWithdrawalsToday);
+        temp.setDeleted(isDeleted);
+        return temp;
     }
 }

@@ -4,7 +4,6 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -50,7 +49,9 @@ public class Database implements Runnable {
     static String shortOrLongLoans = "shortOrLongLoans.txt";
     static String CCAccounts = "CCAccounts.txt";
 
-    static String customers = "customers.txt";
+    // customers was renamed to database.txt at some point
+    // I'm not going to change it now, but we may want to look into this
+    static String customers = "database.txt";
     static String atmCards = "atmCards.txt";
 
     // Methods
@@ -153,77 +154,13 @@ public class Database implements Runnable {
         return toReturn;
     }
 
-    // Restores the internal accounts of each customer to their associated objects
-    // This function is called when information needs to be restored from the database
-    /*
-    This will also set the AbstractAccount field accountIDCounter to the next highest value
-    Since this function runs on every account, it is convenient to do it here
-     */
-    private static void restoreCustomerAccounts() {
-        // This is inefficient with the way I have written the database, but I'm leaving it for now just to finish it
 
-        // Savings accounts
-        // Simple savings
-        for (SavingsAccount.SimpleSavingsAccount a : simpleSavingsAccountList) { // Check every entry in the list
+    // Update AbstractAccount's accountIDCounter to the next largest value as needed
+    private static void updateAbstractAccountIDCounter() {
+        // Go through each account in the AbstractAccount list to find the largest counter we need
+        for (AbstractAccount a : abstractAccountList) {
             if (a.getAccountID() > AbstractAccount.accountIDCounter) {
                 AbstractAccount.accountIDCounter = a.getAccountID();
-            }
-            for (Customer c : customerList) { // Check for every customer
-                if (a.getCustomerID().equals(c.getCustomerID())) {
-                    c.addAccountToCustomerAccounts(a.getAccountID());
-                    break; // Once a match has been found, move to the next account in the accountList
-                }
-            }
-        }
-        // CD
-        for (SavingsAccount.CDSavingsAccount a : cdSavingsAccountList) { // Check every entry in the list
-            if (a.getAccountID() > AbstractAccount.accountIDCounter) {
-                AbstractAccount.accountIDCounter = a.getAccountID();
-            }
-            for (Customer c : customerList) { // Check for every customer
-                if (a.getCustomerID().equals(c.getCustomerID())) {
-                    c.addAccountToCustomerAccounts(a.getAccountID());
-                    break; // Once a match has been found, move to the next account in the accountList
-                }
-            }
-        }
-
-        // Checking accounts
-        for (CheckingAccount a : checkingAccountList) { // Check every entry in the list
-            if (a.getAccountID() > AbstractAccount.accountIDCounter) {
-                AbstractAccount.accountIDCounter = a.getAccountID();
-            }
-            for (Customer c : customerList) { // Check for every customer
-                if (a.getCustomerID().equals(c.getCustomerID())) {
-                    c.addAccountToCustomerAccounts(a.getAccountID());
-                    break; // Once a match has been found, move to the next account in the accountList
-                }
-            }
-        }
-
-        // Loan accounts
-        // ShortOrLong
-        for (LoanAccount.ShortOrLong a : shortOrLongLoanList) { // Check every entry in the list
-            if (a.getAccountID() > AbstractAccount.accountIDCounter) {
-                AbstractAccount.accountIDCounter = a.getAccountID();
-            }
-            for (Customer c : customerList) { // Check for every customer
-                if (a.getCustomerID().equals(c.getCustomerID())) {
-                    c.addAccountToCustomerAccounts(a.getAccountID());
-                    break; // Once a match has been found, move to the next account in the accountList
-                }
-            }
-        }
-        // CC
-        for (LoanAccount.CC a : CCList) { // Check every entry in the list
-            if (a.getAccountID() > AbstractAccount.accountIDCounter) {
-                AbstractAccount.accountIDCounter = a.getAccountID();
-            }
-            for (Customer c : customerList) { // Check for every customer
-                if (a.getCustomerID().equals(c.getCustomerID())) {
-                    c.addAccountToCustomerAccounts(a.getAccountID());
-                    break; // Once a match has been found, move to the next account in the accountList
-                }
             }
         }
         // Finally, increment the AccountIDCounter by one so the next account can be made correctly
@@ -250,8 +187,8 @@ public class Database implements Runnable {
         loadFromFile(customers, customerList, Customer.class);
         loadFromFile(atmCards, atmCardList, ATMCard.class);
 
-        // Each customer has an arrayList of their own accounts, restore that list so they can view it
-        restoreCustomerAccounts();
+        // Update the abstractAccountIDCounter so new accounts can be made correctly
+        updateAbstractAccountIDCounter();
         lock.unlock();
     }
 

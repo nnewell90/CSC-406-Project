@@ -42,6 +42,8 @@ public class SavingsAccount extends AbstractAccount {
         // Specific account information
         toReturn += ";" + getBalance();
 
+        toReturn += ";" + isDeleted();
+
         return toReturn;
     }
 
@@ -58,7 +60,11 @@ public class SavingsAccount extends AbstractAccount {
         // Specific
         double balance = Double.parseDouble(split[4]);
 
-        return new SavingsAccount(customerID, accountCreationDate, balance, accountID);
+        boolean isDeleted = Boolean.parseBoolean(split[5]);
+
+        SavingsAccount temp = new SavingsAccount(customerID, accountCreationDate, balance, accountID);
+        temp.setDeleted(isDeleted);
+        return temp;
     }
 
     public void setBalance(double balance) {
@@ -184,6 +190,8 @@ public class SavingsAccount extends AbstractAccount {
 
             toReturn += ";" + linkedToATMCard;
 
+            toReturn += ";" + isDeleted();
+
             for (String s : stopPaymentArray) {
                 toReturn += ";" + s;
             }
@@ -209,13 +217,17 @@ public class SavingsAccount extends AbstractAccount {
 
             boolean linkedToAtmCard = Boolean.parseBoolean(split[7]);
 
+            boolean isDeleted = Boolean.parseBoolean(split[8]);
+
             // Now make an aList of the held stopped checks
             ArrayList<String> stopPaymentArrayPassed = new ArrayList<>();
-            if (split.length > 8) {
+            if (split.length > 9) {
                 stopPaymentArrayPassed.addAll(Arrays.asList(split).subList(7, split.length));
             }
 
-            return new SimpleSavingsAccount(customerID, accountCreationDate, accountID, balance, interestRate, overdraftAccountID, linkedToAtmCard, stopPaymentArrayPassed);
+            SimpleSavingsAccount temp = new SimpleSavingsAccount(customerID, accountCreationDate, accountID, balance, interestRate, overdraftAccountID, linkedToAtmCard, stopPaymentArrayPassed);
+            temp.setDeleted(isDeleted);
+            return temp;
         }
 
         public void setOverdraftForAccount(long overdraftForAccountID) {
@@ -418,6 +430,8 @@ public class SavingsAccount extends AbstractAccount {
             toReturn += ";" + getInterestRate();
             toReturn += ";" + getDueDate().toString();
 
+            toReturn += ";" + isDeleted();
+
             return toReturn;
         }
 
@@ -435,8 +449,11 @@ public class SavingsAccount extends AbstractAccount {
             double balance = Double.parseDouble(split[4]);
             double interestRate = Double.parseDouble(split[5]);
             Date dueDate = new Date(Long.parseLong(split[6]));
+            boolean isDeleted = Boolean.parseBoolean(split[7]);
 
-            return new CDSavingsAccount(customerID, accountCreationDate, accountID, balance, interestRate, dueDate);
+            CDSavingsAccount temp= new CDSavingsAccount(customerID, accountCreationDate, accountID, balance, interestRate, dueDate);
+            temp.setDeleted(isDeleted);
+            return temp;
         }
 
         public double getBalance() {

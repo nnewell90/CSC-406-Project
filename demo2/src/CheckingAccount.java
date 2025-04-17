@@ -118,6 +118,8 @@ public class CheckingAccount extends AbstractAccount{
         }
 
         toReturn += ";" + isLinkedToATMCard();
+
+        toReturn += ";" + isDeleted();
         
         for (String s : stopPaymentArray) {
             toReturn += ";" + s;
@@ -145,14 +147,18 @@ public class CheckingAccount extends AbstractAccount{
 
         boolean linkedToATMCard = Boolean.parseBoolean(split[8]);
 
+        boolean isDeleted = Boolean.parseBoolean(split[9]);
+
         // Now make an aList of the held stopped checks
         ArrayList<String> stopPaymentArrayPassed = new ArrayList<>();
-        if (split.length > 9) {
+        if (split.length > 10) {
             stopPaymentArrayPassed.addAll(Arrays.asList(split).subList(8, split.length));
         }
 
         // Return an account made from this information
-        return new CheckingAccount(customerID, accountCreationDate, balance, overdraftsThisMonth, accountID, overdraftAccountID, linkedToATMCard, stopPaymentArrayPassed);
+        CheckingAccount temp = new CheckingAccount(customerID, accountCreationDate, balance, overdraftsThisMonth, accountID, overdraftAccountID, linkedToATMCard, stopPaymentArrayPassed);
+        temp.setDeleted(isDeleted);
+        return temp;
     }
 
     public double getBalance() {

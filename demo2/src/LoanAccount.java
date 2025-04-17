@@ -82,6 +82,8 @@ public class LoanAccount extends AbstractAccount {
         toReturn += ";" + getCurrentPaymentDue();
         toReturn += ";" + getLastPaymentMadeDate();
         toReturn += ";" + isMissedPayment();
+
+        toReturn += ";" + isDeleted();
         
         return toReturn;
     }
@@ -103,8 +105,12 @@ public class LoanAccount extends AbstractAccount {
         double currentPaymentDue = Double.parseDouble(split[8]);
         Date lastPaymentMadeDate = new Date(Long.parseLong(split[9]));
         boolean missedPayment = Boolean.parseBoolean(split[10]);
-        
-        return new LoanAccount(customerID, accountCreationDate, accountID, balance, rate, currentPaymentDue, paymentDueDate, notifiedOfPaymentDate, lastPaymentMadeDate, missedPayment);
+
+        boolean isDeleted = Boolean.parseBoolean(split[11]);
+
+        LoanAccount temp = new LoanAccount(customerID, accountCreationDate, accountID, balance, rate, currentPaymentDue, paymentDueDate, notifiedOfPaymentDate, lastPaymentMadeDate, missedPayment);
+        temp.setDeleted(isDeleted);
+        return temp;
     }
 
     public double getBalance() {
@@ -320,6 +326,8 @@ public class LoanAccount extends AbstractAccount {
             toReturn += ";" + getNumOfYearsTotal();
             toReturn += ";" + getNumOfMonthsTotal();
 
+            toReturn += ";" + isDeleted();
+
             return toReturn;
         }
 
@@ -349,8 +357,12 @@ public class LoanAccount extends AbstractAccount {
             double lateFees = Double.parseDouble(split[15]);
             int numOfYearsTotal = Integer.parseInt(split[16]);
             int numOfMonthsTotal = Integer.parseInt(split[17]);
+            boolean isDeleted = Boolean.parseBoolean(split[18]);
 
-            return new ShortOrLong(customerID, accountCreationDate, accountID, loanTotal, rate, paymentDueDate, notifiedOfPaymentDate, thisPaymentDueDate, lastPaymentMadeDate, fixedPayment, currentPaymentDue, balance, lateFees, amountPaidThisMonth, missedPayment, numOfYearsTotal, numOfMonthsTotal);
+
+            ShortOrLong temp = new ShortOrLong(customerID, accountCreationDate, accountID, loanTotal, rate, paymentDueDate, notifiedOfPaymentDate, thisPaymentDueDate, lastPaymentMadeDate, fixedPayment, currentPaymentDue, balance, lateFees, amountPaidThisMonth, missedPayment, numOfYearsTotal, numOfMonthsTotal);
+            temp.setDeleted(isDeleted);
+            return temp;
         }
 
         public void makePayment(double amount, Date dayOfPay) {
@@ -613,6 +625,9 @@ public class LoanAccount extends AbstractAccount {
             toReturn += ";" + getLimit();
             toReturn += ";" + getFinanceCharge();
             toReturn += ";" + getSumOfChargesThisMonth();
+
+            toReturn += ";" + isDeleted();
+
             // Add each message independently
             for (String chargeMessage : chargeMessages) {
                 toReturn += ";" + chargeMessage;
@@ -643,13 +658,18 @@ public class LoanAccount extends AbstractAccount {
             double limit = Double.parseDouble(split[11]);
             double financeCharge = Double.parseDouble(split[12]);
             double sumOfChargesThisMonth = Double.parseDouble(split[13]);
+
+            boolean isDeleted = Boolean.parseBoolean(split[14]);
+
             // Get each charge message
             ArrayList<String> chargeMessages = new ArrayList<>();
-            if (split.length > 14) {
+            if (split.length > 15) {
                 chargeMessages.addAll(Arrays.asList(split).subList(14, split.length));
             }
 
-            return new CC(customerID, accountCreationDate, accountID, balance, rate, currentPaymentDue, paymentDueDate, notifiedOfPaymentDate, lastPaymentMadeDate, missedPayment, limit, financeCharge, sumOfChargesThisMonth, chargeMessages);
+            CC temp = new CC(customerID, accountCreationDate, accountID, balance, rate, currentPaymentDue, paymentDueDate, notifiedOfPaymentDate, lastPaymentMadeDate, missedPayment, limit, financeCharge, sumOfChargesThisMonth, chargeMessages);
+            temp.setDeleted(isDeleted);
+            return temp;
         }
 
         public double getLimit() {
