@@ -16,14 +16,15 @@ public class ReviewCustomersScreen extends JFrame{
         JLabel header = new JLabel("Customers");
         header.setFont(new Font("Arial", Font.BOLD, 15));
 
-        List<String> customerList = Files.readAllLines(Paths.get(Database.customers));
-        JList<String> list = new JList<>((customerList).toArray(new String[0]));
+        List<Customer> customerList = Database.customerList;
+        JList<Customer> list = new JList<>(customerList.toArray(new Customer[0]));
         JScrollPane scrollPane = new JScrollPane(list);
 
         list.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                String selectedCustomer = list.getSelectedValue();
+                Customer selectedCustomer = list.getSelectedValue();
                 if (selectedCustomer != null) {
+                    dispose();
                     new CustomerDetailsScreen(selectedCustomer);
                 }
             }

@@ -57,15 +57,18 @@ public class CloseAccountScreen extends JFrame {
                     new TellerScreen();
                 } else if (account.accountType == AbstractAccount.AccountType.SavingsAccount) {
 
-                    if (account instanceof SavingsAccount.SimpleSavingsAccount) {
+                    AbstractAccount savingAccount = (SavingsAccount) account;
+                    if (savingAccount instanceof SavingsAccount.SimpleSavingsAccount) {
                         SavingsAccount.SimpleSavingsAccount ssa = (SavingsAccount.SimpleSavingsAccount) account;
-                        SavingsAccount.SimpleSavingsAccount.deleteAccount(ssa);
+                        ssa.deleteAccount(ssa);
+
                         JOptionPane.showMessageDialog(null, "Account #" + accountID + " Deleted");
                         dispose();
                         new TellerScreen();
-                    } else if (account instanceof SavingsAccount.CDSavingsAccount) {
+                    } else if (savingAccount instanceof SavingsAccount.CDSavingsAccount) {
                         SavingsAccount.CDSavingsAccount cda = (SavingsAccount.CDSavingsAccount) account;
-                        SavingsAccount.CDSavingsAccount.deleteAccount(cda);
+                        cda.deleteAccount(cda);
+
                         JOptionPane.showMessageDialog(null, "Account #" + accountID + " Deleted");
                         dispose();
                         new TellerScreen();

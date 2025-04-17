@@ -7,10 +7,9 @@ import java.io.IOException;
 public class CustomerDetailsScreen extends JFrame {
 
 
-    public CustomerDetailsScreen(String selectedCustomer) {
+    public CustomerDetailsScreen(Customer selectedCustomer) {
 
-        String ssn = selectedCustomer.substring(0,9);
-        Customer customer = Database.getCustomerFromList(ssn);
+        String ssn = selectedCustomer.getSSN();
 
         setTitle("Customer Details");
         setSize(500, 500);
@@ -18,12 +17,12 @@ public class CustomerDetailsScreen extends JFrame {
         setLayout(new BorderLayout());
 
         //Name
-        assert customer != null;
-        JLabel header = new JLabel(customer.getFirstName() + " " + customer.getLastName());
+        assert selectedCustomer != null;
+        JLabel header = new JLabel(selectedCustomer.getFirstName() + " " + selectedCustomer.getLastName());
         header.setFont(new Font("Arial", Font.BOLD, 15));
 
         //ID
-        JLabel subHeader = new JLabel("ID: " + customer.getCustomerID());
+        JLabel subHeader = new JLabel("ID: " + selectedCustomer.getCustomerID());
         subHeader.setFont(new Font("Arial", Font.BOLD, 10));
 
         //Combine Name and ID into its own panel
@@ -35,11 +34,12 @@ public class CustomerDetailsScreen extends JFrame {
         headerPanel.add(subHeader);
 
         //List of Current Accounts the customer holds
-        JList<Long> list = new JList<>((customer.getCustomerAccountIDs()).toArray(new Long[0]));
+        JList<Long> list = new JList<>(selectedCustomer.getCustomerAccountIDs().toArray(new Long[0]));
         JScrollPane scrollPane = new JScrollPane(list);
 
         list.addListSelectionListener(e -> {
             if(!e.getValueIsAdjusting()) {
+                dispose();
                 String id = list.getSelectedValue().toString();
                 new AccountDetailsScreen(id);
             }
@@ -48,7 +48,7 @@ public class CustomerDetailsScreen extends JFrame {
         //Button to go create a new account for the customer
         JButton createAccount = new JButton("Create New Account");
         createAccount.setAlignmentX(Component.CENTER_ALIGNMENT);
-        createAccount.addActionListener(e -> { new CreateAccountScreen();});
+        createAccount.addActionListener(e -> { dispose(); new CreateAccountScreen();});
 
         //Return Button
         JButton returnButton = new JButton("Return to Customers");
