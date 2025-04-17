@@ -1,3 +1,4 @@
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -134,7 +135,7 @@ public class CheckingAccount extends AbstractAccount{
 
         // Abstract stuff
         String customerID = split[0];
-        Date accountCreationDate = new Date(Long.parseLong(split[1]));
+        Date accountCreationDate = new Date(Date.parse(split[1]));
         AbstractAccount.AccountType abstractAccountType = AbstractAccount.AccountType.valueOf(split[2]);
         long accountID = Long.parseLong(split[3]);
 

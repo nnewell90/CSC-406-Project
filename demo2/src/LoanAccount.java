@@ -93,7 +93,7 @@ public class LoanAccount extends AbstractAccount {
 
         // Abstract stuff
         String customerID = split[0];
-        Date accountCreationDate = new Date(Long.parseLong(split[1]));
+        Date accountCreationDate = new Date(Date.parse(split[1]));
         AccountType abstractAccountType = AccountType.valueOf(split[2]);
         long accountID = Long.parseLong(split[3]);
 
@@ -336,7 +336,7 @@ public class LoanAccount extends AbstractAccount {
 
             // Abstract stuff
             String customerID = split[0];
-            Date accountCreationDate = new Date(Long.parseLong(split[1]));
+            Date accountCreationDate = new Date(Date.parse(split[1]));
             AccountType abstractAccountType = AccountType.valueOf(split[2]);
             long accountID = Long.parseLong(split[3]);
 
@@ -641,7 +641,7 @@ public class LoanAccount extends AbstractAccount {
 
             // Abstract stuff
             String customerID = split[0];
-            Date accountCreationDate = new Date(Long.parseLong(split[1]));
+            Date accountCreationDate = new Date(Date.parse(split[1]));
             AccountType abstractAccountType = AccountType.valueOf(split[2]);
             long accountID = Long.parseLong(split[3]);
 
