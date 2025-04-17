@@ -9,7 +9,6 @@ public class MainMenu extends JFrame {
 
     public MainMenu() {
 
-        Database.restoreFromDatabase();//load data from txt files into arrayList
 
         setTitle("Main Menu");
         setSize(500, 500);
