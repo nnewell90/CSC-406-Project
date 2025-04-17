@@ -50,7 +50,7 @@ public class Database implements Runnable {
     static String shortOrLongLoans = "shortOrLongLoans.txt";
     static String CCAccounts = "CCAccounts.txt";
 
-    static String customers = "database.txt";
+    static String customers = "customers.txt";
     static String atmCards = "atmCards.txt";
 
     // Methods

@@ -1,6 +1,8 @@
+import javax.swing.*;
 import java.util.Date;
 
 public class CreateLoanAccountScreen {
+
 
     public CreateLoanAccountScreen(Customer customer, Date date) {
 
@@ -16,11 +18,18 @@ public class CreateLoanAccountScreen {
 
     public void CreateLoanAccount(Customer customer, Date date, double balance,
                                   double rate, double currentPaymentDue) {
-
         String id = customer.getCustomerID();
         AbstractAccount.AccountType accountType = AbstractAccount.AccountType.LoanAccount;
 
+        if(customer == null){
+            JOptionPane.showMessageDialog(null, "Customer is null");
+            return;
+        }
+
+        long accountID = Long.parseLong(id);
         LoanAccount lnAccount = new LoanAccount(id, date, balance, rate, currentPaymentDue);
+        Database.addItemToList(Database.loanAccountList, lnAccount);
+        customer.addAccountToCustomerAccounts(accountID);
     }
 
 }

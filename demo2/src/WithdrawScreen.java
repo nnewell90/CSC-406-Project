@@ -89,7 +89,7 @@ public class WithdrawScreen extends JFrame {
                         savings.balance+" in Savings.");
             }
 
-        }else if (type == AbstractAccount.AccountType.CheckingAccount){//If withdrawing from a savings account
+        }else if (type == AbstractAccount.AccountType.CheckingAccount){//If withdrawing from a checking account
 
             CheckingAccount checking = (CheckingAccount) account;
             Long overDraftAccountID = checking.overDraftAccountID;
@@ -100,6 +100,10 @@ public class WithdrawScreen extends JFrame {
                 checking.withdraw(amount);
                 JOptionPane.showMessageDialog(this, "Withdraw of $" + amount + " successful! " +
                         "You only have $" + checking.balance+" left in this Checking Account");
+
+                //change the account type according to balance
+                updateType(checking);
+
                 //close the screen and open a new teller screen
                 dispose();
                 new TellerScreen();
@@ -115,6 +119,7 @@ public class WithdrawScreen extends JFrame {
                     }else if (checking.balance+linkedSavings.balance >= amount){//if there is enough in the savings
                         //perform the withdrawal but pull from linked savings
                         linkedSavings.withdraw(amount);
+                        updateType(checking);
                         JOptionPane.showMessageDialog(this, "Withdraw successful, however overdraft process was applied.");
                         dispose();
                         new TellerScreen();
@@ -158,6 +163,14 @@ public class WithdrawScreen extends JFrame {
             JOptionPane.showMessageDialog(this, "You cannot withdraw from a "+ type);
         }
     }//end of makeWithdrawal
+
+    private void updateType(CheckingAccount checking) {
+        if(checking.balance >= 5000){
+            checking.setAccountSpecificType(CheckingAccount.AccountType.GoldDiamond);
+        }else if(checking.balance < 5000){
+            checking.setAccountSpecificType(CheckingAccount.AccountType.TMB);
+        }
+    }
 
 }
 
