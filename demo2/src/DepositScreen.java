@@ -71,6 +71,7 @@ public class DepositScreen extends JFrame {
         if (type == AbstractAccount.AccountType.CheckingAccount) {
             CheckingAccount checkingAccount = (CheckingAccount) account;
             checkingAccount.deposit(amount);
+            updateType(checkingAccount);        //update type of account(TMB or Gold Diamond)
             JOptionPane.showMessageDialog(this, "Deposit Successful!");
             dispose();
             new TellerScreen();
@@ -84,6 +85,14 @@ public class DepositScreen extends JFrame {
             JOptionPane.showMessageDialog(this, "Cannot make a deposit to a " + type);
         }
 
+    }
+
+    private void updateType(CheckingAccount checking) {
+        if(checking.balance >= 5000){
+            checking.setAccountSpecificType(CheckingAccount.AccountType.GoldDiamond);
+        }else if(checking.balance < 5000){
+            checking.setAccountSpecificType(CheckingAccount.AccountType.TMB);
+        }
     }
 
 }

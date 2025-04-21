@@ -19,7 +19,7 @@ public class CustomerScreen extends JFrame {
 
         creditButton.addActionListener(e -> {
             dispose();
-            new CreditCardScreen();
+            new CreditCardDetailScreen();
         });
         reviewButton.addActionListener(e -> {
             dispose();
