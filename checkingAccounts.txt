@@ -1,1 +1,1 @@
-2;Mon Apr 14 08:56:28 CDT 2025;CheckingAccount;2;5000.0;0;GoldDiamond;-1;true
+2;Mon Apr 14 08:56:28 CDT 2025;CheckingAccount;2;5000.0;0;GoldDiamond;-1;true;false

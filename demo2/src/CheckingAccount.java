@@ -2,6 +2,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 
 public class CheckingAccount extends AbstractAccount{
     // Data
@@ -11,7 +12,10 @@ public class CheckingAccount extends AbstractAccount{
     int overdraftsThisMonth;
 
     AccountType accountSpecificType;
-    ArrayList<String> stopPaymentArray;
+    ArrayList<String> stopPaymentArray; // Checks that are stopped
+    HashMap<String, Double> checkMap; // All checks
+        // A positive value in Double means deposit
+        // A negative value in Double means withdrawal
     
     boolean linkedToATMCard;
 
@@ -35,12 +39,13 @@ public class CheckingAccount extends AbstractAccount{
         }
         overdraftsThisMonth = 0;
         stopPaymentArray = new ArrayList<>();
+        checkMap = new HashMap<>();
         overDraftAccountID = -1;
         linkedToATMCard = false;
     }
 
     // Constructor used when restoring accounts
-    public CheckingAccount(String customerID, Date accountCreationDate, double balance, int overdraftsThisMonth, long accountID, long overdraftAccountID, boolean linkedToATMCard, ArrayList<String> stopPaymentArrayPassed) {
+    public CheckingAccount(String customerID, Date accountCreationDate, double balance, int overdraftsThisMonth, long accountID, long overdraftAccountID, boolean linkedToATMCard, HashMap<String, Double> checkMapPassed, ArrayList<String> stopPaymentArrayPassed) {
         super(customerID, accountCreationDate, AbstractAccount.AccountType.CheckingAccount, accountID);
         setAccountType(AbstractAccount.AccountType.CheckingAccount);
         setBalance(balance);
@@ -49,12 +54,9 @@ public class CheckingAccount extends AbstractAccount{
         } else {
             setAccountSpecificType(AccountType.GoldDiamond);
         }
+        checkMap = new HashMap<>(checkMapPassed);
         stopPaymentArray = new ArrayList<>(stopPaymentArrayPassed);
-        if (overdraftAccountID > -1) {
-            this.overDraftAccountID = overdraftAccountID;
-        } else {
-            overDraftAccountID = -1;
-        }
+        this.overDraftAccountID = overdraftAccountID;
         this.linkedToATMCard = linkedToATMCard;
         setOverdraftsThisMonth(overdraftsThisMonth);
     }
@@ -121,7 +123,16 @@ public class CheckingAccount extends AbstractAccount{
         toReturn += ";" + isLinkedToATMCard();
 
         toReturn += ";" + isDeleted();
-        
+
+        // Add the check map
+        toReturn += ";" + checkMap.size();
+        for (String key : checkMap.keySet()) {
+            toReturn += ";" + key;
+            toReturn += ";" + checkMap.get(key);
+        }
+
+        // Add the stop payment list
+        toReturn += ";" + stopPaymentArray.size();
         for (String s : stopPaymentArray) {
             toReturn += ";" + s;
         }
@@ -150,14 +161,28 @@ public class CheckingAccount extends AbstractAccount{
 
         boolean isDeleted = Boolean.parseBoolean(split[9]);
 
-        // Now make an aList of the held stopped checks
-        ArrayList<String> stopPaymentArrayPassed = new ArrayList<>();
-        if (split.length > 10) {
-            stopPaymentArrayPassed.addAll(Arrays.asList(split).subList(8, split.length));
+        // Now make a map of the check numbers to be processed
+        HashMap<String, Double> checkMap = new HashMap<>();
+        int mapLength = Integer.parseInt(split[10]); // Get the number of entries for the map
+        int baseIndex = 11; // This is an index representation for split[]
+        for (int i = 0; i < mapLength; i++) {
+            // * 2 is to offset the fact that every 2 entries is a String:Double pair, meaning the next String is 2 indexes from the current one
+            int stringPosition = baseIndex + i * 2;
+            int doublePosition = baseIndex + i * 2 + 1;
+            checkMap.put(split[stringPosition], Double.parseDouble(split[doublePosition]));
+        }
+
+        // Now make an aList of the held stopped check numbers
+        ArrayList<String> stopPaymentArray = new ArrayList<>();
+        baseIndex += mapLength * 2; // * 2 to account for the String AND Double entries in the list of values
+        int listLength = Integer.parseInt(split[baseIndex]); // Get the number of entries for the list
+        if (listLength > 0) { // There is at least one entry, add them to the list
+            baseIndex += 1; // Update the baseIndex to the correct index value
+            stopPaymentArray.addAll(Arrays.asList(split).subList(baseIndex, split.length));
         }
 
         // Return an account made from this information
-        CheckingAccount temp = new CheckingAccount(customerID, accountCreationDate, balance, overdraftsThisMonth, accountID, overdraftAccountID, linkedToATMCard, stopPaymentArrayPassed);
+        CheckingAccount temp = new CheckingAccount(customerID, accountCreationDate, balance, overdraftsThisMonth, accountID, overdraftAccountID, linkedToATMCard, checkMap, stopPaymentArray);
         temp.setDeleted(isDeleted);
         return temp;
     }
@@ -197,10 +222,10 @@ public class CheckingAccount extends AbstractAccount{
         if (balance >= amount) {
             balance -= amount;
             balance -= getTransactionFee(false);
-            if (accountSpecificType == AccountType.TMB) {
-                if (balance >= minimumBalanceGoldDiamond) {
-                    setAccountSpecificType(AccountType.GoldDiamond);
-                }
+            if (balance >= minimumBalanceGoldDiamond) {
+                setAccountSpecificType(AccountType.GoldDiamond);
+            } else {
+                setAccountSpecificType(AccountType.TMB);
             }
         } else {
             boolean overdraftFail = false;
@@ -288,12 +313,21 @@ public class CheckingAccount extends AbstractAccount{
         if (isDeleted()) {
             return;
         }
-        balance += balance * interestRate;
+        if (accountSpecificType == AccountType.GoldDiamond) { // Only GD accounts have interest
+            balance += balance * interestRate;
+        }
+
     }
 
-    // This expects to be given SavingsAccounts interest rate, it does the x0.5 itself
-    public void setInterestRate(double interestRatePassed) {
-        interestRate = interestRatePassed * 0.5;
+    // Sets the interest rate for checking accounts, updates the rate in SavingsAccount.SimpleSavingsAccount
+    public static void setInterestRate(double interestRatePassed) {
+        interestRate = interestRatePassed;
+        SavingsAccount.SimpleSavingsAccount.setInterestRateByCheckingAccount(interestRatePassed);
+    }
+
+    // Called in SavingsAccount so there isn't a loop in setting interest rates
+    public static void setInterestRateBySavingsAccount (double interestRatePassed) {
+        interestRate = interestRatePassed * 0.5; // Checking accounts have half the interest of SavingsAccounts
     }
 
     public double getInterestRate() {
@@ -378,6 +412,41 @@ public class CheckingAccount extends AbstractAccount{
     }
 
     // Check stuff
+
+    // Add a check to the list of checks which will be processed later
+    // A positive value represents a deposit, a negative value represents a withdrawal
+    public void addCheckToProcessLater(double amount, String checkNumber) {
+        // First see if this check should be added to the list
+        boolean addCheckToList = true;
+        if (!validateCheckNumber(checkNumber)) { // See if the check number is NOT valid
+            addCheckToList = false;
+        }
+        if (checkMap.containsKey(checkNumber)) { // See if the check is already in the check map
+            addCheckToList = false;
+        }
+
+        // Finally, actually add the check to the map if it is valid
+        if (addCheckToList && amount != 0.0) { // Check to make sure a "no-value" check isn't being inserted
+            checkMap.put(checkNumber, amount);
+        }
+    }
+
+    // Process all checks in the list(map) of checks to be processed
+    public void processChecks() {
+        for (String checkNumber : checkMap.keySet()) {
+            // See if this check is supposed to be stopped
+            if (stopPaymentArray.contains(checkNumber)) {
+                continue;
+            }
+            double amount = checkMap.get(checkNumber);
+            if (amount > 0.0) { // A positive number means a deposit
+                deposit(amount);
+            } else { // A negative number means a withdrawal
+                withdraw(amount);
+            }
+        }
+    }
+
     // Add this check to the array of checks to stop payments for
     public void addStopPaymentNumber(String checkNumber) {
         if (isDeleted()) {
@@ -406,69 +475,5 @@ public class CheckingAccount extends AbstractAccount{
 
         // Return true or false
         return validNumber;
-    }
-
-    // Withdraw via a check rather than by card
-    public void withdrawByCheck(int amount, String checkNumber) {
-        if (isDeleted()) {
-            return;
-        }
-        boolean stopPayment = false;
-
-        // Check if the check is valid and if it is contained in the "stop payment" list
-        if (!validateCheckNumber(checkNumber)) {
-            stopPayment = true;
-            System.out.println("Invalid Check Number");
-        }
-        if (stopPaymentArray.contains(checkNumber)) {
-            stopPayment = true;
-            System.out.println("Check number has previously been set to not be paid");
-        }
-
-        // Now do the actual withdrawing
-        if (!stopPayment) {
-
-            // First check to see if this will cause an overdraft
-            if (amount > balance) {
-
-                boolean overdraftFail = false;
-
-                // Check for a SavingsAccount (Overdraft account)
-                if (overDraftAccountID != -1) { // One exists
-                    SavingsAccount.SimpleSavingsAccount overdraftAccount = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
-
-                    if (overdraftAccount.getBalance() >= amount) { // Enough money in the overdraft account
-                        // Withdraw from overdraft, deposit in checking, then withdraw from checking
-                        overdraftAccount.withdraw(amount);
-                        deposit(amount);
-                        balance -= amount;
-                    } else if (balance + overdraftAccount.getBalance() >= amount) { // Not enough in the individual accounts; check them together
-                        // Remove funds from the CheckingAccount, update "amount" with the amount gotten from the account
-                        amount -= balance;
-                        balance = 0.0;
-
-                        // Now do the regular withdrawal procedure
-                        overdraftAccount.withdraw(amount);
-                        deposit(amount);
-                        balance -= amount;
-
-                    } else { // Not enough money between both accounts
-                        overdraftFail = true;
-                    }
-                } else { // No overdraft account
-                    overdraftFail = true;
-                }
-
-                // If an overdraft couldn't be resolved
-                if (overdraftFail) {
-                    balance -= 25; // $25 charge
-                    System.out.println("Insufficient funds: Withdrawal denied, $25 Overdraft Service charged to account");
-                }
-
-            } else { // Enough funds in Checking to cover amount
-                balance -= amount;
-            }
-
-        }
     }
 }

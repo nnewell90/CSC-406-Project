@@ -92,6 +92,13 @@ public class Database implements Runnable {
     public static <T>void removeItemFromList(ArrayList<T> list, T item) {
         if (list.contains(item)) {
             list.remove(item);
+
+            // If this is an Account, remove it from the abstractAccountList, which is used for searching elsewhere
+            if (item instanceof AbstractAccount) {
+                if (abstractAccountList.contains(item)) { // Make sure the item is actually in the list
+                    abstractAccountList.remove((AbstractAccount) item);
+                }
+            }
         } else {
             // This will need to be changed to work with Swing
             System.out.println("Item does not exist in the database: Cannot remove item");
