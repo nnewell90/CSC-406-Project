@@ -19,6 +19,10 @@ abstract public class AbstractAccount {
     // this is meant to act as a placeholder until it actually does.
     boolean isDeleted = false;
 
+    public void withdrawByCheck(int amt, String num) {
+
+    }
+
     // The different types of accounts possible in the system
     public enum AccountType {
         // Checking
