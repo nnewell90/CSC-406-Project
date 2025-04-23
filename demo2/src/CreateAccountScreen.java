@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 public class CreateAccountScreen extends JFrame {
 
@@ -13,7 +14,7 @@ public class CreateAccountScreen extends JFrame {
     public CreateAccountScreen() {
         setTitle("Create New Account");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(500, 500);
+        setSize(700, 500);
 
         JPanel formPanel = new JPanel();
         formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
@@ -30,13 +31,13 @@ public class CreateAccountScreen extends JFrame {
 
         formPanel.add(new JLabel("Account Type:"));
 
-        String[] accountTypes = {"Savings", "Checking", "Loan"};
+        String[] accountTypes = {"Savings", "Checking", "Loan", "Credit Card"};
         accountTypeComboBox = new JComboBox<>(accountTypes);
 
         formPanel.add(accountTypeComboBox);
 
 
-        formPanel.add(new JLabel("Starting Deposit: (If Loan Account, Leave Blank.)"));
+        formPanel.add(new JLabel("Starting Deposit: (If Loan or Credit Card Account, Leave Blank.)"));
         Deposit = new JTextField(10);
         formPanel.add(Deposit);
 
@@ -76,21 +77,31 @@ public class CreateAccountScreen extends JFrame {
             JOptionPane.showMessageDialog(this, "Please enter a valid ID");
         }else if(dateField.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter a valid date");
-        }else if(deposit.isEmpty()) {
+        }else if(deposit.isEmpty() && (Objects.equals(accountType, "Checking") || Objects.equals(accountType, "Savings"))) {
             JOptionPane.showMessageDialog(this, "Please enter a valid deposit");
         }else {
 
-            double depositNum = Double.parseDouble(Deposit.getText().trim());
+            Customer customer = Database.getCustomerFromList(id);
             String dateString = creationDate.getText().trim();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
             LocalDate localDate = LocalDate.parse(dateString, formatter);
             Date date = java.sql.Date.valueOf(localDate);
 
-            Customer customer = Database.getCustomerFromList(id);
-            if (customer == null) {
+
+            if (customer == null) {//make sure customer exists
                 JOptionPane.showMessageDialog(this, "Customer not found, validate your customer ID");
                 return;
-            }else {
+            }else {//customer isn't null, proceed to create account
+
+                if (accountType.equals("Loan")) {
+                    dispose();
+                    new CreateLoanAccountScreen(customer, date);
+                }else if(accountType.equals("Credit Card")) {
+                    dispose();
+                    new CreateCreditCardAccountScreen(customer, date);
+                }
+
+                double depositNum = Double.parseDouble(Deposit.getText().trim());
 
                 //create the account and add it to the list...
                 if (accountType.equals("Checking")) {
@@ -110,9 +121,6 @@ public class CreateAccountScreen extends JFrame {
                     customer.addAccountToCustomerAccounts(account.getAccountID());
                     Database.addItemToList(Database.savingsAccountList, account);
 
-                } else if (accountType.equals("Loan")) {
-                    dispose();
-                    new CreateLoanAccountScreen(customer, date);
                 }
 
                 //close screen and go back to Teller screen

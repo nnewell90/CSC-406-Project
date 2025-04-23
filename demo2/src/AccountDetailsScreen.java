@@ -12,6 +12,7 @@ public class AccountDetailsScreen extends JFrame {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
+        assert account != null;
         JLabel accountIDLabel = new JLabel("Account ID: " + accountID);
         JLabel balanceLabel = new JLabel("Balance: " + accountBalance(account));
         JLabel typeLabel = new JLabel("Account Type: " + account.getAccountType());
@@ -30,8 +31,7 @@ public class AccountDetailsScreen extends JFrame {
         JButton returnToTeller = new JButton("Return to Teller");
 
         returnToCustomer.addActionListener(e -> {
-            String customerID = account.getCustomerID();
-            Customer customer = Database.getCustomerFromList(customerID);
+            Customer customer = Database.getCustomerFromList(account.getCustomerID());
             dispose();
             new CustomerDetailsScreen(customer);
         });
@@ -63,6 +63,7 @@ public class AccountDetailsScreen extends JFrame {
         }
 
         add(panel, BorderLayout.CENTER);
+        setVisible(true);
     }
 
     private double accountBalance(AbstractAccount account){
@@ -82,19 +83,12 @@ public class AccountDetailsScreen extends JFrame {
     }
 
     private void checkingAccountInfo(JPanel panel, CheckingAccount account){
-//        JList<String> list = new JList("CCaccountdetails.txt").toArray(new String[0]);
-//
-//        scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
-//        panel.add(Box.createVerticalStrut(10)); // spacing
-//        panel.add(scrollPane);
 
         JPanel detailsPanel = new JPanel();
         detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
 
         String type = String.valueOf(account.getAccountSpecificType());
         detailsPanel.add(new JLabel(type));
-        detailsPanel.add(new JLabel("DISPLAY ACCOUNT TRANSACTIONS??? "));
-
 
         panel.add(detailsPanel);
         setVisible(true);
@@ -115,7 +109,27 @@ public class AccountDetailsScreen extends JFrame {
     }
 
     private void loanAccountInfo(JPanel panel, LoanAccount account){
+        JPanel detailsPanel = new JPanel();
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
 
+        detailsPanel.add(new JLabel("Rate: " + account.getRate()));
+        detailsPanel.add(new JLabel("Current Payment Due: " + account.getCurrentPaymentDue()));
+        detailsPanel.add(new JLabel("Last Payment Made: " + account.lastPaymentMadeDate));
+
+        if(account instanceof LoanAccount.CC){
+            LoanAccount.CC ccAccount = (LoanAccount.CC) account;
+            detailsPanel.add(new JLabel("limit: " + ccAccount.getLimit()));
+            detailsPanel.add(new JLabel("Finance Charge: " + ccAccount.getFinanceCharge()));
+            detailsPanel.add(new JLabel("Sum of Charges this month: " + ccAccount.sumOfChargesThisMonth));
+
+            JList<String> charges = new JList<>(ccAccount.chargeMessages.toArray(new String[0]));
+            JScrollPane chargesScrollPane = new JScrollPane(charges);
+            detailsPanel.add(chargesScrollPane);
+
+        }
+
+        panel.add(detailsPanel);
+        setVisible(true);
     }
 
 
