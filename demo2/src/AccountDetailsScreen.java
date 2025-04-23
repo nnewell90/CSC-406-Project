@@ -25,7 +25,6 @@ public class AccountDetailsScreen extends JFrame {
         dateLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
 
-
         //Return Buttons
         JButton returnToCustomer = new JButton("Return to Customer Details");
         JButton returnToTeller = new JButton("Return to Teller");
@@ -53,7 +52,6 @@ public class AccountDetailsScreen extends JFrame {
         panel.add(dateLabel);
         add(buttonPanel, BorderLayout.SOUTH);
 
-        //TODO -display account transactions if its a checking account... or not.
         if(account instanceof CheckingAccount checking){
             checkingAccountInfo(panel, checking);
         }else if (account instanceof SavingsAccount savings){
@@ -89,19 +87,45 @@ public class AccountDetailsScreen extends JFrame {
 
         String type = String.valueOf(account.getAccountSpecificType());
         detailsPanel.add(new JLabel(type));
+        if(type.equals(CheckingAccount.AccountType.GoldDiamond)){//GD accounts have an interest rate, so display it
+            detailsPanel.add(new JLabel("Interest Rate: " + account.getInterestRate()));
+        }
+
+        if(account.linkedToATMCard){
+            detailsPanel.add(new JLabel("Linked To ATM Card: "));
+            ATMCard atmCard = account.getLinkedATMCard();
+            detailsPanel.add(new JLabel(atmCard.toString()));
+        }
+
+        if(account.overDraftAccountID != -1){
+            detailsPanel.add(new JLabel("Overdraft Account: "));
+            SavingsAccount savingsAccount = account.getOverDraftAccount();
+            detailsPanel.add(new JLabel(savingsAccount.toString()));
+        }
 
         panel.add(detailsPanel);
         setVisible(true);
     }
 
-    private void savingsAccountInfo(JPanel panel, SavingsAccount savings){
+    private void savingsAccountInfo(JPanel panel, SavingsAccount account){
         JPanel detailsPanel = new JPanel();
         detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
 
-        //String type = String.valueOf(account.getAccountSpecificType());
-        //detailsPanel.add(new JLabel(type));
-        detailsPanel.add(new JLabel("DISPLAY ACCOUNT TRANSACTIONS??? "));
+        if(account instanceof SavingsAccount.SimpleSavingsAccount){
+            SavingsAccount.SimpleSavingsAccount simpleSavingsAccount = (SavingsAccount.SimpleSavingsAccount) account;
+            detailsPanel.add(new JLabel("Simple Savings Account"));
+            detailsPanel.add(new JLabel("Rate: " + simpleSavingsAccount.getInterestRate()));
+            if(simpleSavingsAccount.overdraftForAccountID != -1) {
+                detailsPanel.add(new JLabel("Overdraft for account: " + simpleSavingsAccount.overdraftForAccountID));
+            }
 
+        }else if(account instanceof SavingsAccount.CDSavingsAccount){
+            SavingsAccount.CDSavingsAccount cdsSavingsAccount = (SavingsAccount.CDSavingsAccount) account;
+            detailsPanel.add(new JLabel("CDS Savings Account"));
+            detailsPanel.add(new JLabel("Rate: " + cdsSavingsAccount.getInterestRate()));
+            detailsPanel.add(new JLabel("Due Date: " + cdsSavingsAccount.getDueDate()));
+
+        }
 
         panel.add(detailsPanel);
         setVisible(true);
@@ -121,10 +145,7 @@ public class AccountDetailsScreen extends JFrame {
             detailsPanel.add(new JLabel("limit: " + ccAccount.getLimit()));
             detailsPanel.add(new JLabel("Finance Charge: " + ccAccount.getFinanceCharge()));
             detailsPanel.add(new JLabel("Sum of Charges this month: " + ccAccount.sumOfChargesThisMonth));
-
-            JList<String> charges = new JList<>(ccAccount.chargeMessages.toArray(new String[0]));
-            JScrollPane chargesScrollPane = new JScrollPane(charges);
-            detailsPanel.add(chargesScrollPane);
+            detailsPanel.add(new JLabel(ccAccount.getChargeMessagesString()));
 
         }
 
