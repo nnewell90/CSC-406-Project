@@ -1,7 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.nio.file.Files;
-import java.util.ArrayList;
 
 public class AccountDetailsScreen extends JFrame {
     public AccountDetailsScreen(String id) {
@@ -58,7 +56,9 @@ public class AccountDetailsScreen extends JFrame {
         //TODO -display account transactions if its a checking account... or not.
         if(account instanceof CheckingAccount checking){
             checkingAccountInfo(panel, checking);
-        }else if(account instanceof LoanAccount loan){
+        }else if (account instanceof SavingsAccount savings){
+            savingsAccountInfo(panel, savings);
+        } else if(account instanceof LoanAccount loan){
             loanAccountInfo(panel, loan);
         }
 
@@ -98,6 +98,20 @@ public class AccountDetailsScreen extends JFrame {
 
         panel.add(detailsPanel);
         setVisible(true);
+    }
+
+    private void savingsAccountInfo(JPanel panel, SavingsAccount savings){
+        JPanel detailsPanel = new JPanel();
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
+
+        //String type = String.valueOf(account.getAccountSpecificType());
+        //detailsPanel.add(new JLabel(type));
+        detailsPanel.add(new JLabel("DISPLAY ACCOUNT TRANSACTIONS??? "));
+
+
+        panel.add(detailsPanel);
+        setVisible(true);
+
     }
 
     private void loanAccountInfo(JPanel panel, LoanAccount account){

@@ -1,2 +1,1 @@
-1;Mon Apr 14 08:56:28 CDT 2025;SimpleSavingsAccount;1;5000.0;0.0;-1;false;false
-2;Mon Apr 14 08:56:28 CDT 2025;CheckingAccount;2;5000.0;0;GoldDiamond;-1;true;false
+333669999;2023-02-23;CheckingAccount;2;1498.63;0;TMB;-1;false;false;0;1;8888
