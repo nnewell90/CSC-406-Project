@@ -202,6 +202,9 @@ public class CheckingAccount extends AbstractAccount{
         if (isDeleted()) {
             return;
         }
+        if (amount <= 0.0) {
+            return;
+        }
         balance += amount;
         balance -= getTransactionFee(false);
         if (accountSpecificType == AccountType.TMB) {
@@ -217,6 +220,9 @@ public class CheckingAccount extends AbstractAccount{
 
     public void withdraw(double amount) {
         if (isDeleted()) {
+            return;
+        }
+        if (amount <= 0.0) {
             return;
         }
         if (balance >= amount) {
@@ -266,18 +272,56 @@ public class CheckingAccount extends AbstractAccount{
         }
     }
 
-    // Not 100% sure how this needs to work, for now just a simple function
-    public void transfer(double amount /*, AbstractAccount transferToAccount*/) {
+    // Transfer accounts from a user's Checking account to another one of their accounts, either a Checking or a SimpleSavings account
+    public void transfer(double amount, long accountToTransferToID) {
         if (isDeleted()) {
             return;
         }
+
+        // Make sure they are transferring a positive amount
+        if (amount <= 0.0) {
+            System.out.println("Given amount is less than $0.0: Stopping transfer");
+            return;
+        }
+
+        // See if the given account ID to be transferred to is one of the customer's accounts
+        String cID = this.getCustomerID();
+        Customer c = Database.getCustomerFromList(cID);
+        if (!c.getCustomerAccountIDs().contains(accountToTransferToID)) { // If an account is NOT within this customer's list of accountIDs
+            System.out.println("Account to transfer to is not owned by the customer of this account: Stopping transfer");
+            return;
+        }
+
+        // See if the account being transferred to is a valid account to transfer to: SimpleSavings or Checking
+        // Note that the Database will return null if accounts are not found in the list
+        SavingsAccount.SimpleSavingsAccount ss = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, accountToTransferToID);
+        CheckingAccount ca = (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, accountToTransferToID);
+        boolean isSavingsAccount = false;
+        boolean isCheckingAccount = false;
+        if (ss != null) {
+            isSavingsAccount = true;
+        } else if (ca != null) {
+            isCheckingAccount = true;
+        } else { // An account could not be found for the given account ID
+            System.out.println("An account could not be found for the given account ID: Stopping transfer");
+            return;
+        }
+
+        // An account has been linked to a customer and is a valid account: Actually transfer funds if they are available
         if (balance >= amount) {
             balance -= amount;
             balance -= getTransactionFee(true);
-            if (accountSpecificType == AccountType.TMB) {
-                if (balance >= minimumBalanceGoldDiamond) {
-                    setAccountSpecificType(AccountType.GoldDiamond);
-                }
+            if (balance <= minimumBalanceGoldDiamond) {
+                setAccountSpecificType(AccountType.TMB);
+            } else {
+                setAccountSpecificType(AccountType.GoldDiamond);
+            }
+
+            // Add the amount to the other account
+            if (isCheckingAccount) {
+                ca.deposit(amount);
+            } else if (isSavingsAccount) {
+                ss.deposit(amount);
             }
         } else {
             System.out.println("Insufficient Balance"); // !!! Swing will need to change this
@@ -433,17 +477,35 @@ public class CheckingAccount extends AbstractAccount{
 
     // Process all checks in the list(map) of checks to be processed
     public void processChecks() {
+        // Add checks into a deposit or withdrawal list; this is so deposits can be processed before withdrawals
+        ArrayList<String> depositChecks = new ArrayList<>();
+        ArrayList<String> withdrawChecks = new ArrayList<>();
         for (String checkNumber : checkMap.keySet()) {
+            if (checkMap.get(checkNumber) > 0.0) {
+                depositChecks.add(checkNumber);
+            } else {
+                withdrawChecks.add(checkNumber);
+            }
+        }
+
+        // Process deposits first
+        for (String checkNumber : depositChecks) {
             // See if this check is supposed to be stopped
             if (stopPaymentArray.contains(checkNumber)) {
                 continue;
             }
             double amount = checkMap.get(checkNumber);
-            if (amount > 0.0) { // A positive number means a deposit
-                deposit(amount);
-            } else { // A negative number means a withdrawal
-                withdraw(amount);
+            deposit(amount);
+
+        }
+
+        // Process withdrawals after deposits
+        for (String checkNumber : withdrawChecks) {
+            if (stopPaymentArray.contains(checkNumber)) {
+                continue;
             }
+            double amount = checkMap.get(checkNumber);
+            withdraw(amount * -1); // amount is negative but withdraw expects a positive number, so * -1
         }
     }
 
