@@ -87,24 +87,19 @@ public class AccountDetailsScreen extends JFrame {
 
         String type = String.valueOf(account.getAccountSpecificType());
         detailsPanel.add(new JLabel(type));
-        if(type.equals(CheckingAccount.AccountType.GoldDiamond)){//GD accounts have an interest rate, so display it
+        if(account.getAccountSpecificType() == CheckingAccount.AccountType.GoldDiamond){//GD accounts have an interest rate, so display it
             detailsPanel.add(new JLabel("Interest Rate: " + account.getInterestRate()));
         }
 
-        if(account.linkedToATMCard){
-            detailsPanel.add(new JLabel("Linked To ATM Card: "));
-            ATMCard atmCard = account.getLinkedATMCard();
-            detailsPanel.add(new JLabel(atmCard.toString()));
-        }
+        ATMCard atmCard = account.getLinkedATMCard();
+        detailsPanel.add(new JLabel("Linked To ATM Card: " + atmCard));
 
-        if(account.overDraftAccountID != -1){
-            detailsPanel.add(new JLabel("Overdraft Account: "));
-            SavingsAccount savingsAccount = account.getOverDraftAccount();
-            detailsPanel.add(new JLabel(savingsAccount.toString()));
-        }
+
+        SavingsAccount savingsAccount = account.getOverDraftAccount();
+        detailsPanel.add(new JLabel("Overdraft Account: " + savingsAccount));
+
 
         panel.add(detailsPanel);
-        setVisible(true);
     }
 
     private void savingsAccountInfo(JPanel panel, SavingsAccount account){
@@ -128,7 +123,6 @@ public class AccountDetailsScreen extends JFrame {
         }
 
         panel.add(detailsPanel);
-        setVisible(true);
 
     }
 
@@ -150,7 +144,6 @@ public class AccountDetailsScreen extends JFrame {
         }
 
         panel.add(detailsPanel);
-        setVisible(true);
     }
 
 
