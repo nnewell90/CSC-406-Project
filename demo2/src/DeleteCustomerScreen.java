@@ -23,10 +23,8 @@ public class DeleteCustomerScreen extends JFrame {
 
 
         JButton deleteButton = new JButton("Delete Customer");
-        deleteButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            }
+        deleteButton.addActionListener(e -> {
+            deleteCustomer();
         });
         JButton returntoButton = new JButton("Return to Teller Screen");
 
@@ -39,6 +37,27 @@ public class DeleteCustomerScreen extends JFrame {
         add(returntoButton);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
+    }
+
+    private void deleteCustomer() {
+
+        if(accountNUM.getText().equals("")) {
+            JOptionPane.showMessageDialog(null, "Please enter the SSN: ", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Customer customer = Database.getCustomerFromList(accountNUM.getText());
+        if(customer == null) {
+            JOptionPane.showMessageDialog(null, "Customer not Found! Double-check SSN.");
+            return;
+        }
+
+        double deleted = Customer.deleteCustomer(customer);
+        Database.removeItemFromList(Database.customerList, customer);
+        JOptionPane.showMessageDialog(null, "Customer Deleted Successfully!" + deleted);
+
+        dispose();
+        new TellerScreen();
     }
 
 }
