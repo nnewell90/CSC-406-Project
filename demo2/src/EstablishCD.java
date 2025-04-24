@@ -68,10 +68,10 @@ public class EstablishCD extends JFrame {
         String dateString = dueDate.getText().trim();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
         LocalDate localDate = LocalDate.parse(dateString, formatter);
-        Date DueDate = java.sql.Date.valueOf(localDate);
-        Date date = new Date();
+        LocalDate DueDate = localDate;
+        LocalDate today = LocalDate.now();
 
-        SavingsAccount.CDSavingsAccount account = new SavingsAccount.CDSavingsAccount(ssn, date, depo, interestRate, DueDate);
+        SavingsAccount.CDSavingsAccount account = new SavingsAccount.CDSavingsAccount(ssn, today, depo, interestRate, DueDate);
         Database.addItemToList(Database.savingsAccountList, account);
         JOptionPane.showMessageDialog(null, "Account created! Matures due on: " + account.getDueDate());
         dispose();

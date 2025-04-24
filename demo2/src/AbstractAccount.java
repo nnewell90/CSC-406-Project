@@ -1,4 +1,5 @@
 import java.lang.reflect.Method;
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -7,7 +8,7 @@ import java.util.Date;
 abstract public class AbstractAccount {
     // Data
     protected String customerID;
-    protected Date accountCreationDate;
+    protected LocalDate accountCreationDate;
     // protected String accountType;
     protected AccountType accountType;
     static long accountIDCounter = 0;
@@ -38,7 +39,7 @@ abstract public class AbstractAccount {
     }
 
     // Methods
-    public AbstractAccount(String customerID, Date accountCreationDate, AccountType accountType) {
+    public AbstractAccount(String customerID, LocalDate accountCreationDate, AccountType accountType) {
         this.customerID = customerID;
         this.accountCreationDate = accountCreationDate;
         this.accountType = accountType;
@@ -48,7 +49,7 @@ abstract public class AbstractAccount {
     }
 
     // Constructor used when accounts are being restored, meaning they have already been created
-    public AbstractAccount(String customerID, Date accountCreationDate, AccountType accountType, long accountID) {
+    public AbstractAccount(String customerID, LocalDate accountCreationDate, AccountType accountType, long accountID) {
         this.customerID = customerID;
         this.accountCreationDate = accountCreationDate;
         this.accountType = accountType;
@@ -63,7 +64,7 @@ abstract public class AbstractAccount {
         return customerID;
     }
 
-    public Date getAccountCreationDate() {
+    public LocalDate getAccountCreationDate() {
         if (isDeleted()) {
             return null;
         }
@@ -115,5 +116,25 @@ abstract public class AbstractAccount {
 
     public void setDeleted(boolean deleted) {
         isDeleted = deleted;
+    }
+
+    public void setCustomerID(String customerID) {
+        this.customerID = customerID;
+    }
+
+    public void setAccountCreationDate(LocalDate accountCreationDate) {
+        this.accountCreationDate = accountCreationDate;
+    }
+
+    public static long getAccountIDCounter() {
+        return accountIDCounter;
+    }
+
+    public static void setAccountIDCounter(long accountIDCounter) {
+        AbstractAccount.accountIDCounter = accountIDCounter;
+    }
+
+    public void setAccountID(long accountID) {
+        this.accountID = accountID;
     }
 }

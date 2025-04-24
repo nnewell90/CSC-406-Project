@@ -1,7 +1,6 @@
-import java.text.DateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 
 public class CheckingAccount extends AbstractAccount{
@@ -28,7 +27,7 @@ public class CheckingAccount extends AbstractAccount{
     }
 
     // Constructor used when creating a new account for the first time
-    public CheckingAccount(String customerID, Date accountCreationDate, double initialBalance) {
+    public CheckingAccount(String customerID, LocalDate accountCreationDate, double initialBalance) {
         super(customerID, accountCreationDate, AbstractAccount.AccountType.CheckingAccount);
         setAccountType(AbstractAccount.AccountType.CheckingAccount); // This is probably unnecessary
         setBalance(initialBalance);
@@ -45,7 +44,7 @@ public class CheckingAccount extends AbstractAccount{
     }
 
     // Constructor used when restoring accounts
-    public CheckingAccount(String customerID, Date accountCreationDate, double balance, int overdraftsThisMonth, long accountID, long overdraftAccountID, boolean linkedToATMCard, HashMap<String, Double> checkMapPassed, ArrayList<String> stopPaymentArrayPassed) {
+    public CheckingAccount(String customerID, LocalDate accountCreationDate, double balance, int overdraftsThisMonth, long accountID, long overdraftAccountID, boolean linkedToATMCard, HashMap<String, Double> checkMapPassed, ArrayList<String> stopPaymentArrayPassed) {
         super(customerID, accountCreationDate, AbstractAccount.AccountType.CheckingAccount, accountID);
         setAccountType(AbstractAccount.AccountType.CheckingAccount);
         setBalance(balance);
@@ -146,7 +145,13 @@ public class CheckingAccount extends AbstractAccount{
 
         // Abstract stuff
         String customerID = split[0];
-        Date accountCreationDate = new Date(Date.parse(split[1]));
+
+        String[] splitParseDate = split[1].split("-");
+        int year = Integer.parseInt(splitParseDate[0]);
+        int month = Integer.parseInt(splitParseDate[1]);
+        int day = Integer.parseInt(splitParseDate[2]);
+        LocalDate accountCreationDate = LocalDate.of(year, month, day);
+
         AbstractAccount.AccountType abstractAccountType = AbstractAccount.AccountType.valueOf(split[2]);
         long accountID = Long.parseLong(split[3]);
 

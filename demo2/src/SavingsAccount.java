@@ -1,6 +1,6 @@
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 
 public class SavingsAccount extends AbstractAccount {
@@ -8,13 +8,13 @@ public class SavingsAccount extends AbstractAccount {
     double balance;
 
     // Normal constructor
-    public SavingsAccount(String customerID, Date accountCreationDate, double initialBalance) {
+    public SavingsAccount(String customerID, LocalDate accountCreationDate, double initialBalance) {
         super(customerID, accountCreationDate, AccountType.SavingsAccount);
         setBalance(initialBalance);
     }
 
     // Restore from database constructor
-    public SavingsAccount(String customerID, Date accountCreationDate, double balance, long accountID) {
+    public SavingsAccount(String customerID, LocalDate accountCreationDate, double balance, long accountID) {
         super(customerID, accountCreationDate, AccountType.SavingsAccount, accountID);
         setBalance(balance);
     }
@@ -54,7 +54,11 @@ public class SavingsAccount extends AbstractAccount {
 
         // Abstract stuff
         String customerID = split[0];
-        Date accountCreationDate = new Date(Date.parse(split[1]));
+        String[] splitParseDate = split[1].split("-");
+        int year = Integer.parseInt(splitParseDate[0]);
+        int month = Integer.parseInt(splitParseDate[1]);
+        int day = Integer.parseInt(splitParseDate[2]);
+        LocalDate accountCreationDate = LocalDate.of(year, month, day);
         AccountType abstractAccountType = AccountType.valueOf(split[2]);
         long accountID = Long.parseLong(split[3]);
 
@@ -115,15 +119,16 @@ public class SavingsAccount extends AbstractAccount {
 
         boolean linkedToATMCard;
 
-        public SimpleSavingsAccount(String customerID, Date accountCreationDate, int initialBalance) {
+        public SimpleSavingsAccount(String customerID, LocalDate accountCreationDate, int initialBalance) {
             super(customerID, accountCreationDate, initialBalance);
             setAccountType(AccountType.SimpleSavingsAccount);
             overdraftForAccountID = -1;
             stopPaymentArray = new ArrayList<>();
+            checkMap = new HashMap<>();
             linkedToATMCard = false;
         }
 
-        public SimpleSavingsAccount(String customerID, Date accountCreationDate, long accountID, double balance, long overdraftAccountID, boolean linkedToATMCard, HashMap<String, Double> checkMapPassed, ArrayList<String> stopPaymentArrayPassed) {
+        public SimpleSavingsAccount(String customerID, LocalDate accountCreationDate, long accountID, double balance, long overdraftAccountID, boolean linkedToATMCard, HashMap<String, Double> checkMapPassed, ArrayList<String> stopPaymentArrayPassed) {
             super(customerID, accountCreationDate, balance, accountID);
             setAccountType(AccountType.SimpleSavingsAccount);
             setBalance(balance);
@@ -220,7 +225,11 @@ public class SavingsAccount extends AbstractAccount {
 
             // Abstract stuff
             String customerID = split[0];
-            Date accountCreationDate = new Date(Date.parse(split[1]));
+            String[] splitParseDate = split[1].split("-");
+            int year = Integer.parseInt(splitParseDate[0]);
+            int month = Integer.parseInt(splitParseDate[1]);
+            int day = Integer.parseInt(splitParseDate[2]);
+            LocalDate accountCreationDate = LocalDate.of(year, month, day);
             AccountType abstractAccountType = AccountType.valueOf(split[2]);
             long accountID = Long.parseLong(split[3]);
 
@@ -307,6 +316,80 @@ public class SavingsAccount extends AbstractAccount {
             }
         }
 
+        public void setOverdraftForAccount(long overdraftForAccountID) {
+            if (isDeleted()) {
+                return;
+            }
+            CheckingAccount checkingAccount = (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, overdraftForAccountID);
+            if (checkingAccount != null) {
+                this.overdraftForAccountID = overdraftForAccountID;
+            } else {
+                // Some fail message
+            }
+        }
+
+        public long getOverdraftForAccountID() {
+            return overdraftForAccountID;
+        }
+
+        public boolean isLinkedToATMCard() {
+            return linkedToATMCard;
+        }
+
+        public void setLinkedToATMCard(boolean linkedToATMCard) {
+            this.linkedToATMCard = linkedToATMCard;
+        }
+
+        public ATMCard getATMCard() {
+            return Database.getATMCardFromList(getAccountID());
+        }
+
+        public CheckingAccount getOverdraftForAccount() {
+            if (isDeleted()) {
+                return null;
+            }
+            if (overdraftForAccountID != -1) {
+                return (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, overdraftForAccountID);
+            } else {
+                // Some fail message
+                return null;
+            }
+        }
+
+        public void removeOverdraftForAccount() {
+            overdraftForAccountID = -1;
+        }
+
+        public double getBalance() {
+            return super.getBalance();
+        }
+
+        public double getInterestRate() {
+            return interestRate;
+        }
+
+        public static void setInterestRate(double interestRatePassed) {
+            interestRate = interestRatePassed;
+            CheckingAccount.setInterestRateBySavingsAccount(interestRatePassed);
+        }
+
+        protected static void setInterestRateByCheckingAccount(double interestRatePassed) {
+            interestRate = interestRatePassed * 2; // SavingsAccounts have double the interest of Checking accounts
+        }
+
+        // Calculates and adds the interest for an account
+        public void calcAndAddInterest() {
+            balance += balance * interestRate;
+        }
+
+        public void deposit(int amount) {
+            super.deposit(amount);
+        }
+
+        public void withdraw(int amount) {
+            super.withdraw(amount);
+        }
+
         // Check stuff
 
         // Add a check to the list of checks which will be processed later
@@ -390,96 +473,22 @@ public class SavingsAccount extends AbstractAccount {
             // Return true or false
             return validNumber;
         }
-
-        public void setOverdraftForAccount(long overdraftForAccountID) {
-            if (isDeleted()) {
-                return;
-            }
-            CheckingAccount checkingAccount = (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, overdraftForAccountID);
-            if (checkingAccount != null) {
-                this.overdraftForAccountID = overdraftForAccountID;
-            } else {
-                // Some fail message
-            }
-        }
-
-        public long getOverdraftForAccountID() {
-            return overdraftForAccountID;
-        }
-
-        public boolean isLinkedToATMCard() {
-            return linkedToATMCard;
-        }
-
-        public void setLinkedToATMCard(boolean linkedToATMCard) {
-            this.linkedToATMCard = linkedToATMCard;
-        }
-
-        public ATMCard getATMCard() {
-            return Database.getATMCardFromList(getAccountID());
-        }
-
-        public CheckingAccount getOverdraftForAccount() {
-            if (isDeleted()) {
-                return null;
-            }
-            if (overdraftForAccountID != -1) {
-                return (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, overdraftForAccountID);
-            } else {
-                // Some fail message
-                return null;
-            }
-        }
-
-        public void removeOverdraftForAccount() {
-            overdraftForAccountID = -1;
-        }
-
-        public double getBalance() {
-            return super.getBalance();
-        }
-
-        public double getInterestRate() {
-            return interestRate;
-        }
-
-        public static void setInterestRate(double interestRatePassed) {
-            interestRate = interestRatePassed;
-            CheckingAccount.setInterestRateBySavingsAccount(interestRatePassed);
-        }
-
-        protected static void setInterestRateByCheckingAccount(double interestRatePassed) {
-            interestRate = interestRatePassed * 2; // SavingsAccounts have double the interest of Checking accounts
-        }
-
-        // Calculates and adds the interest for an account
-        public void calcAndAddInterest() {
-            balance += balance * interestRate;
-        }
-
-        public void deposit(int amount) {
-            super.deposit(amount);
-        }
-
-        public void withdraw(int amount) {
-            super.withdraw(amount);
-        }
     }
 
     public static class CDSavingsAccount extends SavingsAccount {
 
         // Data
         double interestRate;
-        Date dueDate;
+        LocalDate dueDate;
 
-        public CDSavingsAccount(String customerID, Date accountCreationDate, double initialBalance, double interestRate, Date dueDate) {
+        public CDSavingsAccount(String customerID, LocalDate accountCreationDate, double initialBalance, double interestRate, LocalDate dueDate) {
             super(customerID, accountCreationDate, initialBalance);
             setAccountType(AccountType.CDSavingsAccount);
             this.interestRate = interestRate;
             this.dueDate = dueDate;
         }
 
-        public CDSavingsAccount(String customerID, Date accountCreationDate, long accountID, double balance, double interestRate, Date dueDate) {
+        public CDSavingsAccount(String customerID, LocalDate accountCreationDate, long accountID, double balance, double interestRate, LocalDate dueDate) {
             super(customerID, accountCreationDate, accountID);
             setAccountType(AccountType.CDSavingsAccount);
             this.balance = balance;
@@ -540,14 +549,22 @@ public class SavingsAccount extends AbstractAccount {
 
             // Abstract stuff
             String customerID = split[0];
-            Date accountCreationDate = new Date(Date.parse(split[1]));
+            String[] splitParseDate = split[1].split("-");
+            int year = Integer.parseInt(splitParseDate[0]);
+            int month = Integer.parseInt(splitParseDate[1]);
+            int day = Integer.parseInt(splitParseDate[2]);
+            LocalDate accountCreationDate = LocalDate.of(year, month, day);
             String abstractAccountType = split[2]; // This is ignored, it is handled in the constructor
             long accountID = Long.parseLong(split[3]);
 
             // Specific
             double balance = Double.parseDouble(split[4]);
             double interestRate = Double.parseDouble(split[5]);
-            Date dueDate = new Date(Long.parseLong(split[6]));
+            splitParseDate = split[6].split("-");
+            year = Integer.parseInt(splitParseDate[0]);
+            month = Integer.parseInt(splitParseDate[1]);
+            day = Integer.parseInt(splitParseDate[2]);
+            LocalDate dueDate = LocalDate.of(year, month, day);
             boolean isDeleted = Boolean.parseBoolean(split[7]);
 
             CDSavingsAccount temp= new CDSavingsAccount(customerID, accountCreationDate, accountID, balance, interestRate, dueDate);
@@ -575,11 +592,11 @@ public class SavingsAccount extends AbstractAccount {
             balance += balance * interestRate;
         }
 
-        public Date getDueDate() {
+        public LocalDate getDueDate() {
             return dueDate;
         }
 
-        public void setDueDate(Date dueDate) {
+        public void setDueDate(LocalDate dueDate) {
             this.dueDate = dueDate;
         }
 
@@ -596,7 +613,7 @@ public class SavingsAccount extends AbstractAccount {
             deleteAccount(this);
         }
 
-        public void rollOver(int numberOfMonthsForNewCycle, double newRate, Date newDueDate) {
+        public void rollOver(int numberOfMonthsForNewCycle, double newRate, LocalDate newDueDate) {
             interestRate = newRate;
             dueDate = newDueDate;
         }
