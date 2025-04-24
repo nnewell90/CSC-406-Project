@@ -47,7 +47,7 @@ public class MainMenu extends JFrame {
         customerButton.addActionListener(e -> {
             lastScreen = "CustomerScreen";
             saveUIState();
-            new CustomerScreen();
+            new CustomerSignIn();
             dispose();
         });
 
@@ -114,7 +114,7 @@ public class MainMenu extends JFrame {
                 new ManagerScreen();
                 break;
             case "CustomerScreen":
-                new CustomerScreen();
+                new CustomerSignIn();
                 break;
             default:
                 new MainMenu(); // Fallback to main menu if something goes horribly, horribly wrong
