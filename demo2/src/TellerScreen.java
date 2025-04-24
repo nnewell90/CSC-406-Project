@@ -19,6 +19,7 @@ public class TellerScreen extends JFrame {
         JButton stopButton = new JButton("Stop Payment");
         JButton reviewButton = new JButton("Review Customer Accounts");
         JButton closeButton = new JButton("Close an Account");
+        JButton deleteButton = new JButton("Delete Customer");
         JButton returnButton = new JButton("Return to Main Menu");
 
         newCustomerButton.addActionListener(e ->{ dispose(); new NewCustomerScreen();});  // creates new customer
@@ -27,6 +28,7 @@ public class TellerScreen extends JFrame {
         withdrawButton.addActionListener(e -> {dispose(); new WithdrawScreen();});
         depositButton.addActionListener(e -> {dispose(); new DepositScreen();});
         closeButton.addActionListener(e -> {dispose(); new CloseAccountScreen();});
+        deleteButton.addActionListener(e -> {dispose(); new DeleteCustomerScreen();});
         stopButton.addActionListener(e -> {dispose(); new StopPayScreen();});
         reviewButton.addActionListener(e -> { dispose();
             try {
@@ -46,6 +48,7 @@ public class TellerScreen extends JFrame {
         add(stopButton);
         add(reviewButton);
         add(closeButton);
+        add(deleteButton);
         add(returnButton);
 
         setVisible(true);
