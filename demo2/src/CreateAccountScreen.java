@@ -31,7 +31,7 @@ public class CreateAccountScreen extends JFrame {
 
         formPanel.add(new JLabel("Account Type:"));
 
-        String[] accountTypes = {"Savings", "Checking", "Loan", "Credit Card"};
+        String[] accountTypes = {"Savings", "Checking", "Loan", "Credit Card", "Certificate of Deposit"};
         accountTypeComboBox = new JComboBox<>(accountTypes);
 
         formPanel.add(accountTypeComboBox);
@@ -86,7 +86,7 @@ public class CreateAccountScreen extends JFrame {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
             LocalDate localDate = LocalDate.parse(dateString, formatter);
             Date date = java.sql.Date.valueOf(localDate);
-
+            int balance = Integer.parseInt(deposit);
 
             if (customer == null) {//make sure customer exists
                 JOptionPane.showMessageDialog(this, "Customer not found, validate your customer ID");
@@ -99,6 +99,10 @@ public class CreateAccountScreen extends JFrame {
                 }else if(accountType.equals("Credit Card")) {
                     dispose();
                     new CreateCreditCardAccountScreen(customer, date);
+                }else if (accountType.equals("Certificate of Deposit")){
+                    double initial = Double.parseDouble(deposit);
+                    dispose();
+                    new CreateCDScreen(customer, date, initial);
                 }
 
                 double depositNum = Double.parseDouble(Deposit.getText().trim());
@@ -117,9 +121,10 @@ public class CreateAccountScreen extends JFrame {
                     Database.addItemToList(Database.checkingAccountList, account);
 
                 } else if (accountType.equals("Savings")) {
-                    SavingsAccount account = new SavingsAccount(id, date,  depositNum);
+                    SavingsAccount.SimpleSavingsAccount account = new SavingsAccount.SimpleSavingsAccount(id, date, balance);
                     customer.addAccountToCustomerAccounts(account.getAccountID());
                     Database.addItemToList(Database.savingsAccountList, account);
+                    Database.addItemToList(Database.simpleSavingsAccountList, account);
 
                 }
 
