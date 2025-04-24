@@ -67,7 +67,7 @@ public class ProcessCheck extends JFrame {
                     return;
                 }
 
-                account.withdrawByCheck(amt, num);
+                account.addCheckToProcessLater(amt, num);
                 JOptionPane.showMessageDialog(null, "Check amount successfully withdrawn!");
                 dispose();
                 new ManagerScreen();
