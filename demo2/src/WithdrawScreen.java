@@ -94,7 +94,7 @@ public class WithdrawScreen extends JFrame {
             CheckingAccount checking = (CheckingAccount) account;
             Long overDraftAccountID = checking.overDraftAccountID;
 
-            SavingsAccount linkedSavings = (SavingsAccount) Database.getAccountFromList(Database.abstractAccountList, overDraftAccountID);
+            SavingsAccount.SimpleSavingsAccount linkedSavings = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
 
             if(checking.balance >= amount) {//If they have enough in checking, perform a normal withdrawal
                 checking.withdraw(amount);
@@ -118,7 +118,7 @@ public class WithdrawScreen extends JFrame {
                         JOptionPane.showMessageDialog(this, "Insufficient funds in both checking and linked Savings!");
                     }else if (checking.balance+linkedSavings.balance >= amount){//if there is enough in the savings
                         //perform the withdrawal but pull from linked savings
-                        linkedSavings.withdraw(amount);
+                        checking.withdraw(amount);
                         updateType(checking);
                         JOptionPane.showMessageDialog(this, "Withdraw successful, however overdraft process was applied.");
                         dispose();
