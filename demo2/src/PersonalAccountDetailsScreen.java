@@ -147,7 +147,13 @@ public class PersonalAccountDetailsScreen extends JFrame {
             detailsPanel.add(new JLabel("limit: " + ccAccount.getLimit()));
             detailsPanel.add(new JLabel("Finance Charge: " + ccAccount.getFinanceCharge()));
             detailsPanel.add(new JLabel("Sum of Charges this month: " + ccAccount.sumOfChargesThisMonth));
-            detailsPanel.add(new JLabel(ccAccount.getChargeMessagesString()));
+//            detailsPanel.add(new JLabel(ccAccount.getChargeMessagesString()));
+
+            JTextArea chargeHistory = new JTextArea(ccAccount.getChargeMessagesString());
+            chargeHistory.setEditable(false);
+            chargeHistory.setLineWrap(true);
+            chargeHistory.setWrapStyleWord(true);
+            detailsPanel.add(new JScrollPane(chargeHistory));
 
         }
 
