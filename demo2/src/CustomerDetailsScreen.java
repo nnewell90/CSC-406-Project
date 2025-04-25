@@ -52,8 +52,10 @@ public class CustomerDetailsScreen extends JFrame {
 
                 //grabs the account number from the string selected
                 String accountID = selected.substring(selected.lastIndexOf("#")+1).trim();
+                Long idLong = Long.parseLong(accountID);
+                AbstractAccount account = Database.getAccountFromList(Database.abstractAccountList, idLong);
 
-                new AccountDetailsScreen(accountID);
+                new AccountDetailsScreen(account);
             }
         });
 

@@ -29,8 +29,8 @@ public class PersonalAccountsScreen extends JFrame {
 
                 //grabs the account number from the string selected
                 String accountID = selected.substring(selected.lastIndexOf("#")+1).trim();
-
-                new PersonalAccountDetailsScreen(accountID);
+                AbstractAccount account = accounts.get(Integer.parseInt(accountID));
+                new PersonalAccountDetailsScreen(account);
             }
         });
 
