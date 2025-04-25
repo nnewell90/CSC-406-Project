@@ -112,11 +112,6 @@ public class PersonalAccountDetailsScreen extends JFrame {
             detailsPanel.add(plainLabel("Linked To ATM Card"));
         }
 
-        detailsPanel.add(plainLabel("CHECKS TO BE PROCESSED: "));
-        HashMap<String, Double> checkMap = account.checkMap;
-        for(String checkNum : checkMap.keySet()){
-            detailsPanel.add(new JLabel("Check #" + checkNum + ": $" + df.format(checkMap.get(checkNum))));
-        }
 
         return  detailsPanel;
     }
@@ -138,11 +133,6 @@ public class PersonalAccountDetailsScreen extends JFrame {
             detailsPanel.add(plainLabel("Linked To ATM Card"));
         }
 
-        detailsPanel.add(plainLabel("CHECKS TO BE PROCESSED: "));
-        HashMap<String, Double> checkMap = account.checkMap;
-        for(String checkNum : checkMap.keySet()){
-            detailsPanel.add(new JLabel("Check #" + checkNum + ": $" + df.format(checkMap.get(checkNum))));
-        }
         return  detailsPanel;
     }
 
