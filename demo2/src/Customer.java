@@ -1,5 +1,5 @@
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 
 /**
  * The customer class handles all customer data
@@ -36,6 +36,23 @@ public class Customer {
         setCustomerID(SSN);
         customerAccountIDs = new ArrayList<>();
     }
+
+    // Constructor called when restoring from the database
+    public Customer(String SSN, String address, String city, String state, String zip, String firstName, String lastName, ArrayList<Long> customerAccountIDsPassed) {
+        // First search to make sure a duplicate user isn't being created!
+
+        // Data management
+        setSSN(SSN);
+        setAddress(address);
+        setCity(city);
+        setState(state);
+        setZip(zip);
+        setFirstName(firstName);
+        setLastName(lastName);
+        setCustomerID(SSN);
+        customerAccountIDs = new ArrayList<>(customerAccountIDsPassed);
+    }
+
 
     // Deletes a customer from the entire system, including the database
     public static double deleteCustomer(Customer customer) {
@@ -209,8 +226,16 @@ public class Customer {
         // String customerID = split[7]; // This is set in the constructor
         boolean isDeleted = Boolean.parseBoolean(split[8]);
 
+        // Get this customer's accounts into their list
+        ArrayList<Long> accountIDs = new ArrayList<>();
+        if (split.length > 9) {
+            for (int i = 9; i < split.length; i++) {
+                accountIDs.add(Long.parseLong(split[i]));
+            }
+        }
+
         // Customer accounts are restored from the database, don't do it here
-        Customer temp = new Customer(SSN, address, city, state, zip, firstName, lastName);
+        Customer temp = new Customer(SSN, address, city, state, zip, firstName, lastName, accountIDs);
         temp.setDeleted(isDeleted);
         return temp;
     }

@@ -2,7 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Date;
 
 
 public class CreateLoanAccountScreen extends JFrame {
@@ -10,9 +9,9 @@ public class CreateLoanAccountScreen extends JFrame {
     private final JTextField interestRate;
     private final JTextField monthlyPayment;
     private final Customer customer;
-    private final Date date;
+    private final LocalDate date;
 
-    public CreateLoanAccountScreen(Customer customer, Date date) {
+    public CreateLoanAccountScreen(Customer customer, LocalDate date) {
         setSize(700, 500);
         setTitle("Creating a Loan Account for "+ customer.getFirstName() + " " + customer.getLastName());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -82,7 +81,7 @@ public class CreateLoanAccountScreen extends JFrame {
 
         //calculate months and years
         int monthsToPayOffLoan = (int) Math.ceil(value/monthly);
-        Date finalPaymentDate = calcFinalPaymentDate(date, monthsToPayOffLoan);
+        LocalDate finalPaymentDate = calcFinalPaymentDate(date, monthsToPayOffLoan);
         int totalYears = calcYears(monthsToPayOffLoan);
         int remainingMonths = calcRemainingMonths(monthsToPayOffLoan);
 
@@ -100,17 +99,9 @@ public class CreateLoanAccountScreen extends JFrame {
     }
 
     //Method to calculate the final payment
-    private Date calcFinalPaymentDate(Date date, int monthsToPayOffLoan) {
-        //change it to a java.LocalDate...
-        LocalDate localStartDate = ((java.sql.Date) date).toLocalDate();
-
+    private LocalDate calcFinalPaymentDate(LocalDate date, int monthsToPayOffLoan) {
         //calculate the last payment date...
-        LocalDate localEndDate = localStartDate.plusMonths(monthsToPayOffLoan);
-
-        //change back into a java.Date
-        Date endDate = Date.from(localEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-
-        return endDate;
+        return date.plusMonths(monthsToPayOffLoan);
     }
 
     private int calcYears(int monthsToPayOffLoan) {

@@ -1,6 +1,7 @@
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
+
 
 public class LoanAccount extends AbstractAccount {
 
@@ -8,14 +9,14 @@ public class LoanAccount extends AbstractAccount {
     double balance; // How much is left to pay off
     double rate;
     double currentPaymentDue;
-    Date paymentDueDate;
-    Date notifiedOfPaymentDate;
-    Date lastPaymentMadeDate;
+    LocalDate paymentDueDate;
+    LocalDate notifiedOfPaymentDate;
+    LocalDate lastPaymentMadeDate;
     boolean missedPayment; // This acts as the "problem account" flag
     
     
     // Regular constructor
-    public LoanAccount(String customerID, Date accountCreationDate, double balance, double rate, double currentPaymentDue) {
+    public LoanAccount(String customerID, LocalDate accountCreationDate, double balance, double rate, double currentPaymentDue) {
         super(customerID, accountCreationDate, AccountType.LoanAccount);
         this.balance = balance;
         this.rate = rate;
@@ -27,7 +28,7 @@ public class LoanAccount extends AbstractAccount {
     }
 
     // Reading from database constructor
-    public LoanAccount(String customerID, Date accountCreationDate, long accountID, double balance, double rate, double currentPaymentDue, Date paymentDueDate, Date notifiedOfPaymentDate, Date lastPaymentMadeDate, boolean missedPayment) {
+    public LoanAccount(String customerID, LocalDate accountCreationDate, long accountID, double balance, double rate, double currentPaymentDue, LocalDate paymentDueDate, LocalDate notifiedOfPaymentDate, LocalDate lastPaymentMadeDate, boolean missedPayment) {
         super(customerID, accountCreationDate, AccountType.LoanAccount, accountID);
         this.balance = balance;
         this.rate = rate;
@@ -93,17 +94,36 @@ public class LoanAccount extends AbstractAccount {
 
         // Abstract stuff
         String customerID = split[0];
-        Date accountCreationDate = new Date(Date.parse(split[1]));
+        String[] splitParseDate = split[1].split("-");
+        int year = Integer.parseInt(splitParseDate[0]);
+        int month = Integer.parseInt(splitParseDate[1]);
+        int day = Integer.parseInt(splitParseDate[2]);
+        LocalDate accountCreationDate = LocalDate.of(year, month, day);
         AccountType abstractAccountType = AccountType.valueOf(split[2]);
         long accountID = Long.parseLong(split[3]);
 
         // Specific stuff
         double balance = Double.parseDouble(split[4]);
         double rate = Double.parseDouble(split[5]);
-        Date paymentDueDate = new Date(Long.parseLong(split[6]));
-        Date notifiedOfPaymentDate = new Date(Long.parseLong(split[7]));
+        splitParseDate = split[6].split("-");
+        year = Integer.parseInt(splitParseDate[0]);
+        month = Integer.parseInt(splitParseDate[1]);
+        day = Integer.parseInt(splitParseDate[2]);
+        LocalDate paymentDueDate = LocalDate.of(year, month, day);
+
+        splitParseDate = split[7].split("-");
+        year = Integer.parseInt(splitParseDate[0]);
+        month = Integer.parseInt(splitParseDate[1]);
+        day = Integer.parseInt(splitParseDate[2]);
+        LocalDate notifiedOfPaymentDate = LocalDate.of(year, month, day);
+
         double currentPaymentDue = Double.parseDouble(split[8]);
-        Date lastPaymentMadeDate = new Date(Long.parseLong(split[9]));
+        splitParseDate = split[9].split("-");
+        year = Integer.parseInt(splitParseDate[0]);
+        month = Integer.parseInt(splitParseDate[1]);
+        day = Integer.parseInt(splitParseDate[2]);
+        LocalDate lastPaymentMadeDate = LocalDate.of(year, month, day);
+
         boolean missedPayment = Boolean.parseBoolean(split[10]);
 
         boolean isDeleted = Boolean.parseBoolean(split[11]);
@@ -135,25 +155,25 @@ public class LoanAccount extends AbstractAccount {
         this.rate = rate;
     }
 
-    public Date getPaymentDueDate() {
+    public LocalDate getPaymentDueDate() {
         if (isDeleted()) {
             return null;
         }
         return paymentDueDate;
     }
 
-    public void setPaymentDueDate(Date paymentDueDate) {
+    public void setPaymentDueDate(LocalDate paymentDueDate) {
         this.paymentDueDate = paymentDueDate;
     }
 
-    public Date getNotifiedOfPaymentDate() {
+    public LocalDate getNotifiedOfPaymentDate() {
         if (isDeleted()) {
             return null;
         }
         return notifiedOfPaymentDate;
     }
 
-    public void setNotifiedOfPaymentDate(Date notifiedOfPaymentDate) {
+    public void setNotifiedOfPaymentDate(LocalDate notifiedOfPaymentDate) {
         this.notifiedOfPaymentDate = notifiedOfPaymentDate;
     }
 
@@ -168,14 +188,14 @@ public class LoanAccount extends AbstractAccount {
         this.currentPaymentDue = currentPaymentDue;
     }
 
-    public Date getLastPaymentMadeDate() {
+    public LocalDate getLastPaymentMadeDate() {
         if (isDeleted()) {
             return null;
         }
         return lastPaymentMadeDate;
     }
 
-    public void setLastPaymentMadeDate(Date lastPaymentMadeDate) {
+    public void setLastPaymentMadeDate(LocalDate lastPaymentMadeDate) {
         this.lastPaymentMadeDate = lastPaymentMadeDate;
     }
 
@@ -193,15 +213,15 @@ public class LoanAccount extends AbstractAccount {
         double balance; How much is left to pay off for the total loan, not by month, internally not including late fees, however getBalance() returns with lateFees added to balance
         double rate; The interest rate on the loan
         double currentPaymentDue; How much is left to pay for this pay period
-        Date paymentDueDate; This is going to be set as the final payment, not the next payment due
-        Date notifiedOfPaymentDate; The date a payment is notified to the system?
-        Date lastPaymentMadeDate;
+        LocalDate paymentDueDate; This is going to be set as the final payment, not the next payment due
+        LocalDate notifiedOfPaymentDate; The date a payment is notified to the system?
+        LocalDate lastPaymentMadeDate;
         boolean missedPayment; This acts as the "problem account" flag
          */
         
         // Data
-        // Date finalPaymentDate;       paymentDueDate
-        Date thisPaymentDueDate;
+        // LocalDate finalPaymentDate;       paymentDueDate
+        LocalDate thisPaymentDueDate;
         
         // double fixedRate; rate
         double fixedPayment; // Amount that needs to be paid every month
@@ -218,7 +238,7 @@ public class LoanAccount extends AbstractAccount {
 
 
         // Regular constructor
-        public ShortOrLong(String customerID, Date accountCreationDate, double loanTotalValue, double rate, double fixedPaymentValue, Date finalPaymentDate, int numOfYears) {
+        public ShortOrLong(String customerID, LocalDate accountCreationDate, double loanTotalValue, double rate, double fixedPaymentValue, LocalDate finalPaymentDate, int numOfYears) {
             super(customerID, accountCreationDate, loanTotalValue, rate, fixedPaymentValue + fixedPaymentValue * rate);
             setAccountType(AccountType.ShortOrLongLoanAccount);
             this.loanTotal = loanTotalValue; // This does NOT change as the user pays
@@ -241,21 +261,14 @@ public class LoanAccount extends AbstractAccount {
             paymentDueDate = finalPaymentDate;
             
             // Set thisPaymentDueDate
-            int nextMonth = accountCreationDate.getMonth() + 1;
-            thisPaymentDueDate = accountCreationDate;
-            if (nextMonth == 12) { // If the next month is 12, roll over to the next year
-                thisPaymentDueDate.setMonth(0);
-                thisPaymentDueDate.setYear(thisPaymentDueDate.getYear() + 1);
-            } else {
-                thisPaymentDueDate.setMonth(nextMonth);
-            }
+            thisPaymentDueDate = accountCreationDate.plusMonths(1);
             
             notifiedOfPaymentDate = accountCreationDate; // Since there has been no payment yet, just set it to the creation date
             lastPaymentMadeDate = accountCreationDate; // Same as above
         }
 
         // Reading from database constructor
-        public ShortOrLong(String customerID, Date accountCreationDate, long accountID, double loanTotalValue, double rate, Date paymentDueDate, Date notifiedOfPaymentDate, Date thisPaymentDueDate, Date lastPaymentMadeDate, double fixedPaymentValue, double currentPaymentDue, double balance, double lateFees, double amountPaidThisMonth, boolean missedPayment, int numOfYearsTotal, int numOfMonthsTotal) {
+        public ShortOrLong(String customerID, LocalDate accountCreationDate, long accountID, double loanTotalValue, double rate, LocalDate paymentDueDate, LocalDate notifiedOfPaymentDate, LocalDate thisPaymentDueDate, LocalDate lastPaymentMadeDate, double fixedPaymentValue, double currentPaymentDue, double balance, double lateFees, double amountPaidThisMonth, boolean missedPayment, int numOfYearsTotal, int numOfMonthsTotal) {
             // Reminder that balance stands for how much is left to pay off, NOT the total value of the loan
             // This will return the total balance to pay off, not the value assigned to balance
             super(customerID, accountCreationDate, accountID, balance + lateFees, rate, currentPaymentDue, paymentDueDate, notifiedOfPaymentDate, lastPaymentMadeDate, missedPayment);
@@ -336,7 +349,11 @@ public class LoanAccount extends AbstractAccount {
 
             // Abstract stuff
             String customerID = split[0];
-            Date accountCreationDate = new Date(Date.parse(split[1]));
+            String[] splitParseDate = split[1].split("-");
+            int year = Integer.parseInt(splitParseDate[0]);
+            int month = Integer.parseInt(splitParseDate[1]);
+            int day = Integer.parseInt(splitParseDate[2]);
+            LocalDate accountCreationDate = LocalDate.of(year, month, day);
             AccountType abstractAccountType = AccountType.valueOf(split[2]);
             long accountID = Long.parseLong(split[3]);
 
@@ -344,13 +361,37 @@ public class LoanAccount extends AbstractAccount {
             double balance = Double.parseDouble(split[4]);
             double rate = Double.parseDouble(split[5]);
             double currentPaymentDue = Double.parseDouble(split[6]);
-            Date paymentDueDate = new Date(Long.parseLong(split[7]));
-            Date notifiedOfPaymentDate = new Date(Long.parseLong(split[8]));
-            Date lastPaymentMadeDate = new Date(Long.parseLong(split[9]));
+
+            // LocalDate paymentDueDate = new LocalDate(Long.parseLong(split[7]));
+            splitParseDate = split[7].split("-");
+            year = Integer.parseInt(splitParseDate[0]);
+            month = Integer.parseInt(splitParseDate[1]);
+            day = Integer.parseInt(splitParseDate[2]);
+            LocalDate paymentDueDate = LocalDate.of(year, month, day);
+
+            //LocalDate notifiedOfPaymentDate = new LocalDate(Long.parseLong(split[8]));
+            splitParseDate = split[8].split("-");
+            year = Integer.parseInt(splitParseDate[0]);
+            month = Integer.parseInt(splitParseDate[1]);
+            day = Integer.parseInt(splitParseDate[2]);
+            LocalDate notifiedOfPaymentDate = LocalDate.of(year, month, day);
+
+            //LocalDate lastPaymentMadeDate = new LocalDate(Long.parseLong(split[9]));
+            splitParseDate = split[9].split("-");
+            year = Integer.parseInt(splitParseDate[0]);
+            month = Integer.parseInt(splitParseDate[1]);
+            day = Integer.parseInt(splitParseDate[2]);
+            LocalDate lastPaymentMadeDate = LocalDate.of(year, month, day);
+
             boolean missedPayment = Boolean.parseBoolean(split[10]);
 
             // Specific
-            Date thisPaymentDueDate = new Date(Long.parseLong(split[11]));
+            // LocalDate thisPaymentDueDate = new LocalDate(Long.parseLong(split[11]));
+            splitParseDate = split[11].split("-");
+            year = Integer.parseInt(splitParseDate[0]);
+            month = Integer.parseInt(splitParseDate[1]);
+            day = Integer.parseInt(splitParseDate[2]);
+            LocalDate thisPaymentDueDate = LocalDate.of(year, month, day);
             double fixedPayment = Double.parseDouble(split[12]);
             double amountPaidThisMonth = Double.parseDouble(split[13]);
             double loanTotal = Double.parseDouble(split[14]);
@@ -365,10 +406,13 @@ public class LoanAccount extends AbstractAccount {
             return temp;
         }
 
-        public void makePayment(double amount, Date dayOfPay) {
+        public void makePayment(double amount, LocalDate dayOfPay) {
             amountPaidThisMonth += amount;
-            notifiedOfPaymentDate = new Date(dayOfPay.getTime());
-            lastPaymentMadeDate = new Date(dayOfPay.getTime());
+            int year = dayOfPay.getYear();
+            int month = dayOfPay.getMonthValue();
+            int day = dayOfPay.getDayOfMonth();
+            notifiedOfPaymentDate = LocalDate.of(year, month, day);
+            lastPaymentMadeDate = LocalDate.of(year, month, day);
         }
 
         // Checks to see if this month's payment has been met, sets missed if not, and resets amountPaidThisMonth
@@ -386,15 +430,7 @@ public class LoanAccount extends AbstractAccount {
         // also sets if this is a problem customer, and resets payment information
         public void updatePayPeriod() {
             monthPaymentCheck();
-            int tempMonth = thisPaymentDueDate.getMonth(); // (0-11 is January-December)
-            tempMonth++;
-            // Update the next payment date
-            if (tempMonth == 12) { // If the next month is 12, roll over to the next year
-                thisPaymentDueDate.setMonth(0);
-                thisPaymentDueDate.setYear(thisPaymentDueDate.getYear() + 1);
-            } else {
-                thisPaymentDueDate.setMonth(tempMonth);
-            }
+            thisPaymentDueDate = thisPaymentDueDate.plusMonths(1);
         }
 
         @Override
@@ -413,11 +449,11 @@ public class LoanAccount extends AbstractAccount {
             this.fixedPayment = fixedPayment;
         }
 
-        public Date getThisPaymentDueDate() {
+        public LocalDate getThisPaymentDueDate() {
             return thisPaymentDueDate;
         }
 
-        public void setThisPaymentDueDate(Date thisPaymentDueDate) {
+        public void setThisPaymentDueDate(LocalDate thisPaymentDueDate) {
             this.thisPaymentDueDate = thisPaymentDueDate;
         }
 
@@ -475,7 +511,7 @@ public class LoanAccount extends AbstractAccount {
         // Regular constructor
         // Balance should start at 0,
         // rate may also be 0 because I don't see any specifications for a rate on CCs
-        public CC(String customerID, Date accountCreationDate, double balance, double rate, double currentPaymentDue, double limit) {
+        public CC(String customerID, LocalDate accountCreationDate, double balance, double rate, double currentPaymentDue, double limit) {
             super(customerID, accountCreationDate, balance, rate, currentPaymentDue);
             setAccountType(AccountType.CCLoanAccount);
             this.limit = limit;
@@ -487,7 +523,7 @@ public class LoanAccount extends AbstractAccount {
 
         // Reading from database constructor
         // Reminder that balance is the total charge for this account
-        public CC(String customerID, Date accountCreationDate, long accountID, double balance, double rate, double currentPaymentDue, Date paymentDueDate, Date notifiedOfPaymentDate, Date lastPaymentMadeDate, boolean missedPayment, double limit, double financeCharge, double sumOfChargesThisMonth, ArrayList<String> chargeMessages) {
+        public CC(String customerID, LocalDate accountCreationDate, long accountID, double balance, double rate, double currentPaymentDue, LocalDate paymentDueDate, LocalDate notifiedOfPaymentDate, LocalDate lastPaymentMadeDate, boolean missedPayment, double limit, double financeCharge, double sumOfChargesThisMonth, ArrayList<String> chargeMessages) {
             super(customerID, accountCreationDate, accountID, balance, rate, currentPaymentDue, paymentDueDate, notifiedOfPaymentDate, lastPaymentMadeDate, missedPayment);
             setAccountType(AccountType.CCLoanAccount);
             this.limit = limit;
@@ -517,7 +553,7 @@ public class LoanAccount extends AbstractAccount {
             account.setDeleted(true);
         }
 
-        public void charge(double amount, String description, Date dayOfCharge) {
+        public void charge(double amount, String description, LocalDate dayOfCharge) {
             // See if this charge would go over the set limit
             if (balance + amount < limit) {
                 balance += amount; // This can be reduced by the customer
@@ -641,7 +677,11 @@ public class LoanAccount extends AbstractAccount {
 
             // Abstract stuff
             String customerID = split[0];
-            Date accountCreationDate = new Date(Date.parse(split[1]));
+            String[] splitParseDate = split[1].split("-");
+            int year = Integer.parseInt(splitParseDate[0]);
+            int month = Integer.parseInt(splitParseDate[1]);
+            int day = Integer.parseInt(splitParseDate[2]);
+            LocalDate accountCreationDate = LocalDate.of(year, month, day);
             AccountType abstractAccountType = AccountType.valueOf(split[2]);
             long accountID = Long.parseLong(split[3]);
 
@@ -649,9 +689,26 @@ public class LoanAccount extends AbstractAccount {
             double balance = Double.parseDouble(split[4]);
             double rate = Double.parseDouble(split[5]);
             double currentPaymentDue = Double.parseDouble(split[6]);
-            Date paymentDueDate = new Date(Long.parseLong(split[7]));
-            Date notifiedOfPaymentDate = new Date(Long.parseLong(split[8]));
-            Date lastPaymentMadeDate = new Date(Long.parseLong(split[9]));
+            // LocalDate paymentDueDate = new LocalDate(Long.parseLong(split[7]));
+            splitParseDate = split[7].split("-");
+            year = Integer.parseInt(splitParseDate[0]);
+            month = Integer.parseInt(splitParseDate[1]);
+            day = Integer.parseInt(splitParseDate[2]);
+            LocalDate paymentDueDate = LocalDate.of(year, month, day);
+
+            //LocalDate notifiedOfPaymentDate = new LocalDate(Long.parseLong(split[8]));
+            splitParseDate = split[8].split("-");
+            year = Integer.parseInt(splitParseDate[0]);
+            month = Integer.parseInt(splitParseDate[1]);
+            day = Integer.parseInt(splitParseDate[2]);
+            LocalDate notifiedOfPaymentDate = LocalDate.of(year, month, day);
+
+            //LocalDate lastPaymentMadeDate = new LocalDate(Long.parseLong(split[9]));
+            splitParseDate = split[9].split("-");
+            year = Integer.parseInt(splitParseDate[0]);
+            month = Integer.parseInt(splitParseDate[1]);
+            day = Integer.parseInt(splitParseDate[2]);
+            LocalDate lastPaymentMadeDate = LocalDate.of(year, month, day);
             boolean missedPayment = Boolean.parseBoolean(split[10]);
 
             // Specific
