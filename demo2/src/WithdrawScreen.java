@@ -91,43 +91,22 @@ public class WithdrawScreen extends JFrame {
             CheckingAccount checking = (CheckingAccount) account;
             Long overDraftAccountID = checking.overDraftAccountID;
 
-            SavingsAccount.SimpleSavingsAccount linkedSavings = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
+            SavingsAccount.SimpleSavingsAccount overdraftAccount = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
+            double balance = checking.getBalance();
 
-            if(checking.balance >= amount) {//If they have enough in checking, perform a normal withdrawal
+            if (balance >= amount) {
                 checking.withdraw(amount);
-                JOptionPane.showMessageDialog(this, "Withdraw of $" + amount + " successful! " +
-                        "You only have $" + checking.balance+" left in this Checking Account");
-
-                //change the account type according to balance
-                updateType(checking);
-
-                //close the screen and open a new teller screen
-                dispose();
-                new TellerScreen();
-
-            }else if (checking.balance < amount) {//if the checking doesn't have enough funds
-
-                //check if they have a linked Savings
-                if(linkedSavings != null) {
-
-                    //check there is enough in checking and savings
-                    if(checking.balance+linkedSavings.balance < amount) {//if there isn't...
-                        JOptionPane.showMessageDialog(this, "Insufficient funds in both checking and linked Savings!");
-                    }else if (checking.balance+linkedSavings.balance >= amount){//if there is enough in the savings
-                        //perform the withdrawal but pull from linked savings
-                        checking.withdraw(amount);
-                        updateType(checking);
-                        JOptionPane.showMessageDialog(this, "Withdraw successful, however overdraft process was applied.");
-                        dispose();
-                        new TellerScreen();
-                    }
-
-                }else {//if no linked savings, deny the withdrawal
-                    JOptionPane.showMessageDialog(this, "Insufficient funds! You only have $" +
-                            checking.balance+" in Checking Account.");
-                }
-
+                JOptionPane.showMessageDialog(this, "Withdrawal successful!");
+            }else if (overdraftAccount != null && (balance + overdraftAccount.getBalance() >= amount)) {
+                checking.withdraw(amount);
+                JOptionPane.showMessageDialog(this, "Withdrawal successful! Overdraft protection used.");
+            }else {
+                JOptionPane.showMessageDialog(this, "Withdrawal denied. Insufficient funds in checking and savings.");
+                return;
             }
+
+            dispose();
+            new TellerScreen();
 
         }else if (type == AbstractAccount.AccountType.CDSavingsAccount){//if withdrawing from a CD
             SavingsAccount.CDSavingsAccount cdAccount = (SavingsAccount.CDSavingsAccount) account;
@@ -151,7 +130,7 @@ public class WithdrawScreen extends JFrame {
                     dispose();
                     new TellerScreen();
                 }
-            } else if (amount > cdAccount.balance) {//if they dont have enough, dont bother checking the date
+            } else if (amount > cdAccount.balance) {//if they don't have enough, don't bother checking the date
                 JOptionPane.showMessageDialog(this, "Insufficient funds! You only have $" +
                         cdAccount.balance+" in Certificate of Deposit.");
             }
