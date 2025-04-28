@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
@@ -76,7 +77,7 @@ public class CreateAccountScreen extends JFrame {
         if(id.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter a valid ID");
         }else if(dateField.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter a valid date");
+            JOptionPane.showMessageDialog(this, "Please enter a valid localDate");
         }else if(deposit.isEmpty() && (Objects.equals(accountType, "Checking") || Objects.equals(accountType, "Savings"))) {
             JOptionPane.showMessageDialog(this, "Please enter a valid deposit");
         }else {
@@ -85,8 +86,6 @@ public class CreateAccountScreen extends JFrame {
             String dateString = creationDate.getText().trim();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
             LocalDate localDate = LocalDate.parse(dateString, formatter);
-            Date date = java.sql.Date.valueOf(localDate);
-
 
             if (customer == null) {//make sure customer exists
                 JOptionPane.showMessageDialog(this, "Customer not found, validate your customer ID");
@@ -95,10 +94,10 @@ public class CreateAccountScreen extends JFrame {
 
                 if (accountType.equals("Loan")) {
                     dispose();
-                    new CreateLoanAccountScreen(customer, date);
+                    new CreateLoanAccountScreen(customer, localDate);
                 }else if(accountType.equals("Credit Card")) {
                     dispose();
-                    new CreateCreditCardAccountScreen(customer, date);
+                    new CreateCreditCardAccountScreen(customer, localDate);
                 }
 
                 double depositNum = Double.parseDouble(Deposit.getText().trim());
@@ -112,12 +111,12 @@ public class CreateAccountScreen extends JFrame {
                     } else if (depositNum < 5000.00) {
                         specificType = CheckingAccount.AccountType.TMB;
                     }
-                    CheckingAccount account = new CheckingAccount(id, date, depositNum);
+                    CheckingAccount account = new CheckingAccount(id, localDate, depositNum);
                     customer.addAccountToCustomerAccounts(account.getAccountID());
                     Database.addItemToList(Database.checkingAccountList, account);
 
                 } else if (accountType.equals("Savings")) {
-                    SavingsAccount account = new SavingsAccount(id, date,  depositNum);
+                    SavingsAccount account = new SavingsAccount(id, localDate,  depositNum);
                     customer.addAccountToCustomerAccounts(account.getAccountID());
                     Database.addItemToList(Database.savingsAccountList, account);
 

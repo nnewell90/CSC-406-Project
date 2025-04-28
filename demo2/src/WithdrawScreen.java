@@ -2,10 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileWriter;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 public class WithdrawScreen extends JFrame {
     private JTextField withdraw;
@@ -134,18 +131,18 @@ public class WithdrawScreen extends JFrame {
 
         }else if (type == AbstractAccount.AccountType.CDSavingsAccount){//if withdrawing from a CD
             SavingsAccount.CDSavingsAccount cdAccount = (SavingsAccount.CDSavingsAccount) account;
-            Date today = new Date();
+            LocalDate today = LocalDate.now();
 
             //Don't let them withdraw too much from the cd account
             if (cdAccount.balance >= amount) {
 
-                if (today.after(cdAccount.dueDate) || today.equals(cdAccount.dueDate)) {
+                if (today.isAfter(cdAccount.dueDate) || today.equals(cdAccount.dueDate)) {
 
                     cdAccount.withdraw(amount);
                     JOptionPane.showMessageDialog(this, "Withdraw successful!");
                     dispose();
                     new TellerScreen();
-                }else if(today.before(cdAccount.dueDate)) {//if they withdraw before the maturation date, proceed but penalize
+                }else if(today.isBefore(cdAccount.dueDate)) {//if they withdraw before the maturation date, proceed but penalize
                     
                     //apply "penalty"
                     cdAccount.withdraw(amount);
