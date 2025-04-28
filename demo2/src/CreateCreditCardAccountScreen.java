@@ -1,12 +1,12 @@
 import javax.swing.*;
-import java.util.Date;
+import java.time.LocalDate;
 import java.awt.*;
 
 public class CreateCreditCardAccountScreen extends JFrame {
     private final JTextField cardLimit, interestRate;
-    private final Date date;
+    private final LocalDate date;
     private final Customer customer;
-    public CreateCreditCardAccountScreen(Customer customer, Date date) {
+    public CreateCreditCardAccountScreen(Customer customer, LocalDate date) {
         setSize(700, 500);
         setTitle("Creating a Credit Card Account for " + customer.getFirstName() + " " + customer.getLastName());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
