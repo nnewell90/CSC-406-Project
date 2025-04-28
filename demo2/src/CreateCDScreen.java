@@ -6,18 +6,16 @@ import java.util.Date;
 
 public class CreateCDScreen extends JFrame{
     private final Customer customer;
-    private final Date creationDate;
-    private final double initialBalance;
+    private final LocalDate creationDate;
 
-    private JTextField interestRate, dueDate;
-    public CreateCDScreen(Customer customer, Date creationDate, double initialBalance){
+    private JTextField interestRate, dueDate, initial ;
+    public CreateCDScreen(Customer customer, LocalDate creationDate){
         setTitle("Create Certificate of Deposit for" + customer.getFirstName() + " " + customer.getLastName());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(700, 500);
 
         this.customer = customer;
         this.creationDate = creationDate;
-        this.initialBalance = initialBalance;
 
         JPanel formPanel = new JPanel();
         formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
@@ -30,6 +28,11 @@ public class CreateCDScreen extends JFrame{
         formPanel.add(new JLabel("Due Date(MM/DD/YYYY):"));
         dueDate = new JTextField(10);
         formPanel.add(dueDate);
+        formPanel.add(Box.createVerticalStrut(4));
+
+        formPanel.add(new JLabel("Initial Amount:"));
+        initial = new JTextField(10);
+        formPanel.add(initial);
         formPanel.add(Box.createVerticalStrut(4));
 
         JButton submitButton = new JButton("Create Account");
@@ -65,13 +68,13 @@ public class CreateCDScreen extends JFrame{
             String dateString = dueDate.getText().trim();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
             LocalDate localDate = LocalDate.parse(dateString, formatter);
-            Date dueDate = java.sql.Date.valueOf(localDate);
             double rate = Double.parseDouble(interestRate.getText());
             String id = customer.getCustomerID();
+            double initialBalance = Double.parseDouble(initial.getText().trim());
 
             //create account and add it to lists...
             SavingsAccount.CDSavingsAccount account = new SavingsAccount.CDSavingsAccount(id,
-                    creationDate, initialBalance, rate, dueDate);
+                    creationDate, initialBalance, rate, localDate);
             customer.addAccountToCustomerAccounts(account.getAccountID());
             Database.addItemToList(Database.cdSavingsAccountList, account);
             Database.addItemToList(Database.savingsAccountList, account);

@@ -6,6 +6,8 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class CreditCardDetailScreen extends JFrame {
@@ -93,11 +95,21 @@ public class CreditCardDetailScreen extends JFrame {
         //pass values and charge the card...
         double cost = Double.parseDouble(itemCost);
 
-        SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
-        Date date = formatter.parse(dateName);
+        double balance = ccAccount.getBalance();
+        double limit = ccAccount.getLimit();
 
-        ccAccount.charge(cost, itemName, date);
-        JOptionPane.showMessageDialog(null, "Purchase Successful");
+        if (balance + cost < limit) {
+            JOptionPane.showMessageDialog(this, "Purchase was Successful!");
+        } else { // Over the limit
+            JOptionPane.showMessageDialog(this, "Purchase was Denied!");
+            // Change this for Swing !!!
+        }
+
+        String dateString = dateName;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        LocalDate localDate = LocalDate.parse(dateString, formatter);
+
+        ccAccount.charge(cost, itemName, localDate);
         dispose();
         new CustomerScreen(customer);
 
