@@ -53,8 +53,14 @@ public class DeleteCustomerScreen extends JFrame {
         }
 
         double deleted = Customer.deleteCustomer(customer);
-        Database.removeItemFromList(Database.customerList, customer);
-        JOptionPane.showMessageDialog(null, "Customer Deleted Successfully!" + deleted);
+        if (deleted > 0) {//customer owes bank
+            JOptionPane.showMessageDialog(this, "Customer owes bank $" + deleted);
+        }else if (deleted < 0 ){//bank owes customer
+            JOptionPane.showMessageDialog(this, "Bank owes Customer $" + -deleted);
+        }else{//No one owes
+            JOptionPane.showMessageDialog(this, "No outstanding Balance.");
+        }
+        JOptionPane.showMessageDialog(this, "Customer Deleted Successfully!");
 
         dispose();
         new TellerScreen();

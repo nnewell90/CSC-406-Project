@@ -10,7 +10,7 @@ public class CloseAccountScreen extends JFrame {
         Label l1 = new Label("Please enter the Account ID you want closed: ");
         l1.setBounds(100, 50, 120, 80);
         add(l1);
-        setSize(500, 500);
+        setSize(700, 500);
         setLayout(new GridLayout(4, 1));
 
         accountIDField = new JTextField(10);
