@@ -68,48 +68,64 @@ public class WithdrawScreen extends JFrame {
         }else if(account == null) {
             JOptionPane.showMessageDialog(this, "Account not found! Check Account ID");
             return;
+        }else if(amount <= 0){
+            JOptionPane.showMessageDialog(this, "Please enter a valid withdrawal amount greater than $0.");
+            return;
         }
 
         AbstractAccount.AccountType type = account.accountType;
 
-        if (type == AbstractAccount.AccountType.SavingsAccount){ //If withdrawing from a Savings Account
-            SavingsAccount savings = (SavingsAccount) account;
+        if (account instanceof SavingsAccount.SimpleSavingsAccount savings){ //If withdrawing from a Savings Account
 
-            //Don't let them withdraw too much from the savings account
-            if (savings.balance >= amount) {
-                savings.withdraw(amount);
-                JOptionPane.showMessageDialog(this, "Withdraw successful!");
-                dispose();
-                new TellerScreen();
-            } else if (amount > savings.balance) {
-                JOptionPane.showMessageDialog(this, "Insufficient funds! You only have $" +
-                        savings.balance+" in Savings.");
-            }
-
-        }else if (type == AbstractAccount.AccountType.CheckingAccount){//If withdrawing from a checking account
-
-            CheckingAccount checking = (CheckingAccount) account;
-            Long overDraftAccountID = checking.overDraftAccountID;
-
-            SavingsAccount.SimpleSavingsAccount overdraftAccount = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
-            double balance = checking.getBalance();
-
-            if (balance >= amount) {
-                checking.withdraw(amount);
-                JOptionPane.showMessageDialog(this, "Withdrawal successful!");
-            }else if (overdraftAccount != null && (balance + overdraftAccount.getBalance() >= amount)) {
-                checking.withdraw(amount);
-                JOptionPane.showMessageDialog(this, "Withdrawal successful! Overdraft protection used.");
-            }else {
-                JOptionPane.showMessageDialog(this, "Withdrawal denied. Insufficient funds in checking and savings.");
+            if (amount > savings.getBalance()) {
+                JOptionPane.showMessageDialog(this, "Insufficient funds in savings.");
                 return;
             }
 
-            dispose();
-            new TellerScreen();
+            double preSave = savings.getBalance();
+            savings.withdraw(amount);
+            double postSave = savings.getBalance();
 
-        }else if (type == AbstractAccount.AccountType.CDSavingsAccount){//if withdrawing from a CD
-            SavingsAccount.CDSavingsAccount cdAccount = (SavingsAccount.CDSavingsAccount) account;
+            if (preSave > postSave) {
+                JOptionPane.showMessageDialog(this, "Withdraw successful!");
+
+            }else{
+                JOptionPane.showMessageDialog(this, "Withdrawal Denied. Insufficient Funds.");
+            }
+
+        }else if (account instanceof CheckingAccount checking){//If withdrawing from a checking account
+
+            if(checking.getBalance() >= amount) {
+                checking.withdraw(amount);
+                JOptionPane.showMessageDialog(this, "Withdrawal successful!");
+            }else{
+
+                long overDraftAccountID = checking.overDraftAccountID;
+                SavingsAccount.SimpleSavingsAccount overdraftAccount = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
+
+                if(overdraftAccount == null) {
+                    JOptionPane.showMessageDialog(this, "Withdrawal Denied. Insufficient funds. ");
+                }else{
+
+                    double preCheck = checking.getBalance();
+                    double preSavings = overdraftAccount.getBalance();
+
+                    checking.withdraw(amount);
+
+                    double postCheck = checking.getBalance();
+                    double postSavings = overdraftAccount.getBalance();
+
+                    if(postCheck<preCheck && postSavings<preSavings){
+                        JOptionPane.showMessageDialog(this, "Withdrawal Successful however overdraft was applied.");
+                    }else{
+                        JOptionPane.showMessageDialog(this, "Withdrawal Denied. Insufficient funds.");
+                    }
+
+                }
+
+            }
+
+        }else if (account instanceof SavingsAccount.CDSavingsAccount cdAccount){//if withdrawing from a CD
             LocalDate today = LocalDate.now();
 
             //Don't let them withdraw too much from the cd account
@@ -119,34 +135,41 @@ public class WithdrawScreen extends JFrame {
 
                     cdAccount.withdraw(amount);
                     JOptionPane.showMessageDialog(this, "Withdraw successful!");
-                    dispose();
-                    new TellerScreen();
                 }else if(today.isBefore(cdAccount.dueDate)) {//if they withdraw before the maturation date, proceed but penalize
                     
                     //apply "penalty"
                     cdAccount.withdraw(amount);
                     JOptionPane.showMessageDialog(this, "Withdraw successful! However, " +
                             "Penalty was applied for withdrawing before " + cdAccount.dueDate);
-                    dispose();
-                    new TellerScreen();
+
                 }
             } else if (amount > cdAccount.balance) {//if they don't have enough, don't bother checking the date
                 JOptionPane.showMessageDialog(this, "Insufficient funds! You only have $" +
                         cdAccount.balance+" in Certificate of Deposit.");
             }
 
+        }else if(account instanceof LoanAccount.CC creditCard){
+
+            String description = "Bank Withdrawal";
+            LocalDate today = LocalDate.now();
+            double preBalance = creditCard.getBalance();
+            creditCard.charge(amount, description, today);
+
+            if (preBalance + amount <= creditCard.getLimit()) {
+                JOptionPane.showMessageDialog(this, "Withdrawal was Successful!");
+            } else { // Over the limit
+                JOptionPane.showMessageDialog(this, "Withdrawal was Denied!");
+            }
+
+
         }else{//if withdrawing from an account that isn't checking or savings, then deny the withdrawal
             JOptionPane.showMessageDialog(this, "You cannot withdraw from a "+ type);
         }
+
+        dispose();
+        new TellerScreen();
     }//end of makeWithdrawal
 
-    private void updateType(CheckingAccount checking) {
-        if(checking.balance >= 5000){
-            checking.setAccountSpecificType(CheckingAccount.AccountType.GoldDiamond);
-        }else if(checking.balance < 5000){
-            checking.setAccountSpecificType(CheckingAccount.AccountType.TMB);
-        }
-    }
 
 }
 
