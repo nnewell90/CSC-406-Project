@@ -102,7 +102,6 @@ public class CreditCardDetailScreen extends JFrame {
             JOptionPane.showMessageDialog(this, "Purchase was Successful!");
         } else { // Over the limit
             JOptionPane.showMessageDialog(this, "Purchase was Denied!");
-            // Change this for Swing !!!
         }
 
         String dateString = dateName;
