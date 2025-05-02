@@ -5,50 +5,42 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class CustomerScreen extends JFrame {
-    public CustomerScreen() {
-        setTitle("Customer Screen");
+    public CustomerScreen(Customer customer) {
+        setTitle("Customer Screen for " + customer.getFirstName() + " " + customer.getLastName());
         setSize(500, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(5, 1));
 
         JButton creditButton = new JButton("Credit Card");
-        JButton reviewButton = new JButton("Review Account Status");
-        JButton checkButton = new JButton("Input Checks");
-        JButton returnButton = new JButton("Return to Main Menu");
+        JButton reviewButton = new JButton("Review Accounts");
+        JButton issueCheckButton = new JButton("Issue a Check");
+        JButton returnButton = new JButton("Return to Sign In");
 
 
         creditButton.addActionListener(e -> {
             dispose();
-            new CreditCardDetailScreen();
+            new CreditCardDetailScreen(customer);
         });
         reviewButton.addActionListener(e -> {
             dispose();
-            new CustomerSignIn();
+            new PersonalAccountsScreen(customer);
         });
-        checkButton.addActionListener(e -> {
+        issueCheckButton.addActionListener(e -> {
             dispose();
-            new InsertCheckScreen();
+            new InsertCheckScreen(customer);
         });
         returnButton.addActionListener(e -> {
-            saveUIState("MainMenu");
             dispose();
-            new MainMenu();
+            new CustomerSignIn();
         });
 
 
         add(creditButton);
         add(reviewButton);
-        add(checkButton);
+        add(issueCheckButton);
         add(returnButton);
 
         setVisible(true);
     }
-    private void saveUIState(String state) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("ui_state.txt"))) {
-            writer.write(state);
-            System.out.println("UI state saved: " + state);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
 }

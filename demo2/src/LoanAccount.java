@@ -558,9 +558,9 @@ public class LoanAccount extends AbstractAccount {
             if (balance + amount < limit) {
                 balance += amount; // This can be reduced by the customer
                 sumOfChargesThisMonth += amount; // This cannot be reduced by the user, used for finance charge
-                chargeMessages.add(dayOfCharge + ": " + description + "\nAmount:$" + amount);
-            } else { // Over the limit
-                System.out.println("Cannot make charge because it would exceed the limit of the account");
+                chargeMessages.add(dayOfCharge + ": " + description + " Amount: $" + amount + "--ACCEPTED");
+            } else { // Over the limitd
+                chargeMessages.add(dayOfCharge + ": " + description + " Amount: $" + amount + "--DENIED");
                 // Change this for Swing !!!
             }
         }

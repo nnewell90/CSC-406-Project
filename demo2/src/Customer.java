@@ -102,7 +102,7 @@ public class Customer {
         }
 
         // Remove the account from the lists in the database
-        // Database.removeItemFromList(Database.customerList, customer);
+        Database.removeItemFromList(Database.customerList, customer);
             // No longer remove from the database so we can retain customer information
 
         // Finally, fully delete the account and return the amount the bank/user owes to the other

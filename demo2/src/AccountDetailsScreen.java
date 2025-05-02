@@ -1,36 +1,45 @@
 import javax.swing.*;
 import java.awt.*;
+import java.text.DecimalFormat;
+import java.util.HashMap;
+
 
 public class AccountDetailsScreen extends JFrame {
-    public AccountDetailsScreen(String id) {
-        setSize(700, 500);
-        long accountID = Long.parseLong(id);
-        AbstractAccount account = Database.getAccountFromList(Database.abstractAccountList, accountID);
 
+    private final Customer customer;
+    private final DecimalFormat df = new DecimalFormat("#,##0.00");
+    public AccountDetailsScreen(AbstractAccount account) {
+        setSize(700, 500);
         setTitle("Account Details");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        assert account != null;
-        JLabel accountIDLabel = new JLabel("Account ID: " + accountID);
-        JLabel balanceLabel = new JLabel("Balance: " + accountBalance(account));
-        JLabel typeLabel = new JLabel("Account Type: " + account.getAccountType());
-        JLabel dateLabel = new JLabel("Creation Date: " + account.getAccountCreationDate());
+        //grab the customer for displaying their name
+        String ssn = account.getCustomerID();
+        Customer customer = Database.getCustomerFromList(ssn);
+        this.customer = customer;
 
-
-        accountIDLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        balanceLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        typeLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        dateLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
+        //Check the specific type of the account and call method to display information
+        if(account instanceof SavingsAccount.SimpleSavingsAccount simpleSavings) {
+            panel.add(simpleSavingsInfo(simpleSavings));
+        }else if(account instanceof SavingsAccount.CDSavingsAccount cdSavings) {
+            panel.add(cdSavingsInfo(cdSavings));
+        }else if((account instanceof CheckingAccount tmbAccount) && (tmbAccount.getAccountSpecificType() == CheckingAccount.AccountType.TMB)){
+            panel.add(tmbAccountInfo(tmbAccount));
+        }else if((account instanceof CheckingAccount gdAccount) && (gdAccount.getAccountSpecificType() == CheckingAccount.AccountType.GoldDiamond)){
+            panel.add(gdAccountInfo(gdAccount));
+        }else if(account instanceof LoanAccount.ShortOrLong loanAccount){
+            panel.add(loanAccountInfo(loanAccount));
+        }else if(account instanceof LoanAccount.CC creditCardAccount){
+            panel.add(creditCardInfo(creditCardAccount));
+        }
 
         //Return Buttons
         JButton returnToCustomer = new JButton("Return to Customer Details");
         JButton returnToTeller = new JButton("Return to Teller");
 
         returnToCustomer.addActionListener(e -> {
-            Customer customer = Database.getCustomerFromList(account.getCustomerID());
             dispose();
             new CustomerDetailsScreen(customer);
         });
@@ -45,114 +54,140 @@ public class AccountDetailsScreen extends JFrame {
         buttonPanel.add(returnToCustomer);
         buttonPanel.add(returnToTeller);
 
-
-        panel.add(accountIDLabel);
-        panel.add(balanceLabel);
-        panel.add(typeLabel);
-        panel.add(dateLabel);
         add(buttonPanel, BorderLayout.SOUTH);
 
-        if(account instanceof CheckingAccount checking){
-            checkingAccountInfo(panel, checking);
-        }else if (account instanceof SavingsAccount savings){
-            savingsAccountInfo(panel, savings);
-        } else if(account instanceof LoanAccount loan){
-            loanAccountInfo(panel, loan);
-        }
-
-        add(panel, BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(panel);
+        add(scrollPane, BorderLayout.CENTER);
         setVisible(true);
     }
 
-    private double accountBalance(AbstractAccount account){
-
-        if(account.getAccountType() == AbstractAccount.AccountType.CheckingAccount){
-            CheckingAccount checkingAccount = (CheckingAccount) account;
-            return checkingAccount.getBalance();
-        }else if(account.getAccountType() == AbstractAccount.AccountType.SavingsAccount){
-            SavingsAccount savingsAccount = (SavingsAccount) account;
-            return savingsAccount.getBalance();
-        }else if(account.getAccountType() == AbstractAccount.AccountType.LoanAccount){
-            LoanAccount loanAccount = (LoanAccount) account;
-            return loanAccount.getBalance();
-        }
-
-        return 0;
-    }
-
-    private void checkingAccountInfo(JPanel panel, CheckingAccount account){
-
+    private JPanel simpleSavingsInfo(SavingsAccount.SimpleSavingsAccount account) {
         JPanel detailsPanel = new JPanel();
         detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
 
-        String type = String.valueOf(account.getAccountSpecificType());
-        detailsPanel.add(new JLabel(type));
-        if(type.equals(CheckingAccount.AccountType.GoldDiamond)){//GD accounts have an interest rate, so display it
-            detailsPanel.add(new JLabel("Interest Rate: " + account.getInterestRate()));
+        detailsPanel.add(headerLabel("Account Holder: " + customer.getFirstName() + " " + customer.getLastName()));
+        detailsPanel.add(headerLabel("Account Type: Simple Savings Account"));
+        detailsPanel.add(plainLabel("Creation Date: " + account.getAccountCreationDate()));
+        detailsPanel.add(plainLabel("Current Balance: $" + df.format((account.getBalance()))));
+        detailsPanel.add(plainLabel("Interest Rate: " + account.getInterestRate()+"%"));
+
+        if(account.overdraftForAccountID != -1){
+            detailsPanel.add(plainLabel("Overdraft for Checking Account #" + account.overdraftForAccountID));
+        }
+        if(account.linkedToATMCard){
+            detailsPanel.add(plainLabel("Linked To ATM Card"));
         }
 
-        if(account.linkedToATMCard){
-            detailsPanel.add(new JLabel("Linked To ATM Card: "));
-            ATMCard atmCard = account.getLinkedATMCard();
-            detailsPanel.add(new JLabel(atmCard.toString()));
-        }
+        return detailsPanel;
+
+    }
+
+    private JPanel cdSavingsInfo(SavingsAccount.CDSavingsAccount account) {
+        JPanel detailsPanel = new JPanel();
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
+
+        detailsPanel.add(headerLabel("Account Holder: " + customer.getFirstName() + " " + customer.getLastName()));
+        detailsPanel.add(headerLabel("Account Type: Certificate of Deposit"));
+        detailsPanel.add(plainLabel("Creation Date: " + account.getAccountCreationDate()));
+        detailsPanel.add(plainLabel("Maturity Date: " + account.getDueDate()));
+        detailsPanel.add(plainLabel("Principal Amount: $" + df.format(account.getBalance())));
+        detailsPanel.add(plainLabel("Interest Rate: " + account.getInterestRate()+"%"));
+
+        return  detailsPanel;
+    }
+
+    private JPanel tmbAccountInfo(CheckingAccount account) {
+        JPanel detailsPanel = new JPanel();
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
+
+        detailsPanel.add(headerLabel("Account Holder: " + customer.getFirstName() + " " + customer.getLastName()));
+        detailsPanel.add(headerLabel("Account Type: Checking Account_TMB"));
+        detailsPanel.add(plainLabel("Creation Date: " + account.getAccountCreationDate()));
+        detailsPanel.add(plainLabel("Current Balance: $" + df.format(account.getBalance())));
+        detailsPanel.add(plainLabel("Interest Rate: " + account.getInterestRate()+"%"));
 
         if(account.overDraftAccountID != -1){
-            detailsPanel.add(new JLabel("Overdraft Account: "));
-            SavingsAccount savingsAccount = account.getOverDraftAccount();
-            detailsPanel.add(new JLabel(savingsAccount.toString()));
+            detailsPanel.add(plainLabel("Overdraft Savings Account: #" + account.getOverdraftAccountID()));
+        }
+        if(account.linkedToATMCard){
+            detailsPanel.add(plainLabel("Linked To ATM Card"));
         }
 
-        panel.add(detailsPanel);
-        setVisible(true);
+
+        return  detailsPanel;
     }
 
-    private void savingsAccountInfo(JPanel panel, SavingsAccount account){
+    private JPanel gdAccountInfo(CheckingAccount account) {
         JPanel detailsPanel = new JPanel();
         detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
 
-        if(account instanceof SavingsAccount.SimpleSavingsAccount){
-            SavingsAccount.SimpleSavingsAccount simpleSavingsAccount = (SavingsAccount.SimpleSavingsAccount) account;
-            detailsPanel.add(new JLabel("Simple Savings Account"));
-            detailsPanel.add(new JLabel("Rate: " + simpleSavingsAccount.getInterestRate()));
-            if(simpleSavingsAccount.overdraftForAccountID != -1) {
-                detailsPanel.add(new JLabel("Overdraft for account: " + simpleSavingsAccount.overdraftForAccountID));
-            }
+        detailsPanel.add(headerLabel("Account Holder: " + customer.getFirstName() + " " + customer.getLastName()));
+        detailsPanel.add(headerLabel("Account Type: Checking Account_Gold Diamond"));
+        detailsPanel.add(plainLabel("Creation Date: " + account.getAccountCreationDate()));
+        detailsPanel.add(plainLabel("Current Balance: $" + df.format(account.getBalance())));
+        detailsPanel.add(plainLabel("Interest Rate: " + account.getInterestRate()+"%"));
 
-        }else if(account instanceof SavingsAccount.CDSavingsAccount){
-            SavingsAccount.CDSavingsAccount cdsSavingsAccount = (SavingsAccount.CDSavingsAccount) account;
-            detailsPanel.add(new JLabel("CDS Savings Account"));
-            detailsPanel.add(new JLabel("Rate: " + cdsSavingsAccount.getInterestRate()));
-            detailsPanel.add(new JLabel("Due Date: " + cdsSavingsAccount.getDueDate()));
-
+        if(account.overDraftAccountID != -1){
+            detailsPanel.add(plainLabel("Overdraft Savings Account: #" + account.getOverdraftAccountID()));
+        }
+        if(account.linkedToATMCard){
+            detailsPanel.add(plainLabel("Linked To ATM Card"));
         }
 
-        panel.add(detailsPanel);
-        setVisible(true);
-
+        return  detailsPanel;
     }
 
-    private void loanAccountInfo(JPanel panel, LoanAccount account){
+    private JPanel loanAccountInfo(LoanAccount.ShortOrLong account) {
         JPanel detailsPanel = new JPanel();
         detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
 
-        detailsPanel.add(new JLabel("Rate: " + account.getRate()));
-        detailsPanel.add(new JLabel("Current Payment Due: " + account.getCurrentPaymentDue()));
-        detailsPanel.add(new JLabel("Last Payment Made: " + account.lastPaymentMadeDate));
-
-        if(account instanceof LoanAccount.CC){
-            LoanAccount.CC ccAccount = (LoanAccount.CC) account;
-            detailsPanel.add(new JLabel("limit: " + ccAccount.getLimit()));
-            detailsPanel.add(new JLabel("Finance Charge: " + ccAccount.getFinanceCharge()));
-            detailsPanel.add(new JLabel("Sum of Charges this month: " + ccAccount.sumOfChargesThisMonth));
-            detailsPanel.add(new JLabel(ccAccount.getChargeMessagesString()));
-
+        String shortOrLong = "";
+        if (account.numOfYearsTotal > 5){
+            shortOrLong += "Long Term Loan";
+        }else{
+            shortOrLong += "Short Term Loan";
         }
 
-        panel.add(detailsPanel);
-        setVisible(true);
+        detailsPanel.add(headerLabel("Account Holder: " + customer.getFirstName() + " " + customer.getLastName()));
+        detailsPanel.add(headerLabel("Account Type: " + shortOrLong));
+        detailsPanel.add(plainLabel("Creation Date: " + account.getAccountCreationDate()));
+        detailsPanel.add(plainLabel("Loan Amount: $" + df.format(account.getBalance())));
+        detailsPanel.add(plainLabel("Interest Rate: " + account.getRate()+"%"));
+        detailsPanel.add(plainLabel("Last Payment Date: " + account.getLastPaymentMadeDate()));
+        detailsPanel.add(plainLabel("Next Payment: $" + df.format(account.getCurrentPaymentDue()) +
+                " due on " + account.getPaymentDueDate()));
+
+        return  detailsPanel;
     }
 
+    private JPanel creditCardInfo(LoanAccount.CC account) {
+        JPanel detailsPanel = new JPanel();
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
 
+        detailsPanel.add(headerLabel("Account Holder: " + customer.getFirstName() + " " + customer.getLastName()));
+        detailsPanel.add(headerLabel("Account Type: Credit Card"));
+        detailsPanel.add(plainLabel("Creation Date: " + account.getAccountCreationDate()));
+        detailsPanel.add(plainLabel("Interest Rate: " + account.getRate()+"%"));
+        detailsPanel.add(plainLabel("Limit: $" + df.format(account.getLimit())));
+        detailsPanel.add(plainLabel("Current total of Charges: $" + df.format(account.getSumOfChargesThisMonth())));
+
+        for (String charge : account.chargeMessages){
+            detailsPanel.add(new JLabel("Charge: " + charge));
+        }
+
+        return  detailsPanel;
+    }
+
+    private JLabel headerLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(new Font("Arial", Font.BOLD, 30)); // or whatever font/size you like
+        return label;
+    }
+
+    private JLabel plainLabel(String text){
+        JLabel label = new JLabel(text);
+        label.setFont(new Font("Arial", Font.PLAIN, 20));
+        return label;
+    }
 
 }

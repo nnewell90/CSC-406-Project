@@ -2,7 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.text.ParseException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
@@ -32,13 +31,13 @@ public class CreateAccountScreen extends JFrame {
 
         formPanel.add(new JLabel("Account Type:"));
 
-        String[] accountTypes = {"Savings", "Checking", "Loan", "Credit Card"};
+        String[] accountTypes = {"Savings", "Checking", "Loan", "Credit Card", "Certificate of Deposit"};
         accountTypeComboBox = new JComboBox<>(accountTypes);
 
         formPanel.add(accountTypeComboBox);
 
 
-        formPanel.add(new JLabel("Starting Deposit: (If Loan or Credit Card Account, Leave Blank.)"));
+        formPanel.add(new JLabel("Starting Deposit: (If Loan, CC or CD, enter 0)"));
         Deposit = new JTextField(10);
         formPanel.add(Deposit);
 
@@ -77,7 +76,7 @@ public class CreateAccountScreen extends JFrame {
         if(id.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter a valid ID");
         }else if(dateField.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter a valid localDate");
+            JOptionPane.showMessageDialog(this, "Please enter a valid date");
         }else if(deposit.isEmpty() && (Objects.equals(accountType, "Checking") || Objects.equals(accountType, "Savings"))) {
             JOptionPane.showMessageDialog(this, "Please enter a valid deposit");
         }else {
@@ -86,6 +85,7 @@ public class CreateAccountScreen extends JFrame {
             String dateString = creationDate.getText().trim();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
             LocalDate localDate = LocalDate.parse(dateString, formatter);
+            int balance = Integer.parseInt(deposit);
 
             if (customer == null) {//make sure customer exists
                 JOptionPane.showMessageDialog(this, "Customer not found, validate your customer ID");
@@ -98,34 +98,39 @@ public class CreateAccountScreen extends JFrame {
                 }else if(accountType.equals("Credit Card")) {
                     dispose();
                     new CreateCreditCardAccountScreen(customer, localDate);
+                }else if (accountType.equals("Certificate of Deposit")){
+                    dispose();
+                    new CreateCDScreen(customer, localDate);
                 }
 
                 double depositNum = Double.parseDouble(Deposit.getText().trim());
 
                 //create the account and add it to the list...
                 if (accountType.equals("Checking")) {
-                    //Check what specific type of Checking account it is...
-                    CheckingAccount.AccountType specificType = null;
-                    if (depositNum >= 5000.00) {
-                        specificType = CheckingAccount.AccountType.GoldDiamond;
-                    } else if (depositNum < 5000.00) {
-                        specificType = CheckingAccount.AccountType.TMB;
-                    }
                     CheckingAccount account = new CheckingAccount(id, localDate, depositNum);
                     customer.addAccountToCustomerAccounts(account.getAccountID());
                     Database.addItemToList(Database.checkingAccountList, account);
 
+                    //close screen and go back to Teller screen
+                    JOptionPane.showMessageDialog(this, "Account created successfully");
+                    dispose();
+                    new TellerScreen();
+
                 } else if (accountType.equals("Savings")) {
-                    SavingsAccount account = new SavingsAccount(id, localDate,  depositNum);
+
+                    //Create the Account and add it to the Lists.
+                    SavingsAccount.SimpleSavingsAccount account = new SavingsAccount.SimpleSavingsAccount(id, localDate, balance);
                     customer.addAccountToCustomerAccounts(account.getAccountID());
                     Database.addItemToList(Database.savingsAccountList, account);
+                    Database.addItemToList(Database.simpleSavingsAccountList, account);
+
+                    //close screen and go back to Teller screen
+                    JOptionPane.showMessageDialog(this, "Account created successfully");
+                    dispose();
+                    new TellerScreen();
 
                 }
 
-                //close screen and go back to Teller screen
-                JOptionPane.showMessageDialog(this, "Account created successfully");
-                dispose();
-                new TellerScreen();
             }//end of customer check if/else
         }//end of datafield check if/else
     }//end of CreateAccount

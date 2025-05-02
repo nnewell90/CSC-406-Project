@@ -5,83 +5,74 @@ import java.awt.event.ActionListener;
 
 public class InsertCheckScreen extends JFrame {
 
-    private JTextField deposit, ssn, account;
+    private JTextField amount, checkNum, ID;
+    private final Customer customer;
 
-    public InsertCheckScreen() {
+    public InsertCheckScreen(Customer customer) {
 
-        setTitle("Deposit a Check");
+        setTitle("Issue a Check");
         setSize(700, 700);
         setLayout(new GridLayout(4, 1));
+        this.customer = customer;
 
-        // Labels and text fields
-        add(new JLabel("Please enter your Customer ID (SSN): "));
-        ssn = new JTextField();
-        add(ssn);
+        add(new JLabel("Please enter Checking Account ID: "));
+        ID = new JTextField(10);
+        add(ID);
 
         add(new JLabel("Please enter check amount: "));
-        deposit = new JTextField();
-        add(deposit);
+        amount = new JTextField();
+        add(amount);
 
 
-        add(new JLabel("Please enter the account number you wish to deposit to: "));
-        account = new JTextField();
-        add(account);
+        add(new JLabel("Please Enter Check Number: (random 2-6 digit number)"));
+        checkNum = new JTextField();
+        add(checkNum);
 
-        JButton submitButton = new JButton("Deposit to Account");
+        JButton submitButton = new JButton("Submit");
         submitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                depositAccount();
+                processCheck();
             }
         });
-        JButton returntoButton = new JButton("Return to Teller Screen");
+        JButton returnToCustomerButton = new JButton("Return to Customer Screen");
 
-        returntoButton.addActionListener(e -> {
+        returnToCustomerButton.addActionListener(e -> {
             dispose();
-            new CustomerScreen();
+            new CustomerScreen(customer);
         });
 
         add(submitButton);
-        add(returntoButton);
+        add(returnToCustomerButton);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
     }
 
-    private void depositAccount() {
+    private void processCheck() {
 
-        String SSN = ssn.getText().trim();
-        double amount = Double.parseDouble(deposit.getText().trim());
-        long accountID = Long.parseLong(account.getText().trim());
-
-        Customer customer = Database.getCustomerFromList(SSN);
-
-        if (customer == null) {
-            JOptionPane.showMessageDialog(this, "Customer not found");
+        //make sure fields are full...
+        if(amount.getText().equals("") || checkNum.getText().equals("") || ID.getText().equals("")) {
+            JOptionPane.showMessageDialog(this, "Please fill in required fields");
             return;
         }
 
-        AbstractAccount account = Database.getAccountFromList(Database.abstractAccountList, accountID);
+        //find account and pass values...
+        long accountID = Long.parseLong(ID.getText());
+        CheckingAccount account = (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, accountID);
+        double amount = Double.parseDouble(this.amount.getText().trim());
+        String checkNum = this.checkNum.getText().trim();
 
+        //make sure account exist...
         if(account == null) {
-            JOptionPane.showMessageDialog(this, "Account not found");
+            JOptionPane.showMessageDialog(this, "Account not found! Double check account ID");
             return;
         }
-        AbstractAccount.AccountType type = account.getAccountType();
-        if (type == AbstractAccount.AccountType.CheckingAccount) {
-            CheckingAccount checkingAccount = (CheckingAccount) account;
-            checkingAccount.deposit(amount);
-            JOptionPane.showMessageDialog(this, "Deposit Successful!");
-            dispose();
-            new CustomerScreen();
-        }else if (type == AbstractAccount.AccountType.SavingsAccount) {
-            SavingsAccount savingsAccount = (SavingsAccount) account;
-            savingsAccount.deposit(amount);
-            JOptionPane.showMessageDialog(this, "Deposit Successful!");
-            dispose();
-            new CustomerScreen();
-        }else{
-            JOptionPane.showMessageDialog(this, "Cannot make a deposit to a " + type);
-        }
+
+        //Add check to process Later...
+        account.addCheckToProcessLater(-amount, checkNum);//negative because it's a withdrawal...see checking class
+        JOptionPane.showMessageDialog(this, "Check will be processed soon.");
+        dispose();
+        new CustomerScreen(customer);
 
     }
 
