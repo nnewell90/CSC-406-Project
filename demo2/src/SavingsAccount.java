@@ -600,20 +600,20 @@ public class SavingsAccount extends AbstractAccount {
             this.dueDate = dueDate;
         }
 
-        public void withdrawBeforeDueDate(int amount) {
-            super.withdraw(amount);
+        public void withdrawBeforeDueDate() {
+            super.withdraw(balance);
             deleteAccount(this);
         }
 
         // Withdraw your funds after the due date, but before the rollover period
         // !!! This deletes the account
-        public void withdrawAfterDueDate(int amount) {
+        public void withdrawAfterDueDate() {
             calcAndAddInterest();
-            super.withdraw(amount);
+            super.withdraw(balance);
             deleteAccount(this);
         }
 
-        public void rollOver(int numberOfMonthsForNewCycle, double newRate, LocalDate newDueDate) {
+        public void rollOver(double newRate, LocalDate newDueDate) {
             interestRate = newRate;
             dueDate = newDueDate;
         }

@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalDate;
+import java.time.chrono.ChronoLocalDate;
 
 public class DepositScreen extends JFrame {
     private JTextField deposit;
@@ -75,13 +77,33 @@ public class DepositScreen extends JFrame {
             JOptionPane.showMessageDialog(this, "Deposit Successful!");
             dispose();
             new TellerScreen();
-        }else if (type == AbstractAccount.AccountType.SavingsAccount) {
+        }else if (type == AbstractAccount.AccountType.SimpleSavingsAccount) {
             SavingsAccount savingsAccount = (SavingsAccount) account;
             savingsAccount.deposit(amount);
             JOptionPane.showMessageDialog(this, "Deposit Successful!");
             dispose();
             new TellerScreen();
-        }else{
+        }else if(type == AbstractAccount.AccountType.CDSavingsAccount) {
+            SavingsAccount.CDSavingsAccount cdAccount = (SavingsAccount.CDSavingsAccount) account;
+            cdAccount.deposit(amount);
+            JOptionPane.showMessageDialog(this, "Deposit Successful!");
+            dispose();
+            new TellerScreen();
+
+        }else if(type == AbstractAccount.AccountType.CCLoanAccount) {
+            LoanAccount.CC ccAccount = (LoanAccount.CC) account;
+            ccAccount.payment(amount);
+            JOptionPane.showMessageDialog(this, "Payment of $" + amount + " made to Credit Card!");
+            dispose();
+            new TellerScreen();
+        }else if(type == AbstractAccount.AccountType.ShortOrLongLoanAccount) {
+            LocalDate date = LocalDate.now();
+            LoanAccount.ShortOrLong loanAccount = (LoanAccount.ShortOrLong) account;
+            loanAccount.makePayment(amount, date);
+            JOptionPane.showMessageDialog(this, "Payment of $" + amount + " made to Loan Account!");
+            dispose();
+            new TellerScreen();
+        }else {
             JOptionPane.showMessageDialog(this, "Cannot make a deposit to a " + type);
         }
 

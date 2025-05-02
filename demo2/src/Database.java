@@ -49,8 +49,6 @@ public class Database implements Runnable {
     static String shortOrLongLoans = "shortOrLongLoans.txt";
     static String CCAccounts = "CCAccounts.txt";
 
-    // customers was renamed to database.txt at some point
-    // I'm not going to change it now, but we may want to look into this
     static String customers = "customers.txt";
     static String atmCards = "atmCards.txt";
 

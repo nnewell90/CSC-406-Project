@@ -4,12 +4,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 public class CheckingAccount extends AbstractAccount{
-    // Data
-    double balance;
-    static final int minimumBalanceGoldDiamond = 5000;
+    // Class Data
+    static final double minimumBalanceGoldDiamond = 5000;
     static double interestRate; // For GoldDiamond accounts
-    int overdraftsThisMonth;
 
+
+    // Instance data
+    double balance;
+    int overdraftsThisMonth;
     AccountType accountSpecificType;
     ArrayList<String> stopPaymentArray; // Checks that are stopped
     HashMap<String, Double> checkMap; // All checks
@@ -212,14 +214,10 @@ public class CheckingAccount extends AbstractAccount{
         }
         balance += amount;
         balance -= getTransactionFee(false);
-        if (accountSpecificType == AccountType.TMB) {
-            if (balance >= minimumBalanceGoldDiamond) {
-                setAccountSpecificType(AccountType.GoldDiamond);
-            }
-        } else { // AccountType is GoldDiamond
-            if (balance < minimumBalanceGoldDiamond) {
-                setAccountSpecificType(AccountType.TMB);
-            }
+        if (balance >= minimumBalanceGoldDiamond) {
+            setAccountSpecificType(AccountType.GoldDiamond);
+        } else {
+            setAccountSpecificType(AccountType.TMB);
         }
     }
 
@@ -231,13 +229,7 @@ public class CheckingAccount extends AbstractAccount{
             return;
         }
         if (balance >= amount) {
-            balance -= amount;
-            balance -= getTransactionFee(false);
-            if (balance >= minimumBalanceGoldDiamond) {
-                setAccountSpecificType(AccountType.GoldDiamond);
-            } else {
-                setAccountSpecificType(AccountType.TMB);
-            }
+            balance -= (amount + getTransactionFee(false));
         } else {
             boolean overdraftFail = false;
 
@@ -245,23 +237,18 @@ public class CheckingAccount extends AbstractAccount{
             if (overDraftAccountID != -1) { // One exists
                 SavingsAccount.SimpleSavingsAccount overdraftAccount = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
 
-                if (overdraftAccount.getBalance() >= amount) { // Enough money in the overdraft account
-                    // Withdraw from overdraft, deposit in checking, then withdraw from checking
-                    overdraftAccount.withdraw(amount);
-                    deposit(amount);
-                    balance -= amount;
-                } else if (balance + overdraftAccount.getBalance() >= amount) { // Not enough in the individual accounts; check them together
-                    // Remove funds from the CheckingAccount, update "amount" with the amount gotten from the account
+                // See if there is enough funds between the two accounts
+                if (balance + overdraftAccount.getBalance() >= amount) {
+                    // Remove funds from the CheckingAccount, update "amount" with the amount removed from the account
                     amount -= balance;
                     balance = 0.0;
                     setAccountSpecificType(AccountType.TMB);
 
                     // Now do the regular withdrawal procedure
-                    double withFee = amount + 0.75; // Include a transfer fee for correct values
+                    double withFee = amount + getTransactionFee(false); // Include a transfer fee so the checking account isn't left negative
                     overdraftAccount.withdraw(withFee);
                     deposit(withFee);
                     balance -= amount;
-
                 } else { // Not enough money between both accounts
                     overdraftFail = true;
                 }
@@ -275,6 +262,12 @@ public class CheckingAccount extends AbstractAccount{
                 System.out.println("Insufficient funds: Withdrawal denied, $25 Overdraft Service charged to account");
             }
         }
+        // Update the account type at the end of the withdrawal process
+        if (balance >= minimumBalanceGoldDiamond) {
+            setAccountSpecificType(AccountType.GoldDiamond);
+        } else {
+            setAccountSpecificType(AccountType.TMB);
+        }
     }
 
     // Transfer accounts from a user's Checking account to another one of their accounts, either a Checking or a SimpleSavings account
@@ -286,6 +279,12 @@ public class CheckingAccount extends AbstractAccount{
         // Make sure they are transferring a positive amount
         if (amount <= 0.0) {
             System.out.println("Given amount is less than $0.0: Stopping transfer");
+            return;
+        }
+
+        // See if there are enough funds to cover the transfer
+        if (balance < amount) {
+            System.out.println("Insufficient funds to transfer: Stopping transfer");
             return;
         }
 
@@ -312,25 +311,22 @@ public class CheckingAccount extends AbstractAccount{
             return;
         }
 
-        // An account has been linked to a customer and is a valid account: Actually transfer funds if they are available
-        if (balance >= amount) {
-            balance -= amount;
-            balance -= getTransactionFee(true);
-            if (balance <= minimumBalanceGoldDiamond) {
-                setAccountSpecificType(AccountType.TMB);
-            } else {
-                setAccountSpecificType(AccountType.GoldDiamond);
-            }
-
-            // Add the amount to the other account
-            if (isCheckingAccount) {
-                ca.deposit(amount);
-            } else if (isSavingsAccount) {
-                ss.deposit(amount);
-            }
+        // An account has been linked to a customer and is a valid account: Actually transfer funds
+        balance -= amount;
+        balance -= getTransactionFee(true);
+        if (balance <= minimumBalanceGoldDiamond) {
+            setAccountSpecificType(AccountType.TMB);
         } else {
-            System.out.println("Insufficient Balance"); // !!! Swing will need to change this
+            setAccountSpecificType(AccountType.GoldDiamond);
         }
+
+        // Add the amount to the other account
+        if (isCheckingAccount) {
+            ca.deposit(amount);
+        } else if (isSavingsAccount) {
+            ss.deposit(amount);
+        }
+
     }
 
     // Returns an amount to be subtracted from an account from a transaction fee
@@ -343,17 +339,7 @@ public class CheckingAccount extends AbstractAccount{
             } else {
                 fee = 0.75; // Deposit/withdrawal
             }
-
-        } else { // GoldDiamond account
-            if (balance < minimumBalanceGoldDiamond) {
-                if (isTransfer) {
-                    fee = 1.25; // Transfer
-                } else {
-                    fee = 0.75; // Deposit/withdrawal
-                }
-            }
         }
-
         return fee;
     }
 
@@ -486,6 +472,10 @@ public class CheckingAccount extends AbstractAccount{
         ArrayList<String> depositChecks = new ArrayList<>();
         ArrayList<String> withdrawChecks = new ArrayList<>();
         for (String checkNumber : checkMap.keySet()) {
+            // See if this check is supposed to be stopped
+            if (stopPaymentArray.contains(checkNumber)) {
+                continue;
+            }
             if (checkMap.get(checkNumber) > 0.0) {
                 depositChecks.add(checkNumber);
             } else {
@@ -495,10 +485,6 @@ public class CheckingAccount extends AbstractAccount{
 
         // Process deposits first
         for (String checkNumber : depositChecks) {
-            // See if this check is supposed to be stopped
-            if (stopPaymentArray.contains(checkNumber)) {
-                continue;
-            }
             double amount = checkMap.get(checkNumber);
             deposit(amount);
 
@@ -506,9 +492,6 @@ public class CheckingAccount extends AbstractAccount{
 
         // Process withdrawals after deposits
         for (String checkNumber : withdrawChecks) {
-            if (stopPaymentArray.contains(checkNumber)) {
-                continue;
-            }
             double amount = checkMap.get(checkNumber);
             withdraw(amount * -1); // amount is negative but withdraw expects a positive number, so * -1
         }
@@ -536,7 +519,7 @@ public class CheckingAccount extends AbstractAccount{
             validNumber = false;
         } else if (checkNumber.length() == 1) { // !!! This will need to change for actual check numbers
             validNumber = false;
-        } else if (checkNumber.matches("[a-zA-Z]+") || checkNumber.matches("[-_]+")) { // Contains a letter, - , or _
+        } else if (!checkNumber.matches("\\d+")) { // If it is not only numbers
             validNumber = false;
         }
 

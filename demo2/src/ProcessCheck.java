@@ -2,11 +2,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 public class ProcessCheck extends JFrame {
 
     JTextField accountID, checkNum, amount;
-
     public ProcessCheck() {
         setTitle("Process Checks");
         setSize(700, 700);
@@ -15,25 +15,20 @@ public class ProcessCheck extends JFrame {
         accountID = new JTextField(10);
         add(accountID);
 
-        add(new JLabel("Check Number (4 digit number):"));
-        checkNum = new JTextField(10);
-        add(checkNum);
-        setLayout(new GridLayout(4, 1));
-
-        add(new JLabel("Amount:"));
-        amount = new JTextField(10);
-        add(amount);
 
         JButton returntoManager = new JButton("Return to Manager Screen");
-        JButton submitButton = new JButton("Process Check");
+        JButton submitButton = new JButton("Process Checks");
         submitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                processCheck();
+                process();
             }
         });
 
-        returntoManager.addActionListener(e -> {dispose(); new ManagerScreen();});
+        returntoManager.addActionListener(e -> {
+            dispose();
+            new ManagerScreen();
+        });
 
         add(submitButton);
         add(returntoManager);
@@ -41,39 +36,44 @@ public class ProcessCheck extends JFrame {
         setVisible(true);
     }
 
-    private void processCheck() {
+    private void process() {
 
-        if(accountID.getText().isEmpty()) {
+        if (accountID.getText().isEmpty()) {
             JOptionPane.showMessageDialog(null, "Please enter account ID!");
-        }else if(checkNum.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Please enter check number!");
-        }else if(amount.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Please enter amount!");
-        }else{
+        } else {
 
-            long ID = Long.parseLong(accountID.getText());
-            String num = checkNum.getText().trim();
-            int amt = Integer.parseInt(amount.getText());
-            CheckingAccount account = (CheckingAccount) Database.getAccountFromList(Database.abstractAccountList, ID);
+            long ID = Long.parseLong(accountID.getText().trim());
+            AbstractAccount found = Database.getAccountFromList(Database.abstractAccountList, ID);
 
-            if(account == null) {
-                JOptionPane.showMessageDialog(null, "Account not found! Check credentials");
-            }else if(account.accountType != AbstractAccount.AccountType.CheckingAccount){
-                JOptionPane.showMessageDialog(null, "Account type is not checking account!");
-            }else if(account != null && account.accountType == AbstractAccount.AccountType.CheckingAccount){
+            if (!(found instanceof CheckingAccount)) {
+                JOptionPane.showMessageDialog(this, "Account is NOT a checking account!");
+                return;
+            }
+            CheckingAccount account = (CheckingAccount) found;
 
-                if(!account.validateCheckNumber(num)) {
-                    JOptionPane.showMessageDialog(null, "Check number is not valid!");
-                    return;
-                }
-
-                account.addCheckToProcessLater(amt, num);
-                JOptionPane.showMessageDialog(null, "Check amount successfully withdrawn!");
-                dispose();
-                new ManagerScreen();
-
+            if(account.checkMap.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "No checks in the queue to process!");
+                return;
             }
 
+            ArrayList<String> skippedChecks = new ArrayList<>();
+            for (String checkNumber : new ArrayList<>(account.checkMap.keySet())) {
+                if (account.stopPaymentArray.contains(checkNumber)) {
+                    skippedChecks.add(checkNumber);
+                }
+            }
+
+            account.processChecks();
+
+            if (skippedChecks.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "All checks processed successfully!");
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "The following checks were skipped due to stop payment:\n" + skippedChecks);
+            }
+
+            dispose();
+            new ManagerScreen();
         }
 
     }

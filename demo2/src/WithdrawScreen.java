@@ -68,69 +68,64 @@ public class WithdrawScreen extends JFrame {
         }else if(account == null) {
             JOptionPane.showMessageDialog(this, "Account not found! Check Account ID");
             return;
+        }else if(amount <= 0){
+            JOptionPane.showMessageDialog(this, "Please enter a valid withdrawal amount greater than $0.");
+            return;
         }
 
         AbstractAccount.AccountType type = account.accountType;
 
-        if (type == AbstractAccount.AccountType.SavingsAccount){ //If withdrawing from a Savings Account
-            SavingsAccount savings = (SavingsAccount) account;
+        if (account instanceof SavingsAccount.SimpleSavingsAccount savings){ //If withdrawing from a Savings Account
 
-            //Don't let them withdraw too much from the savings account
-            if (savings.balance >= amount) {
-                savings.withdraw(amount);
-                JOptionPane.showMessageDialog(this, "Withdraw successful!");
-                dispose();
-                new TellerScreen();
-            } else if (amount > savings.balance) {
-                JOptionPane.showMessageDialog(this, "Insufficient funds! You only have $" +
-                        savings.balance+" in Savings.");
+            if (amount > savings.getBalance()) {
+                JOptionPane.showMessageDialog(this, "Insufficient funds in savings.");
+                return;
             }
 
-        }else if (type == AbstractAccount.AccountType.CheckingAccount){//If withdrawing from a checking account
+            double preSave = savings.getBalance();
+            savings.withdraw(amount);
+            double postSave = savings.getBalance();
 
-            CheckingAccount checking = (CheckingAccount) account;
-            Long overDraftAccountID = checking.overDraftAccountID;
+            if (preSave > postSave) {
+                JOptionPane.showMessageDialog(this, "Withdraw successful!");
 
-            SavingsAccount linkedSavings = (SavingsAccount) Database.getAccountFromList(Database.abstractAccountList, overDraftAccountID);
+            }else{
+                JOptionPane.showMessageDialog(this, "Withdrawal Denied. Insufficient Funds.");
+            }
 
-            if(checking.balance >= amount) {//If they have enough in checking, perform a normal withdrawal
+        }else if (account instanceof CheckingAccount checking){//If withdrawing from a checking account
+
+            if(checking.getBalance() >= amount) {
                 checking.withdraw(amount);
-                JOptionPane.showMessageDialog(this, "Withdraw of $" + amount + " successful! " +
-                        "You only have $" + checking.balance+" left in this Checking Account");
+                JOptionPane.showMessageDialog(this, "Withdrawal successful!");
+            }else{
 
-                //change the account type according to balance
-                updateType(checking);
+                long overDraftAccountID = checking.overDraftAccountID;
+                SavingsAccount.SimpleSavingsAccount overdraftAccount = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
 
-                //close the screen and open a new teller screen
-                dispose();
-                new TellerScreen();
+                if(overdraftAccount == null) {
+                    JOptionPane.showMessageDialog(this, "Withdrawal Denied. Insufficient funds. ");
+                }else{
 
-            }else if (checking.balance < amount) {//if the checking doesn't have enough funds
+                    double preCheck = checking.getBalance();
+                    double preSavings = overdraftAccount.getBalance();
 
-                //check if they have a linked Savings
-                if(linkedSavings != null) {
+                    checking.withdraw(amount);
 
-                    //check there is enough in checking and savings
-                    if(checking.balance+linkedSavings.balance < amount) {//if there isn't...
-                        JOptionPane.showMessageDialog(this, "Insufficient funds in both checking and linked Savings!");
-                    }else if (checking.balance+linkedSavings.balance >= amount){//if there is enough in the savings
-                        //perform the withdrawal but pull from linked savings
-                        linkedSavings.withdraw(amount);
-                        updateType(checking);
-                        JOptionPane.showMessageDialog(this, "Withdraw successful, however overdraft process was applied.");
-                        dispose();
-                        new TellerScreen();
+                    double postCheck = checking.getBalance();
+                    double postSavings = overdraftAccount.getBalance();
+
+                    if(postCheck<preCheck && postSavings<preSavings){
+                        JOptionPane.showMessageDialog(this, "Withdrawal Successful however overdraft was applied.");
+                    }else{
+                        JOptionPane.showMessageDialog(this, "Withdrawal Denied. Insufficient funds.");
                     }
 
-                }else {//if no linked savings, deny the withdrawal
-                    JOptionPane.showMessageDialog(this, "Insufficient funds! You only have $" +
-                            checking.balance+" in Checking Account.");
                 }
 
             }
 
-        }else if (type == AbstractAccount.AccountType.CDSavingsAccount){//if withdrawing from a CD
-            SavingsAccount.CDSavingsAccount cdAccount = (SavingsAccount.CDSavingsAccount) account;
+        }else if (account instanceof SavingsAccount.CDSavingsAccount cdAccount){//if withdrawing from a CD
             LocalDate today = LocalDate.now();
 
             //Don't let them withdraw too much from the cd account
@@ -140,34 +135,41 @@ public class WithdrawScreen extends JFrame {
 
                     cdAccount.withdraw(amount);
                     JOptionPane.showMessageDialog(this, "Withdraw successful!");
-                    dispose();
-                    new TellerScreen();
                 }else if(today.isBefore(cdAccount.dueDate)) {//if they withdraw before the maturation date, proceed but penalize
                     
                     //apply "penalty"
                     cdAccount.withdraw(amount);
                     JOptionPane.showMessageDialog(this, "Withdraw successful! However, " +
                             "Penalty was applied for withdrawing before " + cdAccount.dueDate);
-                    dispose();
-                    new TellerScreen();
+
                 }
-            } else if (amount > cdAccount.balance) {//if they dont have enough, dont bother checking the date
+            } else if (amount > cdAccount.balance) {//if they don't have enough, don't bother checking the date
                 JOptionPane.showMessageDialog(this, "Insufficient funds! You only have $" +
                         cdAccount.balance+" in Certificate of Deposit.");
             }
 
+        }else if(account instanceof LoanAccount.CC creditCard){
+
+            String description = "Bank Withdrawal";
+            LocalDate today = LocalDate.now();
+            double preBalance = creditCard.getBalance();
+            creditCard.charge(amount, description, today);
+
+            if (preBalance + amount <= creditCard.getLimit()) {
+                JOptionPane.showMessageDialog(this, "Withdrawal was Successful!");
+            } else { // Over the limit
+                JOptionPane.showMessageDialog(this, "Withdrawal was Denied!");
+            }
+
+
         }else{//if withdrawing from an account that isn't checking or savings, then deny the withdrawal
             JOptionPane.showMessageDialog(this, "You cannot withdraw from a "+ type);
         }
+
+        dispose();
+        new TellerScreen();
     }//end of makeWithdrawal
 
-    private void updateType(CheckingAccount checking) {
-        if(checking.balance >= 5000){
-            checking.setAccountSpecificType(CheckingAccount.AccountType.GoldDiamond);
-        }else if(checking.balance < 5000){
-            checking.setAccountSpecificType(CheckingAccount.AccountType.TMB);
-        }
-    }
 
 }
 
