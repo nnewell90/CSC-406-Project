@@ -487,13 +487,14 @@ public class CheckingAccount extends AbstractAccount{
         for (String checkNumber : depositChecks) {
             double amount = checkMap.get(checkNumber);
             deposit(amount);
-
+            checkMap.remove(checkNumber);
         }
 
         // Process withdrawals after deposits
         for (String checkNumber : withdrawChecks) {
             double amount = checkMap.get(checkNumber);
             withdraw(amount * -1); // amount is negative but withdraw expects a positive number, so * -1
+            checkMap.remove(checkNumber);
         }
     }
 
