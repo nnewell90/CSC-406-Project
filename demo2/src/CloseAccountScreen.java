@@ -73,14 +73,14 @@ public class CloseAccountScreen extends JFrame {
                     int amount = (int) cdAccount.getBalance();
 
                     if (today.isAfter(cdAccount.dueDate) || today.equals(cdAccount.dueDate)) {
-                        cdAccount.withdrawAfterDueDate(amount);
+                        cdAccount.withdrawAfterDueDate();
                         SavingsAccount.CDSavingsAccount.deleteAccount(cdAccount);
                         JOptionPane.showMessageDialog(this, "CD Account #" + account.getAccountID() + " is closed. Customer is owed $" + amount);
                     } else if (today.isBefore(cdAccount.dueDate)) {//if they withdraw before the maturation date, proceed but penalize
                         //apply "penalty"
                         JOptionPane.showMessageDialog(this, "CD account Closed! However, " +
                                 "a penalty was applied for closing before " + cdAccount.dueDate + ". Customer is owed $" + amount);
-                        cdAccount.withdrawBeforeDueDate(amount);
+                        cdAccount.withdrawBeforeDueDate();
                         SavingsAccount.CDSavingsAccount.deleteAccount(cdAccount);
                         JOptionPane.showMessageDialog(this, "Account #" + accountID + " Deleted");
                     }

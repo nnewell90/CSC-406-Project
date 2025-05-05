@@ -5,11 +5,13 @@ This aims to briefly describe how the database system works
 ### In System
 ArrayLists are used to store all account types, customers, and ATM cards.
 
+    static ArrayList<CheckingAccount> checkingAccountList = new ArrayList<>();
 ### Outside System
 .txt files are used to store data, delimited using ;
 
 Each arrayList has an associated .txt
 
+    static String checkingAccounts = "checkingAccounts.txt";
 ## Retrieving from the Database
 The outside function for this is restoreFromDatabase()
 
@@ -29,9 +31,9 @@ This function will run and add objects into the arrayList until the file runs ou
 
 Parameters for loadFromFile()
 
-fileName - The .txt associated with an arrayList
+    fileName - The .txt associated with an arrayList
 
-list - The arrayList we wish to get data from
+    list - The arrayList we wish to get data from
 
 ## Storing to the Database
 *This process is very similar to reading from the database*
@@ -82,12 +84,29 @@ Example walk through: loadFromFile()
 
 ## Other Functions
 ### Adding and Removing accounts
-There are functions for adding and removing accounts from a given list
+There are functions for adding and removing items to/from a given list.
+An item can be AbstractAccount, a child of Abstract Account, Customer, or ATMCard.
+The list is the associated arrayList with the given item.
+
+    public static <T>void addItemToList(ArrayList<T> list, T item)
+    public static <T>void removeItemFromList(ArrayList<T> list, T item)
 
 ### Get specific account
-There is a function for getting a specific account from a specific arrayList
+Getting a specific account from the database is done through the function getAccountFromList.
+It needs the accountID for that account, and the list to search through.
 
-We could make one for searching through every possible account, but that could take a while
+    public static <T extends AbstractAccount> AbstractAccount getAccountFromList(ArrayList<T> accountList, long accountID)
+
+
+### Getting individual Customers and ATMCards
+
+    public static Customer getCustomerFromList(String customerID)
+    public static ATMCard getATMCardFromList(long accountID)
+
+customerID is from the Customer class. ATMCards are linked to Accounts, accountID is the accountID for that account.
 
 ### Get all accounts of a customer
-There is a function for retrieving all the accounts of a given customer
+
+    public static ArrayList<AbstractAccount> getAllAccountsOfCustomer(ArrayList<Long> customerAccountIDs)
+
+Returns all the Account objects a Customer holds. The ArrayList is meant to come from the Customer's customerAccountID arrayList from the Customer class. 

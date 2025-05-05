@@ -53,8 +53,7 @@ public class LoanAccount extends AbstractAccount {
         if (isDeleted()) {
             return Double.NaN;
         }
-        double monthlyInterest = (balance/2) * rate; // /2 comes from Pickett's sheet, but I'm not sure what it is for
-        return balance + monthlyInterest;
+        return (balance/2) * rate; // /2 comes from Pickett's sheet, but I'm not sure what it is for
     }
 
     @Override
@@ -555,11 +554,11 @@ public class LoanAccount extends AbstractAccount {
 
         public void charge(double amount, String description, LocalDate dayOfCharge) {
             // See if this charge would go over the set limit
-            if (balance + amount < limit) {
+            if (balance + amount <= limit) {
                 balance += amount; // This can be reduced by the customer
                 sumOfChargesThisMonth += amount; // This cannot be reduced by the user, used for finance charge
                 chargeMessages.add(dayOfCharge + ": " + description + " Amount: $" + amount + "--ACCEPTED");
-            } else { // Over the limitd
+            } else { // Over the limit
                 chargeMessages.add(dayOfCharge + ": " + description + " Amount: $" + amount + "--DENIED");
                 // Change this for Swing !!!
             }
@@ -578,7 +577,7 @@ public class LoanAccount extends AbstractAccount {
             return String.format("""
                     Total charge this month: %.2f
                     Finance charge this month: %.2f
-                    """, balance, financeCharge);
+                    """, sumOfChargesThisMonth, financeCharge);
         }
 
         // Returns whether the finance charge needs to be added to the total

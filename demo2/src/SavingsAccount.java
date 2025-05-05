@@ -416,6 +416,10 @@ public class SavingsAccount extends AbstractAccount {
             ArrayList<String> depositChecks = new ArrayList<>();
             ArrayList<String> withdrawChecks = new ArrayList<>();
             for (String checkNumber : checkMap.keySet()) {
+                // See if this check is supposed to be stopped
+                if (stopPaymentArray.contains(checkNumber)) {
+                    continue;
+                }
                 if (checkMap.get(checkNumber) > 0.0) {
                     depositChecks.add(checkNumber);
                 } else {
@@ -425,22 +429,16 @@ public class SavingsAccount extends AbstractAccount {
 
             // Process deposits first
             for (String checkNumber : depositChecks) {
-                // See if this check is supposed to be stopped
-                if (stopPaymentArray.contains(checkNumber)) {
-                    continue;
-                }
                 double amount = checkMap.get(checkNumber);
                 deposit(amount);
-
+                checkMap.remove(checkNumber);
             }
 
             // Process withdrawals after deposits
             for (String checkNumber : withdrawChecks) {
-                if (stopPaymentArray.contains(checkNumber)) {
-                    continue;
-                }
                 double amount = checkMap.get(checkNumber);
                 withdraw(amount * -1); // amount is negative but withdraw expects a positive number, so * -1
+                checkMap.remove(checkNumber);
             }
         }
 
@@ -466,7 +464,7 @@ public class SavingsAccount extends AbstractAccount {
                 validNumber = false;
             } else if (checkNumber.length() == 1) { // !!! This will need to change for actual check numbers
                 validNumber = false;
-            } else if (checkNumber.matches("[a-zA-Z]+") || checkNumber.matches("[-_]+")) { // Contains a letter, - , or _
+            } else if (!checkNumber.matches("\\d+")) { // If it is not only numbers
                 validNumber = false;
             }
 
@@ -600,20 +598,20 @@ public class SavingsAccount extends AbstractAccount {
             this.dueDate = dueDate;
         }
 
-        public void withdrawBeforeDueDate(int amount) {
-            super.withdraw(amount);
+        public void withdrawBeforeDueDate() {
+            super.withdraw(balance);
             deleteAccount(this);
         }
 
         // Withdraw your funds after the due date, but before the rollover period
         // !!! This deletes the account
-        public void withdrawAfterDueDate(int amount) {
+        public void withdrawAfterDueDate() {
             calcAndAddInterest();
-            super.withdraw(amount);
+            super.withdraw(balance);
             deleteAccount(this);
         }
 
-        public void rollOver(int numberOfMonthsForNewCycle, double newRate, LocalDate newDueDate) {
+        public void rollOver(double newRate, LocalDate newDueDate) {
             interestRate = newRate;
             dueDate = newDueDate;
         }
