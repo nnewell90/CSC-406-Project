@@ -66,8 +66,11 @@ To see how the entire write looks, view the code, but the general structure is
   - AccountType (CheckingAccount)
   - Overdraft accountID (If one is linked, otherwise -1)
   - isLinkedToATMCard (This is a boolean)
+  - isDeleted
   - The check map
+    - Size first, then entries
   - The stop payment arrayList
+    - Size first, then entries
 - Return the string
 
 Strings are then written to txts in the Database.

@@ -64,6 +64,7 @@ To see how the entire write looks, view the code, but the general structure is
     - notifiedOfPaymentDate
     - currentPaymentDate
     - missedPayment
+    - isDeleted
 - Return the string
 
 Strings are then written to txts in the Database.
@@ -156,6 +157,7 @@ To see how the entire write looks, view the code, but the general structure is
   - lateFees
   - numOfYearsTotal
   - numOfMonthsTotal
+  - isDeleted
 - Return the string
 
 Strings are then written to txts in the Database.
@@ -257,6 +259,7 @@ To see how the entire write looks, view the code, but the general structure is
   - limit
   - financeCharge
   - sumOfChargesThisMonth
+  - isDeleted
   - chargeMessages
 - Return the string
 

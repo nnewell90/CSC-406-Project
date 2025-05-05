@@ -91,8 +91,11 @@ To see how the entire write looks, view the code, but the general structure is
     - balance
     - Overdraft accountID (If one is linked, otherwise -1)
     - isLinkedToATMCard (This is a boolean)
+    - isDeleted
     - The check map
+      - First size, then entries
     - The stop payment arrayList
+      - First size, then entries
 - Return the string
 
 Strings are then written to txts in the Database.
@@ -248,6 +251,7 @@ To see how the entire write looks, view the code, but the general structure is
     - balance
     - interestRate
     - dueDate
+    - isDeleted
 - Return the string
 
 Strings are then written to txts in the Database.

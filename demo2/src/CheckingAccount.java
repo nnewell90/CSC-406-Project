@@ -481,21 +481,26 @@ public class CheckingAccount extends AbstractAccount{
             } else {
                 withdrawChecks.add(checkNumber);
             }
+            // Add this number to the stopPaymentArray
+            // This is so a check cannot be made with the same check number as this check for this account
+            stopPaymentArray.add(checkNumber);
         }
 
         // Process deposits first
         for (String checkNumber : depositChecks) {
             double amount = checkMap.get(checkNumber);
             deposit(amount);
-            checkMap.remove(checkNumber);
         }
 
         // Process withdrawals after deposits
         for (String checkNumber : withdrawChecks) {
             double amount = checkMap.get(checkNumber);
-            withdraw(amount * -1); // amount is negative but withdraw expects a positive number, so * -1
-            checkMap.remove(checkNumber);
+            withdraw(amount * -1); // amount is negative, but withdraw() expects a positive number, so * -1
         }
+
+        // All checks have either been stopped or processed, meaning they shouldn't be processed again
+        // So clear the checkMap
+        checkMap.clear();
     }
 
     // Add this check to the array of checks to stop payments for
@@ -505,7 +510,7 @@ public class CheckingAccount extends AbstractAccount{
         }
         if (validateCheckNumber(checkNumber)) {
             stopPaymentArray.add(checkNumber);
-            balance -= 25; // $25 charge
+            balance -= 35; // $35 charge
         } else {
             System.out.println("Invalid Check Number or number already stored");
         }
