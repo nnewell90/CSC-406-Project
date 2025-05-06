@@ -69,7 +69,7 @@ public class AccountDetailsScreen extends JFrame {
         detailsPanel.add(headerLabel("Account Type: Simple Savings Account"));
         detailsPanel.add(plainLabel("Creation Date: " + account.getAccountCreationDate()));
         detailsPanel.add(plainLabel("Current Balance: $" + df.format((account.getBalance()))));
-        detailsPanel.add(plainLabel("Interest Rate: " + account.getInterestRate()+"%"));
+        detailsPanel.add(plainLabel("Interest Rate: " + SavingsAccount.SimpleSavingsAccount.getInterestRate()+"%"));
 
         if(account.overdraftForAccountID != -1){
             detailsPanel.add(plainLabel("Overdraft for Checking Account #" + account.overdraftForAccountID));
@@ -104,7 +104,7 @@ public class AccountDetailsScreen extends JFrame {
         detailsPanel.add(headerLabel("Account Type: Checking Account_TMB"));
         detailsPanel.add(plainLabel("Creation Date: " + account.getAccountCreationDate()));
         detailsPanel.add(plainLabel("Current Balance: $" + df.format(account.getBalance())));
-        detailsPanel.add(plainLabel("Interest Rate: " + account.getInterestRate()+"%"));
+        detailsPanel.add(plainLabel("Interest Rate: " + CheckingAccount.getInterestRate()+"%"));
 
         if(account.overDraftAccountID != -1){
             detailsPanel.add(plainLabel("Overdraft Savings Account: #" + account.getOverdraftAccountID()));
@@ -125,7 +125,7 @@ public class AccountDetailsScreen extends JFrame {
         detailsPanel.add(headerLabel("Account Type: Checking Account_Gold Diamond"));
         detailsPanel.add(plainLabel("Creation Date: " + account.getAccountCreationDate()));
         detailsPanel.add(plainLabel("Current Balance: $" + df.format(account.getBalance())));
-        detailsPanel.add(plainLabel("Interest Rate: " + account.getInterestRate()+"%"));
+        detailsPanel.add(plainLabel("Interest Rate: " + CheckingAccount.getInterestRate()+"%"));
 
         if(account.overDraftAccountID != -1){
             detailsPanel.add(plainLabel("Overdraft Savings Account: #" + account.getOverdraftAccountID()));
