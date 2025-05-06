@@ -73,6 +73,9 @@ public class EstablishCD extends JFrame {
 
         SavingsAccount.CDSavingsAccount account = new SavingsAccount.CDSavingsAccount(ssn, today, depo, interestRate, DueDate);
         Database.addItemToList(Database.savingsAccountList, account);
+        Database.addItemToList(Database.cdSavingsAccountList, account);
+        Customer customer = Database.getCustomerFromList(ssn);
+        customer.addAccountToCustomerAccounts(account.getAccountID());
         JOptionPane.showMessageDialog(null, "Account created! Matures due on: " + account.getDueDate());
         dispose();
         new ManagerScreen();
