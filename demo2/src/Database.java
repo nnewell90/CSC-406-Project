@@ -168,15 +168,16 @@ public class Database implements Runnable {
                 AbstractAccount.accountIDCounter = a.getAccountID();
             }
         }
-        // Finally, increment the AccountIDCounter by one so the next account can be made correctly
-        AbstractAccount.incrementAccountIDCounter();
+        // The constructor in AbstractAccount increments accountIDCounter, so no need to do so here
     }
 
     // The function for restoring information from the database (.txts) back to the system
     public static void restoreFromDatabase() {
         lock.lock();
         // Accounts
-        loadAbstractAccounts(abstractAccounts, abstractAccountList);
+        // Abstract accounts are loaded by addItemToList(), no function call needed
+            // addItemToList() is called in loadFromFile() which each child class of
+            // AbstractAccount calls below
 
         loadFromFile(savingAccounts, savingsAccountList, SavingsAccount.class);
         loadFromFile(simpleSavingsAccounts, simpleSavingsAccountList, SavingsAccount.SimpleSavingsAccount.class);
@@ -200,7 +201,7 @@ public class Database implements Runnable {
     // The function for storing information to the database (.txts) from the system
     public static void storeToDatabase() {
         lock.lock();
-        storeToFile(abstractAccounts, abstractAccountList, AbstractAccount.class);
+        storeAbstractAccounts(abstractAccounts, abstractAccountList);
 
         storeToFile(savingAccounts, savingsAccountList, SavingsAccount.class);
         storeToFile(simpleSavingsAccounts, simpleSavingsAccountList, SavingsAccount.SimpleSavingsAccount.class);
@@ -227,9 +228,10 @@ public class Database implements Runnable {
 
     getDeclaredMethod: Gets a declared method from a given class, the String.class is necessary as the function expects a String parameter
     .invoke(): Basically just calls the function from getDeclaredMethod
-        fromFileString is called on a string to turn that string into an object, so line is the first parameter
-        The second parameter is just a dummy parameter because I was getting a warning about needing a second parameter for invoke()
-     */
+        invoke() asks for 1 or more parameters: The first is an object to be "invoked" on, the rest are arguments
+        fromFileString() does not invoke on objects, so the first parameter is null
+        fromFileString() expects a string argument, line is that argument
+    */
     private static <T>void loadFromFile(String fileName, ArrayList<T> list, Class<?> clazz) {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(fileName));
@@ -237,58 +239,22 @@ public class Database implements Runnable {
             Method fromFileString = clazz.getDeclaredMethod("fromFileString", String.class); // !!! Every account class must include the functon "public ClassName fromFileString(){...}"
             while ((line = reader.readLine()) != null) {
                 T temp = (T) fromFileString.invoke(null, line);
-                list.add(temp);
+                addItemToList(list, temp);
             }
             reader.close();
         } catch (Exception e) {
             System.out.println("Error loading from file: " + fileName + " :"+ e.getMessage());
         }
     }
-
-    // Loading to the abstractAccount list has some special logic for loading properly
-    private static <T>void loadAbstractAccounts(String fileName, ArrayList<T> list) {
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(fileName));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] split = line.split(";");
-                String classType = split[2];
-                Class clazz = AbstractAccount.class; // This will be changed to some actual AccountType
-                switch (classType) {
-                    case "CheckingAccount":
-                        clazz = CheckingAccount.class;
-                    break;
-                    case "SimpleSavingsAccount":
-                        clazz = SavingsAccount.SimpleSavingsAccount.class;
-                        break;
-                    case "CDSavingsAccount":
-                        clazz = SavingsAccount.CDSavingsAccount.class;
-                        break;
-                    case "ShortOrLongLoanAccount":
-                        clazz = LoanAccount.ShortOrLong.class;
-                        break;
-                    case "CCLoanAccount":
-                        clazz = LoanAccount.CC.class;
-                        break;
-                }
-
-                Method fromFileString = clazz.getDeclaredMethod("fromFileString", String.class);
-                T temp = (T) fromFileString.invoke(null, line);
-                list.add(temp);
-            }
-            reader.close();
-        } catch (Exception e) {
-            System.out.println("Error loading from file: " + fileName + " :"+ e.getMessage());
-        }
-    }
-
 
     // Writes to a .txt file
     /*
     Similar logic to above but a print writer rather than a buffered reader
+    invoke difference
+        toFileString() is invoked on objects, but does not take arguments,
+        So in this case invoke does have a first parameter, the item to be "invoked on", but does not have more
      */
     private static <T>void storeToFile(String fileName, ArrayList<T> list, Class<?> clazz) {
-        // Class clazz = list.getFirst().getClass();
         try {
             PrintWriter writer = new PrintWriter(new FileWriter(fileName));
             Method toFileString = clazz.getDeclaredMethod("toFileString"); // !!! Same as above but for this function
@@ -302,7 +268,21 @@ public class Database implements Runnable {
         }
     }
 
-
-
-
+    // Storing the abstract account arrayList requires some special logic to deal with the fact that
+    // the list has children classes involved, so it gets its own function
+    private static <T extends AbstractAccount>void storeAbstractAccounts(String fileName, ArrayList<T> list) {
+        try {
+            PrintWriter writer = new PrintWriter(new FileWriter(fileName));
+            Class clazz;
+            for (T a : list) {
+                clazz = a.getClass();
+                Method toFileString = clazz.getDeclaredMethod("toFileString");
+                String temp = (String) toFileString.invoke(a);
+                writer.println(temp);
+            }
+            writer.close();
+        } catch (Exception e) {
+            System.out.println("Error storing to file: " + fileName + " :" + e.getMessage());
+        }
+    }
 }
