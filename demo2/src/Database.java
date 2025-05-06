@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
@@ -51,6 +48,8 @@ public class Database implements Runnable {
 
     static String customers = "customers.txt";
     static String atmCards = "atmCards.txt";
+
+    static String interestRates = "interestRates.txt";
 
     // Methods
     public Database() {
@@ -171,6 +170,34 @@ public class Database implements Runnable {
         // The constructor in AbstractAccount increments accountIDCounter, so no need to do so here
     }
 
+    // Restores the interest rate in the CheckingAccount and SimpleSavingsAccount classes
+    private static void restoreInterestRatesForCheckingAndSimpleSavingsClasses(String fileName) {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(fileName));
+            String line = reader.readLine();
+            String[] split = line.split(";");
+            CheckingAccount.setInterestRate(Double.parseDouble(split[0]));
+            // No need to call SavingsAccount since setInterestRate() updates SavingsAccount
+        } catch (Exception e) {
+            System.out.println("Error when restoring interest rates!");
+        }
+    }
+
+    // Stores the interest rate in the CheckingAccount and SimpleSavingsAccount classes
+    private static void storeInterestRatesForCheckingAndSimpleSavingsClasses(String fileName) {
+        try {
+            PrintWriter writer = new PrintWriter(new FileWriter(fileName));
+            String line = "";
+            double checkingInterest = CheckingAccount.getInterestRate();
+            double savingsInterest = SavingsAccount.SimpleSavingsAccount.getInterestRate();
+            line += checkingInterest + ";" + savingsInterest;
+            writer.write(line);
+            writer.close();
+        } catch (Exception e) {
+            System.out.println("Error when restoring interest rates!");
+        }
+    }
+
     // The function for restoring information from the database (.txts) back to the system
     public static void restoreFromDatabase() {
         lock.lock();
@@ -195,6 +222,9 @@ public class Database implements Runnable {
 
         // Update the abstractAccountIDCounter so new accounts can be made correctly
         updateAbstractAccountIDCounter();
+
+        // Restore the interest rates in the SimpleSavings and Checking account classes
+        restoreInterestRatesForCheckingAndSimpleSavingsClasses(interestRates);
         lock.unlock();
     }
 
@@ -215,6 +245,9 @@ public class Database implements Runnable {
 
         storeToFile(customers, customerList, Customer.class);
         storeToFile(atmCards, atmCardList, ATMCard.class);
+
+        // Store the interest rates in the SimpleSavings and Checking account classes
+        storeInterestRatesForCheckingAndSimpleSavingsClasses(interestRates);
         lock.unlock();
     }
 
