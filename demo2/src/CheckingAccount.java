@@ -365,7 +365,7 @@ public class CheckingAccount extends AbstractAccount{
         interestRate = interestRatePassed * 0.5; // Checking accounts have half the interest of SavingsAccounts
     }
 
-    public double getInterestRate() {
+    public static double getInterestRate() {
         return interestRate;
     }
 

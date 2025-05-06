@@ -364,7 +364,7 @@ public class SavingsAccount extends AbstractAccount {
             return super.getBalance();
         }
 
-        public double getInterestRate() {
+        public static double getInterestRate() {
             return interestRate;
         }
 
