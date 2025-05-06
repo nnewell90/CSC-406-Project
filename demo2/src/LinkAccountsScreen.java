@@ -53,7 +53,7 @@ public class LinkAccountsScreen extends JFrame {
 
 
             CheckingAccount checkingAccount = (CheckingAccount) Database.getAccountFromList(Database.checkingAccountList, account1);
-            SavingsAccount savingsAccount = (SavingsAccount) Database.getAccountFromList(Database.savingsAccountList, account2);
+            SavingsAccount.SimpleSavingsAccount savingsAccount = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, account2);
 
             if(checkingAccount == null) {
                 JOptionPane.showMessageDialog(this, "Checking Account not found, double-check account ID");

@@ -206,7 +206,7 @@ public class Database implements Runnable {
             // addItemToList() is called in loadFromFile() which each child class of
             // AbstractAccount calls below
 
-        loadFromFile(savingAccounts, savingsAccountList, SavingsAccount.class);
+        // loadFromFile(savingAccounts, savingsAccountList, SavingsAccount.class);
         loadFromFile(simpleSavingsAccounts, simpleSavingsAccountList, SavingsAccount.SimpleSavingsAccount.class);
         loadFromFile(cdSavingsAccounts, cdSavingsAccountList, SavingsAccount.CDSavingsAccount.class);
 
