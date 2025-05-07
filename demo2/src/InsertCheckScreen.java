@@ -5,7 +5,7 @@ import java.awt.event.ActionListener;
 
 public class InsertCheckScreen extends JFrame {
 
-    private JTextField amount, checkNum, ID;
+    private final JTextField amount, checkNum, ID;
     private final Customer customer;
 
     public InsertCheckScreen(Customer customer) {

@@ -45,11 +45,10 @@ public class ProcessCheck extends JFrame {
             long ID = Long.parseLong(accountID.getText().trim());
             AbstractAccount found = Database.getAccountFromList(Database.abstractAccountList, ID);
 
-            if (!(found instanceof CheckingAccount)) {
+            if (!(found instanceof CheckingAccount account)) {
                 JOptionPane.showMessageDialog(this, "Account is NOT a checking account!");
                 return;
             }
-            CheckingAccount account = (CheckingAccount) found;
 
             if(account.checkMap.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "No checks in the queue to process!");

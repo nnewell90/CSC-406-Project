@@ -169,7 +169,9 @@ public class AccountDetailsScreen extends JFrame {
         detailsPanel.add(plainLabel("Creation Date: " + account.getAccountCreationDate()));
         detailsPanel.add(plainLabel("Interest Rate: " + account.getRate()+"%"));
         detailsPanel.add(plainLabel("Limit: $" + df.format(account.getLimit())));
-        detailsPanel.add(plainLabel("Current total of Charges: $" + df.format(account.getSumOfChargesThisMonth())));
+        detailsPanel.add(plainLabel("Current total of Charges: $" + df.format(account.getBalance())));
+        double availableCredit = account.getLimit() - account.getBalance();
+        detailsPanel.add(plainLabel("Available Credit $" + df.format(availableCredit)));
 
         for (String charge : account.chargeMessages){
             detailsPanel.add(new JLabel("Charge: " + charge));
