@@ -487,7 +487,7 @@ public class SavingsAccount extends AbstractAccount {
         }
 
         public CDSavingsAccount(String customerID, LocalDate accountCreationDate, long accountID, double balance, double interestRate, LocalDate dueDate) {
-            super(customerID, accountCreationDate, accountID);
+            super(customerID, accountCreationDate, balance, accountID);
             setAccountType(AccountType.CDSavingsAccount);
             this.balance = balance;
             this.interestRate = interestRate;
