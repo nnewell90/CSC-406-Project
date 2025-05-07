@@ -101,10 +101,11 @@ public class WithdrawScreen extends JFrame {
             }else{
 
                 long overDraftAccountID = checking.overDraftAccountID;
-                SavingsAccount.SimpleSavingsAccount overdraftAccount = (SavingsAccount.SimpleSavingsAccount) Database.getAccountFromList(Database.simpleSavingsAccountList, overDraftAccountID);
+                SavingsAccount.SimpleSavingsAccount overdraftAccount = checking.getOverDraftAccount();
 
                 if(overdraftAccount == null) {
                     JOptionPane.showMessageDialog(this, "Withdrawal Denied. Insufficient funds. ");
+                    return;
                 }else{
 
                     double preCheck = checking.getBalance();
@@ -115,7 +116,9 @@ public class WithdrawScreen extends JFrame {
                     double postCheck = checking.getBalance();
                     double postSavings = overdraftAccount.getBalance();
 
-                    if(postCheck<preCheck && postSavings<preSavings){
+
+                    //postCheck<preCheck &&
+                    if(( postSavings<preSavings)){
                         JOptionPane.showMessageDialog(this, "Withdrawal Successful however overdraft was applied.");
                     }else{
                         JOptionPane.showMessageDialog(this, "Withdrawal Denied. Insufficient funds.");
