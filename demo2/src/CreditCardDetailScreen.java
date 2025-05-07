@@ -98,7 +98,7 @@ public class CreditCardDetailScreen extends JFrame {
         double balance = ccAccount.getBalance();
         double limit = ccAccount.getLimit();
 
-        if (balance + cost < limit) {
+        if (balance + cost <= limit) {
             JOptionPane.showMessageDialog(this, "Purchase was Successful!");
         } else { // Over the limit
             JOptionPane.showMessageDialog(this, "Purchase was Denied!");
