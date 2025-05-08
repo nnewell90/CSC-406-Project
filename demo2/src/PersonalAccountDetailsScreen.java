@@ -155,6 +155,7 @@ public class PersonalAccountDetailsScreen extends JFrame {
         detailsPanel.add(plainLabel("Last Payment Date: " + account.getLastPaymentMadeDate()));
         detailsPanel.add(plainLabel("Next Payment: $" + df.format(account.getCurrentPaymentDue()) +
                 " due on " + account.getThisPaymentDueDate()));
+        detailsPanel.add(plainLabel("Final Payment on " + account.getPaymentDueDate()));
 
         return  detailsPanel;
     }
