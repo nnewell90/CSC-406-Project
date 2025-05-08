@@ -1,22 +1,22 @@
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 
 public class CreateLoanAccountScreen extends JFrame {
     private final JTextField loanTotalValue;
     private final JTextField interestRate;
-    private final JTextField monthlyPayment;
+    private final JTextField payoffDate;
     private final Customer customer;
-    private final LocalDate date;
+    private final LocalDate startDate;
 
     public CreateLoanAccountScreen(Customer customer, LocalDate date) {
         setSize(700, 500);
         setTitle("Creating a Loan Account for "+ customer.getFirstName() + " " + customer.getLastName());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.customer = customer;
-        this.date = date;
+        this.startDate = date;
 
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -31,9 +31,9 @@ public class CreateLoanAccountScreen extends JFrame {
         panel.add(interestRate);
         panel.add(Box.createVerticalStrut(5));
 
-        panel.add(new JLabel("Monthly Payment(ex. 300): $"));
-        monthlyPayment = new JTextField(10);
-        panel.add(monthlyPayment);
+        panel.add(new JLabel("Loan Payoff Date "));
+        payoffDate = new JTextField(10);
+        panel.add(payoffDate);
         panel.add(Box.createVerticalStrut(5));
 
 
@@ -68,7 +68,7 @@ public class CreateLoanAccountScreen extends JFrame {
         } else if (interestRate.getText().trim().equals("")) {
             JOptionPane.showMessageDialog(this, "Please enter a Interest Rate");
             return;
-        } else if (monthlyPayment.getText().trim().equals("")) {
+        } else if (payoffDate.getText().trim().equals("")) {
             JOptionPane.showMessageDialog(this, "Please enter a Monthly Payment");
             return;
         }
@@ -77,22 +77,21 @@ public class CreateLoanAccountScreen extends JFrame {
         String id = customer.getCustomerID();
         double value = Double.parseDouble(loanTotalValue.getText().trim());
         double rate = Double.parseDouble(interestRate.getText().trim());
-        double monthly = Double.parseDouble(monthlyPayment.getText().trim());
+        String dateString = payoffDate.getText().trim();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
-        //calculate months and years
-        int monthsToPayOffLoan = (int) Math.ceil(value/monthly);
-        LocalDate finalPaymentDate = calcFinalPaymentDate(date, monthsToPayOffLoan);
-        int totalYears = calcYears(monthsToPayOffLoan);
-        int remainingMonths = calcRemainingMonths(monthsToPayOffLoan);
+        LocalDate endDate = LocalDate.parse(dateString, formatter);
+
+        int numOfYears = endDate.getYear() - startDate.getYear();
 
         //create account and add it to lists
-        LoanAccount.ShortOrLong lnAccount = new LoanAccount.ShortOrLong(id, date, value, rate, monthly, finalPaymentDate, totalYears);
+        LoanAccount.ShortOrLong lnAccount = new LoanAccount.ShortOrLong(id, startDate, value, rate, endDate, numOfYears);
         customer.addAccountToCustomerAccounts(lnAccount.getAccountID());
         Database.addItemToList(Database.shortOrLongLoanList, lnAccount);
 
         //close screen with success message
         JOptionPane.showMessageDialog(this,
-                "Loan Account Created\nLoan Term: "+ totalYears + " years and " + remainingMonths+" months.");
+                "Loan Account Created\nLoan Term: "+ startDate + "-" + endDate);
         dispose();
         new TellerScreen();
 
