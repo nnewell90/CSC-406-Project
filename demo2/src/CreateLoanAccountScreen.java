@@ -85,7 +85,7 @@ public class CreateLoanAccountScreen extends JFrame {
         int numOfYears = endDate.getYear() - startDate.getYear();
 
         //create account and add it to lists
-        LoanAccount.ShortOrLong lnAccount = new LoanAccount.ShortOrLong(id, startDate, value, rate, 0, endDate, numOfYears);
+        LoanAccount.ShortOrLong lnAccount = new LoanAccount.ShortOrLong(id, startDate, value, rate, endDate, numOfYears);
         customer.addAccountToCustomerAccounts(lnAccount.getAccountID());
         Database.addItemToList(Database.shortOrLongLoanList, lnAccount);
 

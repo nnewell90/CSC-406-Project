@@ -45,7 +45,7 @@ public class LoanAccount extends AbstractAccount {
         }
         int numOfMonthsTotal = numOfYearsTotal * 12;
         double monthlyPrinciple = balance/numOfMonthsTotal;
-        double monthlyInterest = (balance/2) * numOfYearsTotal * rate; // /2 comes from Pickett's sheet, but I'm not sure what it is for
+        double monthlyInterest = (balance/2) * numOfYearsTotal * (rate/100); // /2 comes from Pickett's sheet, but I'm not sure what it is for
         return monthlyPrinciple + monthlyInterest;
     }
 
@@ -237,8 +237,8 @@ public class LoanAccount extends AbstractAccount {
 
 
         // Regular constructor
-        public ShortOrLong(String customerID, LocalDate accountCreationDate, double loanTotalValue, double rate, double fixedPaymentValue, LocalDate finalPaymentDate, int numOfYears) {
-            super(customerID, accountCreationDate, loanTotalValue, rate, fixedPaymentValue + fixedPaymentValue * rate);
+        public ShortOrLong(String customerID, LocalDate accountCreationDate, double loanTotalValue, double rate, LocalDate finalPaymentDate, int numOfYears) {
+            super(customerID, accountCreationDate, loanTotalValue, rate, 0); // currentPaymentDue is calculated below
             setAccountType(AccountType.ShortOrLongLoanAccount);
             this.loanTotal = loanTotalValue; // This does NOT change as the user pays
             balance = loanTotalValue; // Initially set the total amount to pay to the given total;
@@ -254,8 +254,7 @@ public class LoanAccount extends AbstractAccount {
             // Do calculation for monthly payment
             this.fixedPayment = getMonthlyPaymentOnLoanWithYearlyRate(numOfYearsTotal, balance, rate);
 
-            // this.fixedPayment = fixedPaymentValue; For now, keep the fixedPaymentValue input, but it will be corrected here
-            currentPaymentDue = fixedPaymentValue + fixedPaymentValue * rate;
+            currentPaymentDue = fixedPayment + fixedPayment * (rate/100);
             
             paymentDueDate = finalPaymentDate;
             
